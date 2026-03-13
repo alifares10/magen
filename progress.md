@@ -5,9 +5,9 @@
 Date:
 2026-03-13
 Phase:
-Phase 7 in progress
+Phase 7 complete
 Current focus:
-Phase 7 optional follow-up complete: Browser Notification API opt-in and local preference controls, with browser notifications only firing when the tab is in the background.
+Phase 8 kickoff: add first overlay ingestion path (manual refresh script or worker slice) after completing Oref Israel relay cutover and recovery verification.
 
 Done:
 
@@ -185,6 +185,11 @@ Done:
 - Re-validated successfully after browser notification follow-up: `lint`, `test`, `typecheck`, `build`.
 - Fixed an SSR hydration mismatch in `src/components/notifications/browser-notification-opt-in.tsx` by making notification permission state deterministic on first render and deferring browser-only UI branching until hydration completes.
 - Re-validated the notification slice with focused tests: `npm test -- browser-notification-opt-in use-browser-notification-permission`.
+- Completed Israel-only Oref relay rollout for official alerts using Kamatera + Caddy TLS (`https://212.80.205.239.sslip.io`).
+- Verified relay endpoints return healthy responses: `/healthz` -> `200`; `/oref-alerts?token=...` -> `200` with Oref JSON payload.
+- Cut over `sources.feed_url` for `home-front-command-alerts` to the relay URL and kept source active.
+- Verified `official_alerts` ingestion recovered from recurring `Official alerts request failed (403)` failures to successful runs after cutover.
+- Confirmed latest successful runs may report `items_fetched = 0` when Oref has no active alerts (expected behavior).
 
 In progress:
 
@@ -193,7 +198,8 @@ In progress:
 Next up:
 
 1. Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records.
-2. Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice.
+2. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
+3. Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice.
 
 Blockers:
 

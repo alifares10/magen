@@ -9,11 +9,11 @@
 
 ## Current phase
 
-Phase 7 — overlay data integration
+Phase 8 — overlay ingestion automation
 
 ## Current sprint goal
 
-Move shelters / road closures / hospitals from fixture-only map overlays to Supabase-backed data flow while keeping validation green.
+Add the first ingestion path for map overlays (manual refresh script or worker slice) while keeping validation green.
 
 ## Locked decisions
 
@@ -144,7 +144,7 @@ Use these unless a later task explicitly changes them.
 - [x] Define initial map overlay baseline scope (shelter / road closure / hospital data sources and visual priority)
 - [x] Implement the first map overlay pass with clear separation from official alert markers
 
-## Phase 7 execution (current)
+## Phase 7 execution (completed)
 
 - [x] Add Supabase migration(s) for map overlays (shelters, road closures, hospitals)
 - [x] Extend source typing/seeds for overlay data ingestion ownership if needed
@@ -153,12 +153,18 @@ Use these unless a later task explicitly changes them.
 - [x] Preserve visual priority: official alerts above overlays and overlays never replace official markers
 - [x] Add tests for Supabase overlay mapping/validation and map rendering with DB-backed overlay payloads
 - [x] Re-run full validation: `lint`, `test`, `typecheck`, `build`
+- [x] Complete Israel-only Oref relay cutover for `home-front-command-alerts` and confirm `official_alerts` runs recover from `403` failures to successful runs
 
 ### Phase 7 follow-up (optional)
 
 - [x] Add browser Notification API opt-in as a secondary channel to in-app notifications
 - [x] Add user preference controls for notification permission/state handling
 - [x] Fix browser notification opt-in hydration mismatch for SSR/client initial render
+
+## Phase 8 execution (current)
+
+- [ ] Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records
+- [ ] Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice
 
 ## Open items to revisit later
 
