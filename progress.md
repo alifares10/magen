@@ -5,9 +5,9 @@
 Date:
 2026-03-13
 Phase:
-Phase 7 complete
+Phase 8 in progress
 Current focus:
-Phase 8 kickoff: add first overlay ingestion path (manual refresh script or worker slice) after completing Oref Israel relay cutover and recovery verification.
+Phase 8 ops stabilization follow-up: keep ingestion automation moving while hardening realtime notification delivery reliability.
 
 Done:
 
@@ -190,16 +190,28 @@ Done:
 - Cut over `sources.feed_url` for `home-front-command-alerts` to the relay URL and kept source active.
 - Verified `official_alerts` ingestion recovered from recurring `Official alerts request failed (403)` failures to successful runs after cutover.
 - Confirmed latest successful runs may report `items_fetched = 0` when Oref has no active alerts (expected behavior).
+- Deployed Railway RSS worker (`worker:rss`) in loop mode and verified successful `rss_news` ingestion runs.
+- Added temporary Railway install workaround (`NIXPACKS_INSTALL_CMD`) to bypass strict `npm ci` lockfile failure during worker deployment.
+- Added Supabase scheduled cleanup (every 10 minutes): delete resolved alerts older than 3 hours and delete all ingestion runs older than 2 hours.
+- Deactivated RSS sources `times-of-israel-main` and `jns-main` after repeated `403` failures.
+- Hardened notification realtime reliability in `src/components/notifications/use-notification-center.ts` by adding subscription status diagnostics, graceful connection timeout handling, and fallback polling against `/api/alerts` + `/api/official-updates` when realtime is unavailable.
+- Added shared notification runtime status store (`src/store/use-notification-runtime-store.ts`) and surfaced delivery mode messaging in browser notification controls (`src/components/notifications/browser-notification-opt-in.tsx`) so users can distinguish realtime vs fallback behavior.
+- Added realtime subscription error logging to feed/source-health hooks (`src/components/feed/use-supabase-feed-realtime.ts`, `src/components/layout/use-supabase-source-health-realtime.ts`) to prevent silent failures.
+- Extended alerts API/client fetch options to support `activeOnly` query semantics for fallback polling (`src/app/api/alerts/route.ts`, `src/lib/feed/client.ts`).
+- Re-validated successfully after notification reliability hardening: `lint`, `test`, `typecheck`, `build`.
+- Fixed client-side public env resolution in `src/lib/supabase/env.ts` by switching to static `process.env.NEXT_PUBLIC_*` access so realtime/notifications initialize correctly in dev and deployed bundles.
+- Re-validated after env fix with targeted notification checks: `lint`, `typecheck`, `test -- use-notification-center notification-center browser-notification-opt-in`.
 
 In progress:
 
-- None right now.
+- Railway `worker:official` deployment is deferred; official guidance source currently returns `403` from non-Israel egress.
 
 Next up:
 
-1. Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records.
-2. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
-3. Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice.
+1. Resolve Israel-only access for official guidance and deploy Railway `worker:official` (relay or Israel egress path).
+2. Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records.
+3. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
+4. Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice.
 
 Blockers:
 

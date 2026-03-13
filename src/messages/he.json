@@ -148,6 +148,12 @@
     "browserStatusNeedsPermission": "הפעל כדי לבקש הרשאת התראות מהדפדפן.",
     "browserStatusBlocked": "נחסם על ידי הגדרות ההרשאה בדפדפן.",
     "browserStatusUnsupported": "התראות דפדפן אינן נתמכות כאן.",
+    "deliveryStatusLabel": "אופן מסירה",
+    "deliveryStatusRealtime": "החיבור בזמן אמת פעיל.",
+    "deliveryStatusFallback": "חיבור בזמן אמת לא זמין. מופעלת בדיקת גיבוי תקופתית.",
+    "deliveryStatusError": "לא ניתן לאתחל את ערוץ ההתראות.",
+    "deliveryStatusDisabled": "מסירת ההתראות כרגע מושבתת.",
+    "deliveryStatusConnecting": "מתחבר לערוץ זמן אמת...",
     "browserBackgroundOnlyHint": "התראות דפדפן יישלחו רק כשהלשונית הזו ברקע.",
     "browserBlockedHelp": "כדי להפעיל מחדש, אשר התראות לאתר זה בהגדרות הדפדפן."
   }

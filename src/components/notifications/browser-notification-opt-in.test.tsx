@@ -8,6 +8,7 @@ const {
   browserNotificationsEnabledState,
   setBrowserNotificationsEnabledMock,
   browserPermissionState,
+  notificationRuntimeState,
 } = vi.hoisted(() => ({
   browserNotificationsEnabledState: {
     value: false,
@@ -19,6 +20,14 @@ const {
     isSupported: true,
     permission: "default" as NotificationPermission,
     requestPermission: vi.fn<() => Promise<NotificationPermission>>(),
+  },
+  notificationRuntimeState: {
+    deliveryMode: "realtime" as
+      | "disabled"
+      | "connecting"
+      | "realtime"
+      | "fallback_polling"
+      | "error",
   },
 }));
 
@@ -34,6 +43,12 @@ vi.mock("next-intl", () => ({
       browserStatusNeedsPermission: "Enable to request browser notification permission.",
       browserStatusBlocked: "Blocked by browser permission settings.",
       browserStatusUnsupported: "Browser notifications are not supported here.",
+      deliveryStatusLabel: "Delivery",
+      deliveryStatusRealtime: "Realtime connected.",
+      deliveryStatusFallback: "Realtime unavailable. Backup polling is active.",
+      deliveryStatusError: "Notification channel failed to initialize.",
+      deliveryStatusDisabled: "Notification delivery is currently disabled.",
+      deliveryStatusConnecting: "Connecting to realtime channel...",
       browserBackgroundOnlyHint:
         "Browser alerts only fire when this tab is in the background.",
       browserBlockedHelp:
@@ -61,6 +76,21 @@ vi.mock("@/components/notifications/use-browser-notification-permission", () => 
   useBrowserNotificationPermission: () => browserPermissionState,
 }));
 
+vi.mock("@/store/use-notification-runtime-store", () => ({
+  useNotificationRuntimeStore: <T,>(
+    selector: (state: {
+      deliveryMode: "disabled" | "connecting" | "realtime" | "fallback_polling" | "error";
+      errorMessage: string | null;
+      setRuntimeState: (input: { deliveryMode: string; errorMessage?: string | null }) => void;
+    }) => T,
+  ) =>
+    selector({
+      deliveryMode: notificationRuntimeState.deliveryMode,
+      errorMessage: null,
+      setRuntimeState: () => undefined,
+    }),
+}));
+
 describe("BrowserNotificationOptIn", () => {
   beforeEach(() => {
     browserNotificationsEnabledState.value = false;
@@ -70,6 +100,7 @@ describe("BrowserNotificationOptIn", () => {
     browserPermissionState.requestPermission = vi
       .fn<() => Promise<NotificationPermission>>()
       .mockResolvedValue("granted");
+    notificationRuntimeState.deliveryMode = "realtime";
   });
 
   it("requests permission and enables browser alerts", async () => {

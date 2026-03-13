@@ -148,6 +148,12 @@
     "browserStatusNeedsPermission": "Enable to request browser notification permission.",
     "browserStatusBlocked": "Blocked by browser permission settings.",
     "browserStatusUnsupported": "Browser notifications are not supported here.",
+    "deliveryStatusLabel": "Delivery",
+    "deliveryStatusRealtime": "Realtime connected.",
+    "deliveryStatusFallback": "Realtime unavailable. Backup polling is active.",
+    "deliveryStatusError": "Notification channel failed to initialize.",
+    "deliveryStatusDisabled": "Notification delivery is currently disabled.",
+    "deliveryStatusConnecting": "Connecting to realtime channel...",
     "browserBackgroundOnlyHint": "Browser alerts only fire when this tab is in the background.",
     "browserBlockedHelp": "To re-enable, allow notifications for this site in browser settings."
   }

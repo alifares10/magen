@@ -1,5 +1,5 @@
 import { getAlertsFeed } from "@/lib/db/feed";
-import { parseLimitParam } from "@/lib/api/params";
+import { parseBooleanParam, parseLimitParam } from "@/lib/api/params";
 
 export async function GET(request: Request) {
   try {
@@ -8,14 +8,16 @@ export async function GET(request: Request) {
       defaultValue: 20,
       max: 100,
     });
+    const activeOnly = parseBooleanParam(searchParams.get("activeOnly"), false);
 
-    const data = await getAlertsFeed({ limit });
+    const data = await getAlertsFeed({ limit, activeOnly });
 
     return Response.json({
       data,
       meta: {
         count: data.length,
         limit,
+        activeOnly,
       },
     });
   } catch {

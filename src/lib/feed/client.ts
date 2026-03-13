@@ -23,6 +23,15 @@ export type AsyncState<T> = {
   lastUpdated: number | null;
 };
 
+type AlertsFetchOptions = {
+  activeOnly?: boolean;
+};
+
+type OfficialUpdatesFetchOptions = {
+  limit?: number;
+  activeOnly?: boolean;
+};
+
 export const TAB_FETCH_INTERVALS: Record<FeedTabKey, number> = {
   alerts: 30_000,
   news: 60_000,
@@ -59,8 +68,19 @@ function getApiErrorMessage(payload: unknown, fallback: string): string {
   return parsedError.success ? parsedError.data.error : fallback;
 }
 
-export async function getAlertsData(limit = 20): Promise<AlertFeedItem[]> {
-  const response = await fetch(`/api/alerts?limit=${limit}`, { cache: "no-store" });
+export async function getAlertsData(
+  limit = 20,
+  options: AlertsFetchOptions = {},
+): Promise<AlertFeedItem[]> {
+  const searchParams = new URLSearchParams({
+    limit: String(limit),
+  });
+
+  if (typeof options.activeOnly === "boolean") {
+    searchParams.set("activeOnly", String(options.activeOnly));
+  }
+
+  const response = await fetch(`/api/alerts?${searchParams.toString()}`, { cache: "no-store" });
   const payload: unknown = await response.json();
 
   if (!response.ok) {
@@ -93,8 +113,18 @@ export async function getNewsData(): Promise<NewsFeedItem[]> {
   return parsed.data.data;
 }
 
-export async function getOfficialUpdatesData(): Promise<OfficialUpdateFeedItem[]> {
-  const response = await fetch("/api/official-updates?limit=20", {
+export async function getOfficialUpdatesData(
+  options: OfficialUpdatesFetchOptions = {},
+): Promise<OfficialUpdateFeedItem[]> {
+  const searchParams = new URLSearchParams({
+    limit: String(options.limit ?? 20),
+  });
+
+  if (typeof options.activeOnly === "boolean") {
+    searchParams.set("activeOnly", String(options.activeOnly));
+  }
+
+  const response = await fetch(`/api/official-updates?${searchParams.toString()}`, {
     cache: "no-store",
   });
   const payload: unknown = await response.json();

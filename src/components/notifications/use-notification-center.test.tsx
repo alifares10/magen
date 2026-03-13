@@ -11,11 +11,26 @@ type MockChannel = {
     filter: { event: MockEventType; schema: "public"; table: MockTable },
     callback: (payload: Record<string, unknown>) => void,
   ) => MockChannel;
-  subscribe: () => MockChannel;
+  subscribe: (
+    callback?: (status: "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED", error?: { message?: string }) => void,
+  ) => MockChannel;
 };
 
 let callbacksByKey: Record<string, ((payload: Record<string, unknown>) => void) | undefined>;
 let removeChannelMock: ReturnType<typeof vi.fn>;
+let subscribeStatusCallback:
+  | ((status: "SUBSCRIBED" | "CHANNEL_ERROR" | "TIMED_OUT" | "CLOSED", error?: { message?: string }) => void)
+  | null;
+
+const feedClientMocks = vi.hoisted(() => ({
+  getAlertsData: vi.fn(),
+  getOfficialUpdatesData: vi.fn(),
+}));
+
+vi.mock("@/lib/feed/client", () => ({
+  getAlertsData: feedClientMocks.getAlertsData,
+  getOfficialUpdatesData: feedClientMocks.getOfficialUpdatesData,
+}));
 
 vi.mock("@/lib/supabase/client", () => {
   return {
@@ -25,7 +40,10 @@ vi.mock("@/lib/supabase/client", () => {
           callbacksByKey[`${filter.table}:${filter.event}`] = callback;
           return channel;
         },
-        subscribe: () => channel,
+        subscribe: (callback) => {
+          subscribeStatusCallback = callback ?? null;
+          return channel;
+        },
       };
 
       return {
@@ -50,9 +68,13 @@ describe("useNotificationCenter", () => {
   beforeEach(() => {
     callbacksByKey = {};
     removeChannelMock = vi.fn();
+    subscribeStatusCallback = null;
+    feedClientMocks.getAlertsData.mockResolvedValue([]);
+    feedClientMocks.getOfficialUpdatesData.mockResolvedValue([]);
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
@@ -180,4 +202,86 @@ describe("useNotificationCenter", () => {
 
     expect(removeChannelMock).toHaveBeenCalledTimes(1);
   });
+
+  it("falls back to polling when realtime channel errors", async () => {
+    vi.useFakeTimers();
+
+    feedClientMocks.getAlertsData
+      .mockResolvedValueOnce([
+        {
+          id: "22df13a9-6fa2-4cf3-a647-f6a5f3113751",
+          sourceId: "2f0d4177-5ec6-4d44-83de-6e4f257fbc01",
+          sourceName: "Oref",
+          title: "Initial alert",
+          message: "Existing alert",
+          alertType: "rocket",
+          severity: "critical",
+          status: "active",
+          country: "IL",
+          region: null,
+          city: "Haifa",
+          locationName: "Haifa",
+          latitude: null,
+          longitude: null,
+          publishedAt: "2026-03-09T12:21:00.000+00:00",
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: "22df13a9-6fa2-4cf3-a647-f6a5f3113751",
+          sourceId: "2f0d4177-5ec6-4d44-83de-6e4f257fbc01",
+          sourceName: "Oref",
+          title: "Initial alert",
+          message: "Existing alert",
+          alertType: "rocket",
+          severity: "critical",
+          status: "active",
+          country: "IL",
+          region: null,
+          city: "Haifa",
+          locationName: "Haifa",
+          latitude: null,
+          longitude: null,
+          publishedAt: "2026-03-09T12:21:00.000+00:00",
+        },
+        {
+          id: "56df13a9-6fa2-4cf3-a647-f6a5f3113751",
+          sourceId: "2f0d4177-5ec6-4d44-83de-6e4f257fbc01",
+          sourceName: "Oref",
+          title: "New alert",
+          message: "Take shelter",
+          alertType: "rocket",
+          severity: "critical",
+          status: "active",
+          country: "IL",
+          region: null,
+          city: "Tel Aviv",
+          locationName: "Tel Aviv",
+          latitude: null,
+          longitude: null,
+          publishedAt: "2026-03-09T12:31:00.000+00:00",
+        },
+      ]);
+
+    const { result } = renderHook(() =>
+      useNotificationCenter({
+        alertFallbackBody: "Alert fallback",
+        officialFallbackBody: "Official fallback",
+      }),
+    );
+
+    await act(async () => {
+      subscribeStatusCallback?.("CHANNEL_ERROR", {
+        message: "realtime unavailable",
+      });
+      await Promise.resolve();
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+
+    expect(result.current.notifications).toHaveLength(1);
+    expect(result.current.notifications[0]?.title).toBe("New alert");
+  }, 10_000);
 });

@@ -72,7 +72,13 @@ export function useSupabaseFeedRealtime({
 
     try {
       supabaseClient = createSupabaseBrowserClient();
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Supabase client initialization failed";
+
+      if (process.env.NODE_ENV !== "test") {
+        console.error(`[feed-realtime] Failed to initialize Supabase client: ${reason}`);
+      }
+
       return;
     }
 
@@ -146,7 +152,19 @@ export function useSupabaseFeedRealtime({
       },
     );
 
-    void channel.subscribe();
+    void channel.subscribe((status, error) => {
+      if (
+        status === "CHANNEL_ERROR" ||
+        status === "TIMED_OUT" ||
+        status === "CLOSED"
+      ) {
+        const reason = error?.message ?? `Feed realtime status: ${status}`;
+
+        if (process.env.NODE_ENV !== "test") {
+          console.error(`[feed-realtime] ${reason}`);
+        }
+      }
+    });
 
     return () => {
       void supabaseClient.removeChannel(channel);

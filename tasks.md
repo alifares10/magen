@@ -163,8 +163,14 @@ Use these unless a later task explicitly changes them.
 
 ## Phase 8 execution (current)
 
+- [x] Deploy Railway `worker:rss` as a long-lived loop service and verify successful `rss_news` ingestion runs
+- [x] Add Supabase scheduled cleanup for operational tables (every 10 minutes): delete resolved alerts older than 3 hours and ingestion runs older than 2 hours
+- [x] Deactivate failing RSS sources `times-of-israel-main` and `jns-main` after repeated `403` responses
+- [ ] Resolve Israel-only access path for official guidance source and deploy Railway `worker:official`
 - [ ] Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records
 - [ ] Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice
+- [x] Harden notification delivery reliability: add realtime subscription diagnostics/status visibility and fallback polling when realtime is unavailable
+- [x] Fix public Supabase env resolution in client runtime (`NEXT_PUBLIC_*`) so realtime/notifications initialize correctly in both dev and deployed builds
 
 ## Open items to revisit later
 

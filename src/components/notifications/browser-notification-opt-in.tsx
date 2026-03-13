@@ -4,6 +4,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
 import { useBrowserNotificationPermission } from "@/components/notifications/use-browser-notification-permission";
 import { useNotificationPreferencesStore } from "@/store/use-notification-preferences-store";
+import { useNotificationRuntimeStore } from "@/store/use-notification-runtime-store";
 
 type BrowserNotificationOptInProps = {
   className?: string;
@@ -26,6 +27,7 @@ export function BrowserNotificationOptIn({
   );
   const { isSupported, permission, requestPermission } =
     useBrowserNotificationPermission();
+  const deliveryMode = useNotificationRuntimeStore((state) => state.deliveryMode);
   const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
@@ -90,6 +92,22 @@ export function BrowserNotificationOptIn({
           : permission === "granted"
             ? t("browserStatusDisabled")
             : t("browserStatusNeedsPermission");
+  const deliveryStatusText =
+    deliveryMode === "realtime"
+      ? t("deliveryStatusRealtime")
+      : deliveryMode === "fallback_polling"
+        ? t("deliveryStatusFallback")
+        : deliveryMode === "error"
+          ? t("deliveryStatusError")
+          : deliveryMode === "disabled"
+            ? t("deliveryStatusDisabled")
+            : t("deliveryStatusConnecting");
+  const deliveryStatusClassName =
+    deliveryMode === "realtime"
+      ? "text-emerald-700"
+      : deliveryMode === "fallback_polling" || deliveryMode === "error"
+        ? "text-amber-700"
+        : "text-zinc-600";
 
   return (
     <div className={className}>
@@ -114,6 +132,9 @@ export function BrowserNotificationOptIn({
       </button>
 
       <p className="mt-1 text-xs text-zinc-600">{statusText}</p>
+      <p className={`mt-1 text-xs ${deliveryStatusClassName}`}>
+        {t("deliveryStatusLabel")}: {deliveryStatusText}
+      </p>
       <p className="mt-1 text-[11px] text-zinc-500">
         {t("browserBackgroundOnlyHint")}
       </p>

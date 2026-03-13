@@ -114,7 +114,13 @@ export function useSupabaseSourceHealthRealtime({
 
     try {
       supabaseClient = createSupabaseBrowserClient();
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Supabase client initialization failed";
+
+      if (process.env.NODE_ENV !== "test") {
+        console.error(`[source-health-realtime] Failed to initialize Supabase client: ${reason}`);
+      }
+
       return;
     }
 
@@ -162,7 +168,19 @@ export function useSupabaseSourceHealthRealtime({
       },
     );
 
-    void channel.subscribe();
+    void channel.subscribe((status, error) => {
+      if (
+        status === "CHANNEL_ERROR" ||
+        status === "TIMED_OUT" ||
+        status === "CLOSED"
+      ) {
+        const reason = error?.message ?? `Source health realtime status: ${status}`;
+
+        if (process.env.NODE_ENV !== "test") {
+          console.error(`[source-health-realtime] ${reason}`);
+        }
+      }
+    });
 
     return () => {
       void supabaseClient.removeChannel(channel);
