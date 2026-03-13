@@ -136,6 +136,7 @@
     "alertLabel": "התראה רשמית",
     "officialLabel": "הנחיה רשמית",
     "dismissLabel": "סגור",
+    "locationLabel": "מיקום",
     "severityLabel": "חומרה",
     "alertFallbackBody": "פורסמה התראה רשמית חדשה.",
     "officialFallbackBody": "פורסם עדכון הנחיה רשמי חדש.",

@@ -9,6 +9,10 @@ export const alertNotificationRowSchema = z.object({
   message: z.string().nullable(),
   severity: notificationSeveritySchema,
   status: z.string().min(1),
+  location_name: z.string().min(1).nullable().optional(),
+  city: z.string().min(1).nullable().optional(),
+  region: z.string().min(1).nullable().optional(),
+  country: z.string().min(1).nullable().optional(),
   published_at: isoDateTimeSchema,
 });
 
@@ -28,6 +32,7 @@ export const inAppNotificationSchema = z.object({
   type: notificationTypeSchema,
   title: z.string().min(1),
   body: z.string().min(1),
+  location: z.string().min(1).nullable(),
   severity: notificationSeveritySchema.nullable(),
   publishedAt: isoDateTimeSchema,
   createdAt: z.number().int().nonnegative(),

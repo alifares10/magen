@@ -1,6 +1,6 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, render, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 
 const { notificationCenterState, browserPreferenceState, browserPermissionState } = vi.hoisted(
@@ -11,6 +11,7 @@ const { notificationCenterState, browserPreferenceState, browserPermissionState 
         type: "official_alert" | "official_guidance";
         title: string;
         body: string;
+        location: string | null;
         severity: "low" | "medium" | "high" | "critical" | null;
         publishedAt: string;
         createdAt: number;
@@ -35,6 +36,7 @@ vi.mock("next-intl", () => ({
       alertLabel: "Official alert",
       officialLabel: "Official guidance",
       dismissLabel: "Dismiss",
+      locationLabel: "Location",
       severityLabel: "Severity",
       alertFallbackBody: "Alert fallback",
       officialFallbackBody: "Official fallback",
@@ -74,6 +76,7 @@ describe("NotificationCenter browser notifications", () => {
         type: "official_alert",
         title: "Official alert",
         body: "Take shelter now",
+        location: "Tel Aviv",
         severity: "critical",
         publishedAt: "2026-03-13T12:21:00.000+00:00",
         createdAt: Date.now(),
@@ -82,6 +85,10 @@ describe("NotificationCenter browser notifications", () => {
     browserPreferenceState.browserNotificationsEnabled = true;
     browserPermissionState.isSupported = true;
     browserPermissionState.permission = "granted";
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("fires browser notifications only when tab is hidden", async () => {
@@ -98,6 +105,7 @@ describe("NotificationCenter browser notifications", () => {
       expect(notificationMock).toHaveBeenCalledWith("Official alert", {
         body: "Take shelter now",
         tag: "official_alert-1",
+        requireInteraction: true,
       });
     });
   });
@@ -117,6 +125,76 @@ describe("NotificationCenter browser notifications", () => {
     });
   });
 
+  it("sends a pending browser notification after tab becomes hidden", async () => {
+    const notificationMock = vi.fn(function MockNotification(this: { onclick: (() => void) | null; close: () => void }) {
+      this.onclick = null;
+      this.close = vi.fn();
+    });
+    vi.stubGlobal("Notification", notificationMock);
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+
+    render(<NotificationCenter />);
+
+    await waitFor(() => {
+      expect(notificationMock).not.toHaveBeenCalled();
+    });
+
+    await act(async () => {
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "hidden",
+      });
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    await waitFor(() => {
+      expect(notificationMock).toHaveBeenCalledWith("Official alert", {
+        body: "Take shelter now",
+        tag: "official_alert-1",
+        requireInteraction: true,
+      });
+    });
+  });
+
+  it("retries browser notification delivery after a dispatch failure", async () => {
+    let callCount = 0;
+    const notificationMock = vi.fn(function MockNotification(this: { onclick: (() => void) | null; close: () => void }) {
+      callCount += 1;
+
+      if (callCount === 1) {
+        throw new Error("dispatch failed");
+      }
+
+      this.onclick = null;
+      this.close = vi.fn();
+    });
+    vi.stubGlobal("Notification", notificationMock);
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+
+    const view = render(<NotificationCenter />);
+
+    await waitFor(() => {
+      expect(notificationMock).toHaveBeenCalledTimes(1);
+    });
+
+    notificationCenterState.notifications = [
+      {
+        ...notificationCenterState.notifications[0],
+      },
+    ];
+    view.rerender(<NotificationCenter />);
+
+    await waitFor(() => {
+      expect(notificationMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it("does not fire browser notifications when opt-in is disabled", async () => {
     const notificationMock = vi.fn();
     vi.stubGlobal("Notification", notificationMock);
@@ -131,5 +209,65 @@ describe("NotificationCenter browser notifications", () => {
     await waitFor(() => {
       expect(notificationMock).not.toHaveBeenCalled();
     });
+  });
+
+  it("renders alert location when available", async () => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+
+    const view = render(<NotificationCenter />);
+
+    await waitFor(() => {
+      expect(view.getByText("Location: Tel Aviv")).toBeInTheDocument();
+    });
+  });
+
+  it("auto-dismisses guidance before alert by configured timers", async () => {
+    vi.useFakeTimers();
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+
+    notificationCenterState.notifications = [
+      {
+        id: "official_alert-1",
+        type: "official_alert",
+        title: "Official alert",
+        body: "Take shelter now",
+        location: "Tel Aviv",
+        severity: "critical",
+        publishedAt: "2026-03-13T12:21:00.000+00:00",
+        createdAt: Date.now(),
+      },
+      {
+        id: "official_guidance-1",
+        type: "official_guidance",
+        title: "Official guidance",
+        body: "Stay near shelter",
+        location: null,
+        severity: "high",
+        publishedAt: "2026-03-13T12:21:00.000+00:00",
+        createdAt: Date.now(),
+      },
+    ];
+
+    render(<NotificationCenter />);
+
+    expect(notificationCenterState.dismissNotification).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(12_000);
+    });
+
+    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith("official_guidance-1");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(8_000);
+    });
+
+    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith("official_alert-1");
   });
 });

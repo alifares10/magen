@@ -201,6 +201,13 @@ Done:
 - Re-validated successfully after notification reliability hardening: `lint`, `test`, `typecheck`, `build`.
 - Fixed client-side public env resolution in `src/lib/supabase/env.ts` by switching to static `process.env.NEXT_PUBLIC_*` access so realtime/notifications initialize correctly in dev and deployed bundles.
 - Re-validated after env fix with targeted notification checks: `lint`, `typecheck`, `test -- use-notification-center notification-center browser-notification-opt-in`.
+- Improved browser notification delivery resilience in `src/components/notifications/notification-center.tsx`: notifications are now marked as browser-seen only after successful dispatch, pending notifications can fire after tab visibility switches to hidden, and failed dispatch attempts log a non-test warning for diagnosis.
+- Added regression tests covering pending-while-visible delivery and retry-after-dispatch-failure behavior in `src/components/notifications/notification-center.test.tsx`.
+- Further hardened browser dispatch by setting `requireInteraction: true` on notification options and clearing seen state on async `notification.onerror` so failed browser deliveries can retry.
+- Extended notification schemas/hook mapping to include alert location in in-app notifications (`src/lib/schemas/notifications.ts`, `src/components/notifications/use-notification-center.ts`), deriving location from `location_name -> city -> region -> country`.
+- Updated in-app notification UI for better alert prominence: `official_alert` cards now use a stronger red background and render location metadata (`src/components/notifications/notification-center.tsx`).
+- Added/updated tests for location rendering and location propagation in notification hooks (`src/components/notifications/notification-center.test.tsx`, `src/components/notifications/use-notification-center.test.tsx`) and re-ran `lint`, `typecheck`, plus targeted notification/message tests.
+- Added in-app notification auto-dismiss timers in `src/components/notifications/notification-center.tsx` (official guidance: 12s, official alerts: 20s) with timeout cleanup and regression coverage in `src/components/notifications/notification-center.test.tsx`.
 
 In progress:
 

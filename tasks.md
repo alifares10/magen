@@ -171,6 +171,10 @@ Use these unless a later task explicitly changes them.
 - [ ] Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice
 - [x] Harden notification delivery reliability: add realtime subscription diagnostics/status visibility and fallback polling when realtime is unavailable
 - [x] Fix public Supabase env resolution in client runtime (`NEXT_PUBLIC_*`) so realtime/notifications initialize correctly in both dev and deployed builds
+- [x] Improve browser notification delivery behavior: retry pending items after tab visibility changes and after transient dispatch failures
+- [x] Strengthen browser notification dispatch: request persistent banners (`requireInteraction`) and retry on async `onerror` by clearing seen marker
+- [x] Enhance in-app alert notification prominence: show alert location metadata and use a stronger red background for `official_alert` cards only
+- [x] Add auto-dismiss timers for in-app notifications (official guidance faster, official alerts slower)
 
 ## Open items to revisit later
 

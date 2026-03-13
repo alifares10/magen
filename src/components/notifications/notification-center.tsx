@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { formatDateTime } from "@/lib/feed/client";
 import { useBrowserNotificationPermission } from "@/components/notifications/use-browser-notification-permission";
 import { useNotificationCenter } from "@/components/notifications/use-notification-center";
 import { useNotificationPreferencesStore } from "@/store/use-notification-preferences-store";
 
+const ALERT_AUTO_DISMISS_MS = 20_000;
+const GUIDANCE_AUTO_DISMISS_MS = 12_000;
+
 function getNotificationClasses(type: "official_alert" | "official_guidance"): string {
   if (type === "official_alert") {
-    return "border-rose-300 bg-rose-50/95 text-rose-950";
+    return "border-red-700 bg-red-600/95 text-red-50";
   }
 
   return "border-sky-300 bg-sky-50/95 text-sky-950";
@@ -26,6 +29,30 @@ export function NotificationCenter() {
     officialFallbackBody: t("officialFallbackBody"),
   });
   const browserSeenNotificationIdsRef = useRef<Set<string>>(new Set());
+  const dismissTimeoutsRef = useRef<Map<string, number>>(new Map());
+  const [visibilityState, setVisibilityState] = useState<DocumentVisibilityState>(() => {
+    if (typeof document === "undefined") {
+      return "visible";
+    }
+
+    return document.visibilityState;
+  });
+
+  useEffect(() => {
+    if (typeof document === "undefined") {
+      return;
+    }
+
+    const onVisibilityChange = () => {
+      setVisibilityState(document.visibilityState);
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -36,14 +63,12 @@ export function NotificationCenter() {
       browserNotificationsEnabled &&
       isSupported &&
       permission === "granted" &&
-      document.visibilityState !== "visible";
+      visibilityState !== "visible";
 
     for (const notification of notifications) {
       if (browserSeenNotificationIdsRef.current.has(notification.id)) {
         continue;
       }
-
-      browserSeenNotificationIdsRef.current.add(notification.id);
 
       if (!canSendBrowserNotification) {
         continue;
@@ -53,17 +78,80 @@ export function NotificationCenter() {
         const browserNotification = new window.Notification(notification.title, {
           body: notification.body,
           tag: notification.id,
+          requireInteraction: true,
         });
+
+        browserSeenNotificationIdsRef.current.add(notification.id);
+
+        browserNotification.onerror = () => {
+          browserSeenNotificationIdsRef.current.delete(notification.id);
+
+          if (process.env.NODE_ENV !== "test") {
+            console.warn("[notifications] Browser notification failed after dispatch.");
+          }
+        };
 
         browserNotification.onclick = () => {
           window.focus();
           browserNotification.close();
         };
-      } catch {
+      } catch (error) {
+        if (process.env.NODE_ENV !== "test") {
+          const reason = error instanceof Error ? error.message : "Unknown browser notification error";
+          console.warn(`[notifications] Browser notification dispatch failed: ${reason}`);
+        }
+
         continue;
       }
     }
-  }, [browserNotificationsEnabled, isSupported, notifications, permission]);
+  }, [browserNotificationsEnabled, isSupported, notifications, permission, visibilityState]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const activeNotificationIds = new Set(notifications.map((notification) => notification.id));
+
+    for (const notification of notifications) {
+      if (dismissTimeoutsRef.current.has(notification.id)) {
+        continue;
+      }
+
+      const autoDismissMs =
+        notification.type === "official_alert"
+          ? ALERT_AUTO_DISMISS_MS
+          : GUIDANCE_AUTO_DISMISS_MS;
+
+      const timeoutId = window.setTimeout(() => {
+        dismissTimeoutsRef.current.delete(notification.id);
+        dismissNotification(notification.id);
+      }, autoDismissMs);
+
+      dismissTimeoutsRef.current.set(notification.id, timeoutId);
+    }
+
+    for (const [notificationId, timeoutId] of dismissTimeoutsRef.current.entries()) {
+      if (activeNotificationIds.has(notificationId)) {
+        continue;
+      }
+
+      window.clearTimeout(timeoutId);
+      dismissTimeoutsRef.current.delete(notificationId);
+    }
+  }, [dismissNotification, notifications]);
+
+  useEffect(() => {
+    const dismissTimeouts = dismissTimeoutsRef.current;
+
+    return () => {
+      for (const timeoutId of dismissTimeouts.values()) {
+        window.clearTimeout(timeoutId);
+      }
+
+      dismissTimeouts.clear();
+    };
+  }, []);
 
   if (notifications.length === 0) {
     return null;
@@ -108,7 +196,20 @@ export function NotificationCenter() {
               </div>
 
               <p className="mt-1 text-sm font-semibold">{notification.title}</p>
-              <p className="mt-1 line-clamp-2 text-xs text-current/90">{notification.body}</p>
+
+              {notification.location ? (
+                <p
+                  className={
+                    notification.type === "official_alert"
+                      ? "mt-2 inline-flex rounded-md border border-red-100/40 bg-red-900/35 px-2 py-1 text-[11px] font-semibold tracking-wide text-red-50"
+                      : "mt-2 inline-flex rounded-md border border-sky-300/60 bg-sky-100/80 px-2 py-1 text-[11px] font-semibold tracking-wide text-sky-900"
+                  }
+                >
+                  {t("locationLabel")}: {notification.location}
+                </p>
+              ) : null}
+
+              <p className="mt-2 line-clamp-2 text-xs text-current/90">{notification.body}</p>
 
               <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-current/80">
                 {notification.severity ? (

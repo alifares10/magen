@@ -136,6 +136,7 @@
     "alertLabel": "Official alert",
     "officialLabel": "Official guidance",
     "dismissLabel": "Dismiss",
+    "locationLabel": "Location",
     "severityLabel": "Severity",
     "alertFallbackBody": "A new official alert was published.",
     "officialFallbackBody": "A new official guidance update was published.",

@@ -67,6 +67,30 @@ function getRecordField(
   return Reflect.get(record, field);
 }
 
+function normalizeLocationSegment(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalizedValue = value.trim();
+  return normalizedValue.length > 0 ? normalizedValue : null;
+}
+
+function pickAlertLocation(input: {
+  locationName?: unknown;
+  city?: unknown;
+  region?: unknown;
+  country?: unknown;
+}): string | null {
+  return (
+    normalizeLocationSegment(input.locationName) ??
+    normalizeLocationSegment(input.city) ??
+    normalizeLocationSegment(input.region) ??
+    normalizeLocationSegment(input.country) ??
+    null
+  );
+}
+
 function buildAlertNotification(
   payload: RealtimePostgresChangesPayload<Record<string, unknown>>,
   fallbackBody: string,
@@ -97,6 +121,12 @@ function buildAlertNotification(
       parsedNewRow.data.message && parsedNewRow.data.message.trim().length > 0
         ? parsedNewRow.data.message
         : fallbackBody,
+    location: pickAlertLocation({
+      locationName: parsedNewRow.data.location_name,
+      city: parsedNewRow.data.city,
+      region: parsedNewRow.data.region,
+      country: parsedNewRow.data.country,
+    }),
     severity: parsedNewRow.data.severity,
     publishedAt: parsedNewRow.data.published_at,
     createdAt: Date.now(),
@@ -139,6 +169,7 @@ function buildOfficialNotification(
       parsedNewRow.data.body && parsedNewRow.data.body.trim().length > 0
         ? parsedNewRow.data.body
         : fallbackBody,
+    location: null,
     severity: parsedNewRow.data.severity,
     publishedAt: parsedNewRow.data.published_at,
     createdAt: Date.now(),
@@ -164,6 +195,12 @@ function buildNotificationFromAlertFeedItem(
     type: "official_alert",
     title: item.title,
     body: item.message && item.message.trim().length > 0 ? item.message : fallbackBody,
+    location: pickAlertLocation({
+      locationName: item.locationName,
+      city: item.city,
+      region: item.region,
+      country: item.country,
+    }),
     severity: item.severity,
     publishedAt: item.publishedAt,
     createdAt: Date.now(),
@@ -189,6 +226,7 @@ function buildNotificationFromOfficialFeedItem(
     type: "official_guidance",
     title: item.title,
     body: item.body && item.body.trim().length > 0 ? item.body : fallbackBody,
+    location: null,
     severity: item.severity,
     publishedAt: item.publishedAt,
     createdAt: Date.now(),

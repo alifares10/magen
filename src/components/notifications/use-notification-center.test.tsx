@@ -107,17 +107,20 @@ describe("useNotificationCenter", () => {
           message: "Take shelter now",
           severity: "critical",
           status: "active",
+          location_name: "Ashkelon",
           published_at: "2026-03-09T12:21:00.000+00:00",
         },
       });
     });
 
     await waitFor(() => {
-      expect(result.current.notifications).toHaveLength(2);
+    expect(result.current.notifications).toHaveLength(2);
     });
 
     expect(result.current.notifications[0]?.type).toBe("official_alert");
+    expect(result.current.notifications[0]?.location).toBe("Ashkelon");
     expect(result.current.notifications[1]?.type).toBe("official_guidance");
+    expect(result.current.notifications[1]?.location).toBeNull();
   });
 
   it("deduplicates repeated events for the same row", async () => {
@@ -283,5 +286,6 @@ describe("useNotificationCenter", () => {
 
     expect(result.current.notifications).toHaveLength(1);
     expect(result.current.notifications[0]?.title).toBe("New alert");
+    expect(result.current.notifications[0]?.location).toBe("Tel Aviv");
   }, 10_000);
 });
