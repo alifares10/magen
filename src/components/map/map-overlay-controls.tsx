@@ -15,10 +15,10 @@ type MapOverlayControlsProps = {
 
 function getToggleClasses(isActive: boolean): string {
   if (isActive) {
-    return "border-slate-900 bg-slate-900 text-white";
+    return "border-slate-900 bg-slate-900 text-white dark:border-amber-800/70 dark:bg-amber-950/60 dark:text-amber-100";
   }
 
-  return "border-slate-300 bg-white text-slate-800";
+  return "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700/80 dark:bg-slate-950/75 dark:text-slate-200 dark:hover:bg-slate-900";
 }
 
 export function MapOverlayControls({
@@ -33,7 +33,7 @@ export function MapOverlayControls({
 }: MapOverlayControlsProps) {
   return (
     <section className="flex flex-wrap items-center gap-2">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-700">{title}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300">{title}</p>
 
       <button
         type="button"

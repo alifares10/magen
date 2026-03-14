@@ -30,6 +30,11 @@ const content = {
   severityLabel: "Severity",
   locationLabel: "Location",
   updatedLabel: "Updated",
+  themeSwitcher: {
+    label: "Theme",
+    dark: "Dark",
+    light: "Light",
+  },
 };
 
 function createJsonResponse(payload: unknown, status = 200): Response {

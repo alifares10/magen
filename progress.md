@@ -7,7 +7,7 @@ Date:
 Phase:
 Phase 8 in progress
 Current focus:
-Phase 8 ops stabilization follow-up: keep ingestion automation moving while refining toast-based notification presentation and delivery reliability.
+Phase 8 ops stabilization follow-up: run official guidance and overlays in temporary manual DB mode, keep tracking/docs aligned, and keep validation green.
 
 Done:
 
@@ -211,16 +211,28 @@ Done:
 - Replaced the custom top-center in-app notification card stack with the 21st.dev Sonner-based toast UI (`src/components/ui/toast.tsx`, `src/components/ui/button.tsx`) and wired `src/components/notifications/notification-center.tsx` to drive it imperatively while preserving browser Notification API behavior.
 - Kept notification lifecycle behavior intact during the toast migration: official alerts still map to the strongest variant, top-center placement remains global, metadata is included in toast copy, manual dismiss clears state, and auto-dismiss timers still remove queued items after 20s/12s.
 - Re-validated the toast migration with focused checks: `npx vitest run src/components/notifications/notification-center.test.tsx src/components/notifications/use-notification-center.test.tsx`, `npx eslint src/components/ui/toast.tsx src/components/notifications/notification-center.tsx src/components/notifications/notification-center.test.tsx`, and `npm run typecheck`.
+- Set Phase 8 guidance/overlay ingestion automation items to deferred manual mode in `tasks.md` (`[!]`) until API/egress constraints are removed.
+- Added temporary manual DB runbook entries in `README.md` for `official_updates` and overlay snapshot maintenance.
+- Aligned right-rail layout test expectation with current Tailwind utility token (`lg:h-140`) in `src/components/layout/app-shell.test.tsx`.
+- Re-validated successfully after manual-mode planning updates: `lint`, `test`, `typecheck`, `build`.
+- Added a global theme switcher using `src/components/ui/sky-toggle.tsx` (migrated from `styled-components` to CSS Modules), wired it into dashboard/feed/map headers, and set the default app theme to dark in root layout.
+- Added client theme provider state + document class syncing in `src/components/providers/theme-provider.tsx` and wrapped locale layout with the provider.
+- Added localized theme labels for English/Hebrew (`app`, `feedPage`, `mapPage`) and re-validated successfully: `lint`, `test`, `typecheck`, `build`.
+- Reworked dark-mode styling into a cohesive midnight palette across dashboard/feed/map surfaces (`src/app/globals.css`, `src/components/layout/app-shell.tsx`, `src/components/feed/live-feed-page.tsx`, `src/components/map/*`, `src/components/streams/stream-panel.tsx`) with stronger contrast for alerts/official/news cards, tab pills, status badges, and form controls.
+- Tuned supporting dark-mode UI details in `src/components/notifications/browser-notification-opt-in.tsx`, `src/components/i18n/locale-switcher.tsx`, and `src/components/ui/sky-toggle.module.css` for more consistent readability and tone.
+- Re-validated successfully after dark-mode refinement: `lint`, `test`, `typecheck`, `build`.
+- Applied a follow-up dark-card cleanup pass to remove muddy tinted dark card bodies in favor of neutral slate surfaces with semantic accent borders/chips (`src/components/layout/app-shell.tsx`, `src/components/feed/live-feed-page.tsx`, `src/components/map/map-summary-cards.tsx`, `src/components/map/map-watchlist-manager.tsx`).
+- Re-validated the follow-up card-surface pass: `lint`, targeted `vitest` (`app-shell`, `live-feed-page`, `map-preview`), `typecheck`, `build`.
 
 In progress:
 
-- Railway `worker:official` deployment is deferred; official guidance source currently returns `403` from non-Israel egress.
+- Manual DB operations for official guidance and overlays remain active until ingestion automation is re-enabled.
 
 Next up:
 
-1. Resolve Israel-only access for official guidance and deploy Railway `worker:official` (relay or Israel egress path).
-2. Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records.
-3. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
+1. Continue manual DB refreshes for `official_updates`, `shelters`, `road_closures`, and `hospitals` using the README runbook.
+2. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
+3. Re-open automation work once constraints clear: official guidance Israel-egress path + first overlay ingestion path.
 4. Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice.
 
 Blockers:

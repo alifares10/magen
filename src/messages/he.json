@@ -54,6 +54,11 @@
       "degraded": "חלקי",
       "down": "לא זמין",
       "unknown": "לא ידוע"
+    },
+    "themeSwitcher": {
+      "label": "ערכת נושא",
+      "dark": "כהה",
+      "light": "בהיר"
     }
   },
   "feedPage": {
@@ -73,7 +78,12 @@
     "publishedLabel": "פורסם",
     "severityLabel": "חומרה",
     "locationLabel": "מיקום",
-    "updatedLabel": "עודכן"
+    "updatedLabel": "עודכן",
+    "themeSwitcher": {
+      "label": "ערכת נושא",
+      "dark": "כהה",
+      "light": "בהיר"
+    }
   },
   "mapPage": {
     "title": "מפת חירום",
@@ -122,7 +132,12 @@
     "watchlistTopPriorityLabel": "קדימות עליונה",
     "watchlistNearbyAlertsLabel": "התראות סמוכות",
     "watchlistHighestSeverityLabel": "חומרה מרבית",
-    "watchlistNearestAlertLabel": "ההתראה הקרובה ביותר"
+    "watchlistNearestAlertLabel": "ההתראה הקרובה ביותר",
+    "themeSwitcher": {
+      "label": "ערכת נושא",
+      "dark": "כהה",
+      "light": "בהיר"
+    }
   },
   "localeSwitcher": {
     "label": "שפה",

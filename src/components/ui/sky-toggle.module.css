@@ -1,0 +1,236 @@
+.root {
+  display: inline-flex;
+}
+
+.switch {
+  --toggle-size: 30px;
+  --track-width: 5.625em;
+  --track-height: 2.5em;
+  --track-radius: 6.25em;
+  --track-light-bg: #3d7eae;
+  --track-dark-bg: linear-gradient(160deg, #0b1220 0%, #111a2a 58%, #1a2437 100%);
+  --thumb-wrap-size: 3.375em;
+  --thumb-size: 2.125em;
+  --sun-bg: #ecca2f;
+  --moon-bg: #d4d9e5;
+  --spot-color: #919bb3;
+  --thumb-offset: calc((var(--thumb-wrap-size) - var(--track-height)) / 2 * -1);
+  --stars-color: #f8f5da;
+  --clouds-color: #eef8ff;
+  --back-clouds-color: #93b4ca;
+  --transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25);
+  --thumb-transition: 0.3s cubic-bezier(0, -0.02, 0.35, 1.17);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.switch,
+.switch *,
+.switch *::before,
+.switch *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-size: var(--toggle-size);
+}
+
+.checkbox {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.checkbox:disabled + .track {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.track {
+  position: relative;
+  inline-size: var(--track-width);
+  block-size: var(--track-height);
+  border-radius: var(--track-radius);
+  overflow: hidden;
+  background: var(--track-light-bg);
+  box-shadow:
+    0 -0.062em 0.062em rgb(0 0 0 / 25%),
+    0 0.062em 0.125em rgb(255 255 255 / 94%);
+  transition: var(--transition);
+}
+
+.track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: var(--track-radius);
+  box-shadow:
+    0 0.05em 0.187em rgb(0 0 0 / 25%) inset,
+    0 0.05em 0.187em rgb(0 0 0 / 25%) inset;
+}
+
+.thumbWrap {
+  position: absolute;
+  top: var(--thumb-offset);
+  left: var(--thumb-offset);
+  z-index: 2;
+  display: flex;
+  inline-size: var(--thumb-wrap-size);
+  block-size: var(--thumb-wrap-size);
+  border-radius: var(--track-radius);
+  background: rgb(255 255 255 / 10%);
+  box-shadow:
+    inset 0 0 0 3.375em rgb(255 255 255 / 10%),
+    0 0 0 0.625em rgb(255 255 255 / 10%),
+    0 0 0 1.25em rgb(255 255 255 / 10%);
+  pointer-events: none;
+  transition: var(--thumb-transition);
+}
+
+.thumb {
+  position: relative;
+  display: flex;
+  margin: auto;
+  inline-size: var(--thumb-size);
+  block-size: var(--thumb-size);
+  border-radius: var(--track-radius);
+  overflow: hidden;
+  background: var(--sun-bg);
+  box-shadow:
+    0.062em 0.062em 0.062em 0 rgb(254 255 239 / 61%) inset,
+    0 -0.062em 0.062em 0 #a1872a inset;
+  filter: drop-shadow(0.062em 0.125em 0.125em rgb(0 0 0 / 25%));
+  transition: var(--transition);
+}
+
+.moon {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--moon-bg);
+  transform: translateX(100%);
+  box-shadow:
+    0.062em 0.062em 0.062em 0 rgb(254 255 239 / 61%) inset,
+    0 -0.062em 0.062em 0 #969696 inset;
+  transition: var(--transition);
+}
+
+.spot {
+  position: absolute;
+  top: 0.75em;
+  left: 0.312em;
+  inline-size: 0.75em;
+  block-size: 0.75em;
+  border-radius: var(--track-radius);
+  background: var(--spot-color);
+  box-shadow: 0 0.0312em 0.062em rgb(0 0 0 / 25%) inset;
+}
+
+.spot:nth-of-type(2) {
+  top: 0.937em;
+  left: 1.375em;
+  inline-size: 0.375em;
+  block-size: 0.375em;
+}
+
+.spot:nth-of-type(3) {
+  top: 0.312em;
+  left: 0.812em;
+  inline-size: 0.25em;
+  block-size: 0.25em;
+}
+
+.clouds {
+  position: absolute;
+  bottom: -0.625em;
+  left: 0.312em;
+  inline-size: 1.25em;
+  block-size: 1.25em;
+  border-radius: var(--track-radius);
+  background: var(--clouds-color);
+  box-shadow:
+    0.937em 0.312em var(--clouds-color),
+    -0.312em -0.312em var(--back-clouds-color),
+    1.437em 0.375em var(--clouds-color),
+    0.5em -0.125em var(--back-clouds-color),
+    2.187em 0 var(--clouds-color),
+    1.25em -0.062em var(--back-clouds-color),
+    2.937em 0.312em var(--clouds-color),
+    2em -0.312em var(--back-clouds-color),
+    3.625em -0.062em var(--clouds-color),
+    2.625em 0 var(--back-clouds-color),
+    4.5em -0.312em var(--clouds-color),
+    3.375em -0.437em var(--back-clouds-color);
+  transition: var(--transition);
+}
+
+.stars {
+  position: absolute;
+  top: -100%;
+  left: 0.312em;
+  z-index: 1;
+  inline-size: 2.75em;
+  color: var(--stars-color);
+  transition: var(--transition);
+}
+
+.stars svg {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+}
+
+.checkbox:focus-visible + .track {
+  outline: 2px solid rgb(59 130 246 / 80%);
+  outline-offset: 2px;
+}
+
+.checkbox:checked + .track {
+  background: var(--track-dark-bg);
+}
+
+.switch:hover .thumbWrap {
+  left: calc(var(--thumb-offset) + 0.187em);
+}
+
+.checkbox:checked + .track .moon {
+  transform: translateX(0%);
+}
+
+.checkbox:checked + .track .clouds {
+  bottom: -4.062em;
+}
+
+.checkbox:checked + .track .stars {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.checkbox:checked + .track .thumbWrap {
+  left: calc(100% - var(--thumb-offset) - var(--thumb-wrap-size));
+}
+
+.checkbox:checked + .track:hover .thumbWrap {
+  left: calc(100% - var(--thumb-offset) - var(--thumb-wrap-size) - 0.187em);
+}
+
+.srOnly {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  clip: rect(0, 0, 0, 0);
+  overflow: hidden;
+}

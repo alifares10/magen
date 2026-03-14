@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSupabaseSourceHealthRealtime } from "@/components/layout/use-supabase-source-health-realtime";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { BrowserNotificationOptIn } from "@/components/notifications/browser-notification-opt-in";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import {
   apiErrorSchema,
   dashboardOverviewRequestBodySchema,
@@ -89,6 +90,11 @@ type AppShellContent = {
     down: string;
     unknown: string;
   };
+  themeSwitcher: {
+    label: string;
+    dark: string;
+    light: string;
+  };
 };
 
 type AppShellProps = {
@@ -112,18 +118,18 @@ const sourceHealthTypeOrder: SourceHealthType[] = [
 
 function getSourceHealthStatusClasses(status: SourceHealthStatus): string {
   if (status === "healthy") {
-    return "border-emerald-300 bg-emerald-50 text-emerald-800";
+    return "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800/65 dark:bg-emerald-950/55 dark:text-emerald-100";
   }
 
   if (status === "degraded") {
-    return "border-amber-300 bg-amber-50 text-amber-900";
+    return "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800/65 dark:bg-amber-950/55 dark:text-amber-100";
   }
 
   if (status === "down") {
-    return "border-rose-300 bg-rose-50 text-rose-800";
+    return "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800/65 dark:bg-rose-950/55 dark:text-rose-100";
   }
 
-  return "border-zinc-300 bg-zinc-100 text-zinc-700";
+  return "border-zinc-300 bg-zinc-100 text-zinc-700 dark:border-slate-600/80 dark:bg-slate-800/80 dark:text-slate-200";
 }
 
 async function getDashboardOverviewData(
@@ -189,14 +195,14 @@ type TickerItem = {
 
 function getTickerItemTypeClasses(itemType: TickerItem["type"]): string {
   if (itemType === "alert") {
-    return "border-rose-300 bg-rose-100 text-rose-900";
+    return "border-rose-300 bg-rose-100 text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/55 dark:text-rose-100";
   }
 
   if (itemType === "official") {
-    return "border-sky-300 bg-sky-100 text-sky-900";
+    return "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-800/70 dark:bg-sky-950/55 dark:text-sky-100";
   }
 
-  return "border-zinc-300 bg-zinc-100 text-zinc-900";
+  return "border-zinc-300 bg-zinc-100 text-zinc-900 dark:border-slate-700/80 dark:bg-slate-800/85 dark:text-slate-100";
 }
 
 function buildTickerItems(overview: DashboardOverview | null): TickerItem[] {
@@ -353,7 +359,7 @@ function UpdatedAtLabel({
   }
 
   return (
-    <p className="mt-3 text-xs text-slate-500">
+    <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
       {updatedLabel}: {formatDateTime(lastUpdated)}
     </p>
   );
@@ -687,31 +693,32 @@ export function AppShell({ content }: AppShellProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_15%_15%,#f7f5ef_0%,#f3efe3_28%,#f9f7f2_65%,#f6f3ea_100%)] text-slate-900">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_15%_15%,#f7f5ef_0%,#f3efe3_28%,#f9f7f2_65%,#f6f3ea_100%)] text-slate-900 dark:bg-[radial-gradient(circle_at_12%_10%,#1c2838_0%,#111825_34%,#0c121e_70%,#070a12_100%)] dark:text-slate-100">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 pb-10 pt-6 md:px-6">
-        <header className="rounded-2xl border border-amber-200/70 bg-white/80 px-5 py-4 shadow-[0_12px_30px_-22px_rgba(15,23,42,0.45)] backdrop-blur">
+        <header className="rounded-2xl border border-amber-200/70 bg-white/80 px-5 py-4 shadow-[0_12px_30px_-22px_rgba(15,23,42,0.45)] backdrop-blur dark:border-amber-800/45 dark:bg-transparent dark:shadow-[0_12px_30px_-22px_rgba(2,6,23,0.92)]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl dark:text-slate-50">
                 {content.title}
               </h1>
-              <p className="mt-1 text-sm text-slate-700 md:text-base">
+              <p className="mt-1 text-sm text-slate-700 md:text-base dark:text-slate-300">
                 {content.subtitle}
               </p>
             </div>
 
             <div className="flex flex-wrap items-start gap-3">
+              <ThemeSwitcher content={content.themeSwitcher} className="min-w-36" />
               <BrowserNotificationOptIn className="min-w-47.5" />
               <LocaleSwitcher className="min-w-32.5" />
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50/90 px-3 py-3">
+          <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50/90 px-3 py-3 dark:border-slate-700/80 dark:bg-slate-900/65">
             <div className="grid gap-3 md:grid-cols-[220px_minmax(0,1fr)_auto] md:items-end">
               <div className="space-y-1">
                 <label
                   htmlFor="dashboard-region-filter"
-                  className="block text-xs font-semibold uppercase tracking-wide text-zinc-700"
+                  className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
                 >
                   {content.regionFilterLabel}
                 </label>
@@ -721,7 +728,7 @@ export function AppShell({ content }: AppShellProps) {
                   onChange={(event) => {
                     setSelectedRegion(event.target.value);
                   }}
-                  className="h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900"
+                  className="h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100"
                 >
                   <option value={ALL_REGIONS_FILTER_VALUE}>
                     {content.regionFilterAll}
@@ -737,7 +744,7 @@ export function AppShell({ content }: AppShellProps) {
               <div className="space-y-1">
                 <label
                   htmlFor="dashboard-location-search"
-                  className="block text-xs font-semibold uppercase tracking-wide text-zinc-700"
+                  className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
                 >
                   {content.locationSearchLabel}
                 </label>
@@ -749,11 +756,11 @@ export function AppShell({ content }: AppShellProps) {
                     setLocationSearchQuery(event.target.value);
                   }}
                   placeholder={content.locationSearchPlaceholder}
-                  className="h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-500"
+                  className="h-9 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-900 placeholder:text-zinc-500 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:placeholder:text-slate-500"
                 />
               </div>
 
-              <p className="text-xs text-slate-600 md:text-end">
+              <p className="text-xs text-slate-600 dark:text-slate-300 md:text-end">
                 {content.updatedLabel}:{" "}
                 {overviewState.lastUpdated
                   ? formatDateTime(overviewState.lastUpdated)
@@ -762,9 +769,9 @@ export function AppShell({ content }: AppShellProps) {
             </div>
           </div>
 
-          <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50/90 px-3 py-3">
+          <div className="mt-4 rounded-xl border border-zinc-200/80 bg-zinc-50/90 px-3 py-3 dark:border-slate-700/80 dark:bg-slate-900/65">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
                 {content.sourceHealthTitle}
               </p>
               <span
@@ -799,10 +806,10 @@ export function AppShell({ content }: AppShellProps) {
             </div>
 
             {sourceHealthState.errorMessage ? (
-              <p className="mt-2 text-xs text-rose-700">
-                {content.statusError}
-              </p>
-            ) : null}
+                <p className="mt-2 text-xs text-rose-700 dark:text-rose-300">
+                  {content.statusError}
+                </p>
+              ) : null}
 
             <UpdatedAtLabel
               updatedLabel={content.updatedLabel}
@@ -811,13 +818,13 @@ export function AppShell({ content }: AppShellProps) {
           </div>
         </header>
 
-        <section className="rounded-xl border border-amber-300/80 bg-amber-50/90 px-4 py-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-900">
+        <section className="rounded-xl border border-amber-300/80 bg-amber-50/90 px-4 py-3 dark:border-amber-800/60 dark:bg-amber-950/38">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-900 dark:text-amber-200">
             {content.tickerLabel}
           </p>
 
           {filteredTickerItems.length === 0 ? (
-            <p className="text-sm font-medium text-amber-950">
+            <p className="text-sm font-medium text-amber-950 dark:text-amber-100">
               {hasActiveFilters && tickerItems.length > 0
                 ? content.filterNoMatches
                 : content.tickerFallback}
@@ -830,7 +837,7 @@ export function AppShell({ content }: AppShellProps) {
                 return (
                   <article
                     key={item.id}
-                    className="w-70 shrink-0 rounded-lg border border-amber-200 bg-white/80 px-3 py-2"
+                    className="w-70 shrink-0 rounded-lg border border-amber-200 bg-white/80 px-3 py-2 dark:border-amber-800/55 dark:bg-slate-900/78"
                   >
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
                       <span
@@ -840,24 +847,24 @@ export function AppShell({ content }: AppShellProps) {
                       </span>
 
                       {item.isBreaking ? (
-                        <span className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900">
+                        <span className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-900 dark:border-amber-800/70 dark:bg-amber-950/55 dark:text-amber-100">
                           {content.tickerBreakingTag}
                         </span>
                       ) : null}
 
                       {item.severity ? (
-                        <span className="inline-flex rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700">
+                        <span className="inline-flex rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/85 dark:text-slate-200">
                           {content.severityLabel}: {item.severity}
                         </span>
                       ) : null}
                     </div>
 
-                    <p className="line-clamp-2 text-sm font-semibold text-slate-900">
+                    <p className="line-clamp-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {item.title}
                     </p>
 
                     {item.sourceName ? (
-                      <p className="mt-1 text-xs text-slate-700">
+                      <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
                         {content.sourceLabel}: {item.sourceName}
                       </p>
                     ) : null}
@@ -884,24 +891,24 @@ export function AppShell({ content }: AppShellProps) {
               streamsState={streamsState}
             />
 
-            <article className="rounded-2xl border border-rose-300/70 bg-rose-50 p-5">
-              <h2 className="text-base font-semibold text-rose-900">
+            <article className="rounded-2xl border border-rose-300/70 bg-rose-50 p-5 dark:border-rose-800/65 dark:bg-transparent">
+              <h2 className="text-base font-semibold text-rose-900 dark:text-rose-100">
                 {content.latestAlertTitle}
               </h2>
 
               {overviewState.isLoading && !latestAlert ? (
-                <p className="mt-2 text-sm text-rose-900/80">
+                <p className="mt-2 text-sm text-rose-900/80 dark:text-rose-200">
                   {content.statusLoading}
                 </p>
               ) : filteredLatestAlert ? (
-                <div className="mt-2 space-y-2 text-sm text-rose-950">
+                <div className="mt-2 space-y-2 text-sm text-rose-950 dark:text-rose-100">
                   <p className="font-semibold">{filteredLatestAlert.title}</p>
                   <p>
                     {filteredLatestAlert.message?.trim().length
                       ? filteredLatestAlert.message
                       : content.alertMessageFallback}
                   </p>
-                  <div className="grid gap-1 rounded-lg border border-rose-200/80 bg-white/70 px-3 py-2 text-xs text-rose-950/90 sm:grid-cols-2">
+                  <div className="grid gap-1 rounded-lg border border-rose-200/80 bg-white/70 px-3 py-2 text-xs text-rose-950/90 dark:border-rose-800/45 dark:bg-slate-900/78 dark:text-rose-100 sm:grid-cols-2">
                     <p>
                       {content.locationLabel}:{" "}
                       {getAlertLocation(filteredLatestAlert)}
@@ -919,7 +926,7 @@ export function AppShell({ content }: AppShellProps) {
                   </div>
                 </div>
               ) : (
-                <p className="mt-2 text-sm text-rose-950">
+                <p className="mt-2 text-sm text-rose-950 dark:text-rose-100">
                   {hasActiveFilters && latestAlert
                     ? content.filterNoMatches
                     : content.latestAlertEmpty}
@@ -927,7 +934,7 @@ export function AppShell({ content }: AppShellProps) {
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-rose-800">
+                <p className="mt-3 text-xs text-rose-800 dark:text-rose-200">
                   {overviewState.errorMessage}
                 </p>
               ) : null}
@@ -938,22 +945,22 @@ export function AppShell({ content }: AppShellProps) {
               />
             </article>
 
-            <article className="rounded-2xl border border-sky-300/70 bg-sky-50 p-5">
-              <h2 className="text-base font-semibold text-sky-900">
+            <article className="rounded-2xl border border-sky-300/70 bg-sky-50 p-5 dark:border-sky-800/65 dark:bg-transparent">
+              <h2 className="text-base font-semibold text-sky-900 dark:text-sky-100">
                 {content.officialTitle}
               </h2>
 
               {overviewState.isLoading && !latestOfficialUpdate ? (
-                <p className="mt-2 text-sm text-sky-900/80">
+                <p className="mt-2 text-sm text-sky-900/80 dark:text-sky-200">
                   {content.statusLoading}
                 </p>
               ) : filteredLatestOfficialUpdate ? (
-                <div className="mt-2 space-y-2 text-sm text-sky-950">
+                <div className="mt-2 space-y-2 text-sm text-sky-950 dark:text-sky-100">
                   <p className="font-semibold">
                     {filteredLatestOfficialUpdate.title}
                   </p>
                   <p>{filteredLatestOfficialUpdate.body}</p>
-                  <div className="grid gap-1 rounded-lg border border-sky-200/80 bg-white/70 px-3 py-2 text-xs text-sky-950/90 sm:grid-cols-2">
+                  <div className="grid gap-1 rounded-lg border border-sky-200/80 bg-white/70 px-3 py-2 text-xs text-sky-950/90 dark:border-sky-800/45 dark:bg-slate-900/78 dark:text-sky-100 sm:grid-cols-2">
                     <p>
                       {content.sourceLabel}:{" "}
                       {filteredLatestOfficialUpdate.sourceName}
@@ -965,7 +972,7 @@ export function AppShell({ content }: AppShellProps) {
                   </div>
                 </div>
               ) : (
-                <p className="mt-2 text-sm text-sky-950">
+                <p className="mt-2 text-sm text-sky-950 dark:text-sky-100">
                   {hasActiveFilters && latestOfficialUpdate
                     ? content.filterNoMatches
                     : content.officialEmpty}
@@ -973,7 +980,7 @@ export function AppShell({ content }: AppShellProps) {
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-sky-800">
+                <p className="mt-3 text-xs text-sky-800 dark:text-sky-200">
                   {overviewState.errorMessage}
                 </p>
               ) : null}
@@ -984,37 +991,37 @@ export function AppShell({ content }: AppShellProps) {
               />
             </article>
 
-            <article className="rounded-2xl border border-zinc-300/80 bg-zinc-50 p-5">
-              <h2 className="text-base font-semibold text-zinc-900">
+            <article className="rounded-2xl border border-zinc-300/80 bg-zinc-50 p-5 dark:border-slate-700/80 dark:bg-transparent">
+              <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
                 {content.watchlistTitle}
               </h2>
 
               {overviewState.isLoading &&
               watchedLocationMatches.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-800">
+                <p className="mt-2 text-sm text-zinc-800 dark:text-zinc-200">
                   {content.statusLoading}
                 </p>
               ) : filteredWatchedLocationMatches.length > 0 ? (
-                <ul className="mt-2 space-y-2 text-sm text-zinc-900">
+                <ul className="mt-2 space-y-2 text-sm text-zinc-900 dark:text-zinc-100">
                   {filteredWatchedLocationMatches.map((match, index) => (
                     <li
                       key={`${match.locationName}-${match.alertCount}`}
-                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2"
+                        className="rounded-lg border border-zinc-200 bg-white px-3 py-2 dark:border-slate-700/80 dark:bg-slate-900/78"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <p className="font-medium">{match.locationName}</p>
-                        <span className="inline-flex rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">
+                        <span className="inline-flex rounded-full border border-zinc-300 bg-zinc-100 px-2 py-0.5 text-[11px] font-semibold text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
                           #{index + 1}
                         </span>
                       </div>
-                      <p className="mt-1 text-xs text-zinc-700">
+                      <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300">
                         {match.alertCount} {content.watchlistMatchSuffix}
                       </p>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-2 text-sm text-zinc-800">
+                <p className="mt-2 text-sm text-zinc-800 dark:text-zinc-200">
                   {hasActiveFilters && watchedLocationMatches.length > 0
                     ? content.filterNoMatches
                     : content.watchlistEmpty}
@@ -1022,7 +1029,7 @@ export function AppShell({ content }: AppShellProps) {
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-zinc-700">
+                <p className="mt-3 text-xs text-zinc-700 dark:text-zinc-300">
                   {overviewState.errorMessage}
                 </p>
               ) : null}
@@ -1034,8 +1041,8 @@ export function AppShell({ content }: AppShellProps) {
             </article>
           </section>
 
-          <aside className="order-last w-full rounded-2xl border border-zinc-300/80 bg-white/85 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] lg:order-0">
-            <h2 className="text-base font-semibold text-slate-900">
+          <aside className="order-last w-full rounded-2xl border border-zinc-300/80 bg-white/85 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] dark:border-slate-700/80 dark:bg-transparent dark:shadow-[0_14px_30px_-24px_rgba(2,6,23,0.9)] lg:order-0">
+            <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
               {content.feedTitle}
             </h2>
 
@@ -1053,8 +1060,8 @@ export function AppShell({ content }: AppShellProps) {
                 }}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                   activeTab === "alerts"
-                    ? "border-rose-300 bg-rose-100 text-rose-900"
-                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                    ? "border-rose-300 bg-rose-100 text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/55 dark:text-rose-100"
+                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
                 }`}
               >
                 {content.feedTabs.alerts}
@@ -1068,8 +1075,8 @@ export function AppShell({ content }: AppShellProps) {
                 }}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                   activeTab === "news"
-                    ? "border-zinc-300 bg-zinc-200 text-zinc-950"
-                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                    ? "border-zinc-300 bg-zinc-200 text-zinc-950 dark:border-slate-600 dark:bg-slate-700/85 dark:text-slate-100"
+                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
                 }`}
               >
                 {content.feedTabs.news}
@@ -1083,8 +1090,8 @@ export function AppShell({ content }: AppShellProps) {
                 }}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
                   activeTab === "official"
-                    ? "border-sky-300 bg-sky-100 text-sky-900"
-                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
+                    ? "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-800/70 dark:bg-sky-950/55 dark:text-sky-100"
+                    : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
                 }`}
               >
                 {content.feedTabs.official}
@@ -1093,20 +1100,20 @@ export function AppShell({ content }: AppShellProps) {
 
             <div className="mt-4 flex flex-col gap-2 lg:h-140" role="tabpanel">
               {shouldShowFeedLoading ? (
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-700 dark:text-slate-300">
                   {content.statusLoading}
                 </p>
               ) : null}
 
               {shouldShowFeedError ? (
-                <p className="text-sm text-rose-700">{content.statusError}</p>
+                <p className="text-sm text-rose-700 dark:text-rose-300">{content.statusError}</p>
               ) : null}
 
               <div className="min-h-0 lg:flex-1 lg:overflow-y-auto lg:pe-1">
                 {!shouldShowFeedLoading &&
                 !shouldShowFeedError &&
                 activeTabFilteredCount === 0 ? (
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
                     {hasActiveFilters
                       ? content.filterNoMatches
                       : content.noFeedItems}
@@ -1120,15 +1127,15 @@ export function AppShell({ content }: AppShellProps) {
                     {filteredAlerts.map((item) => (
                       <li
                         key={item.id}
-                        className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2"
+                        className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800/55 dark:bg-slate-900/78"
                       >
-                        <p className="text-sm font-semibold text-rose-950">
+                        <p className="text-sm font-semibold text-rose-950 dark:text-rose-100">
                           {item.title}
                         </p>
-                        <p className="mt-1 text-xs text-rose-900/90">
+                        <p className="mt-1 text-xs text-rose-900/90 dark:text-rose-200">
                           {content.locationLabel}: {getAlertLocation(item)}
                         </p>
-                        <p className="text-xs text-rose-900/90">
+                        <p className="text-xs text-rose-900/90 dark:text-rose-200">
                           {content.publishedLabel}:{" "}
                           {formatDateTime(item.publishedAt)}
                         </p>
@@ -1144,20 +1151,20 @@ export function AppShell({ content }: AppShellProps) {
                     {filteredNews.map((item) => (
                       <li
                         key={item.id}
-                        className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+                        className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-slate-700/80 dark:bg-slate-900/78"
                       >
                         <a
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-sm font-semibold text-zinc-950 underline-offset-2 hover:underline"
+                          className="text-sm font-semibold text-zinc-950 underline-offset-2 hover:underline dark:text-zinc-100"
                         >
                           {item.title}
                         </a>
-                        <p className="mt-1 text-xs text-zinc-700">
+                        <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300">
                           {content.sourceLabel}: {item.sourceName}
                         </p>
-                        <p className="text-xs text-zinc-700">
+                        <p className="text-xs text-zinc-700 dark:text-zinc-300">
                           {content.publishedLabel}:{" "}
                           {formatDateTime(item.publishedAt)}
                         </p>
@@ -1173,15 +1180,15 @@ export function AppShell({ content }: AppShellProps) {
                     {filteredOfficial.map((item) => (
                       <li
                         key={item.id}
-                        className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2"
+                        className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 dark:border-sky-800/55 dark:bg-slate-900/78"
                       >
-                        <p className="text-sm font-semibold text-sky-950">
+                        <p className="text-sm font-semibold text-sky-950 dark:text-sky-100">
                           {item.title}
                         </p>
-                        <p className="mt-1 text-xs text-sky-900/90">
+                        <p className="mt-1 text-xs text-sky-900/90 dark:text-sky-200">
                           {item.body}
                         </p>
-                        <p className="mt-1 text-xs text-sky-900/90">
+                        <p className="mt-1 text-xs text-sky-900/90 dark:text-sky-200">
                           {content.publishedLabel}:{" "}
                           {formatDateTime(item.publishedAt)}
                         </p>

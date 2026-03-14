@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { DirectionProvider } from "@/components/providers/direction-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { getDirectionForLocale } from "@/lib/i18n/direction";
 
@@ -34,10 +35,12 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider locale={appLocale} messages={messages}>
-      <DirectionProvider locale={appLocale} direction={direction}>
-        <NotificationCenter />
-        {children}
-      </DirectionProvider>
+      <ThemeProvider>
+        <DirectionProvider locale={appLocale} direction={direction}>
+          <NotificationCenter />
+          {children}
+        </DirectionProvider>
+      </ThemeProvider>
     </NextIntlClientProvider>
   );
 }

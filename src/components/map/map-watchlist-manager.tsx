@@ -112,18 +112,18 @@ export function MapWatchlistManager({
 
   return (
     <section className="mt-4 grid gap-3 md:grid-cols-2">
-      <article className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-        <h2 className="text-sm font-semibold text-amber-900">{content.title}</h2>
-        <p className="mt-1 text-xs text-amber-900/80">{content.description}</p>
+      <article className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-800/65 dark:bg-transparent">
+        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-100">{content.title}</h2>
+        <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200">{content.description}</p>
 
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-900/80">
+        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-amber-900/80 dark:text-amber-300">
           {content.suggestedTitle}
         </p>
 
         {watchCandidates.length === 0 ? (
-          <p className="mt-2 text-xs text-amber-900/80">{content.suggestedEmptyBody}</p>
+          <p className="mt-2 text-xs text-amber-900/80 dark:text-amber-200">{content.suggestedEmptyBody}</p>
         ) : (
-          <ul className="mt-2 space-y-2 text-sm text-amber-950">
+          <ul className="mt-2 space-y-2 text-sm text-amber-950 dark:text-amber-100">
             {watchCandidates.map((candidate) => {
               const existingWatchedLocation = getExistingWatchedLocation(
                 candidate,
@@ -133,25 +133,25 @@ export function MapWatchlistManager({
               return (
                 <li
                   key={candidate.id}
-                  className="flex items-start justify-between gap-3 rounded-lg border border-amber-200/70 bg-white px-3 py-2"
+                  className="flex items-start justify-between gap-3 rounded-lg border border-amber-200/70 bg-white px-3 py-2 dark:border-amber-800/50 dark:bg-slate-900/78"
                 >
                   <div>
                     <p className="font-medium">{candidate.name}</p>
-                    <p className="text-xs text-amber-900/80">{getCandidateAreaLabel(candidate)}</p>
-                    <p className="text-xs text-amber-900/80">
+                    <p className="text-xs text-amber-900/80 dark:text-amber-200">{getCandidateAreaLabel(candidate)}</p>
+                    <p className="text-xs text-amber-900/80 dark:text-amber-200">
                       {candidate.alertCount} {content.suggestedAlertsLabel}
                     </p>
                   </div>
 
                   {existingWatchedLocation ? (
-                    <span className="inline-flex rounded-full border border-emerald-300 bg-emerald-100 px-2 py-1 text-[11px] font-semibold text-emerald-800">
+                    <span className="inline-flex rounded-full border border-emerald-300 bg-emerald-100 px-2 py-1 text-[11px] font-semibold text-emerald-800 dark:border-emerald-900/70 dark:bg-emerald-900/35 dark:text-emerald-200">
                       {content.watchingBadgeLabel}
                     </span>
                   ) : (
                     <button
                       type="button"
                       aria-label={`${content.addWatchActionLabel} ${candidate.name}`}
-                      className="rounded-full border border-amber-300 bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200"
+                      className="rounded-full border border-amber-300 bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-200 dark:border-amber-800/70 dark:bg-amber-950/55 dark:text-amber-100 dark:hover:bg-amber-900/65"
                       onClick={() => {
                         onAddWatchedLocation(candidate);
                       }}
@@ -166,34 +166,34 @@ export function MapWatchlistManager({
         )}
       </article>
 
-      <article className="rounded-xl border border-slate-300 bg-slate-50 p-3">
-        <h2 className="text-sm font-semibold text-slate-900">{content.currentTitle}</h2>
+      <article className="rounded-xl border border-slate-300 bg-slate-50 p-3 dark:border-slate-700/80 dark:bg-transparent">
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{content.currentTitle}</h2>
 
         {watchedLocations.length === 0 ? (
-          <p className="mt-2 text-xs text-slate-700">{content.currentEmptyBody}</p>
+          <p className="mt-2 text-xs text-slate-700 dark:text-slate-300">{content.currentEmptyBody}</p>
         ) : (
-          <ul className="mt-2 space-y-2 text-sm text-slate-900">
+          <ul className="mt-2 space-y-2 text-sm text-slate-900 dark:text-slate-100">
             {prioritizedWatchedLocations.map((item) => (
               <li
                 key={item.location.id}
-                className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2"
+                className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-slate-700/80 dark:bg-slate-900/80"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-medium">{item.location.name}</p>
                     {item.rank ? (
-                      <span className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+                      <span className="inline-flex rounded-full border border-amber-300 bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-900 dark:border-amber-900/70 dark:bg-amber-900/35 dark:text-amber-200">
                         {item.rank === 1
                           ? content.watchlistTopPriorityLabel
                           : `${content.watchlistPriorityLabel} #${item.rank}`}
                       </span>
                     ) : null}
                   </div>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {content.watchRadiusLabel}: {item.location.radiusKm.toFixed(1)} km
                   </p>
                   {item.rank ? (
-                    <p className="text-xs text-slate-700">
+                    <p className="text-xs text-slate-700 dark:text-slate-300">
                       {item.matchedAlertCount} {content.watchlistNearbyAlertsLabel}
                     </p>
                   ) : null}
@@ -202,7 +202,7 @@ export function MapWatchlistManager({
                 <button
                   type="button"
                   aria-label={`${content.removeWatchActionLabel} ${item.location.name}`}
-                  className="rounded-full border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-200"
+                  className="rounded-full border border-slate-300 bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-800 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                   onClick={() => {
                     onRemoveWatchedLocation(item.location.id);
                   }}

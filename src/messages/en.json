@@ -54,6 +54,11 @@
       "degraded": "Degraded",
       "down": "Down",
       "unknown": "Unknown"
+    },
+    "themeSwitcher": {
+      "label": "Theme",
+      "dark": "Dark",
+      "light": "Light"
     }
   },
   "feedPage": {
@@ -73,7 +78,12 @@
     "publishedLabel": "Published",
     "severityLabel": "Severity",
     "locationLabel": "Location",
-    "updatedLabel": "Updated"
+    "updatedLabel": "Updated",
+    "themeSwitcher": {
+      "label": "Theme",
+      "dark": "Dark",
+      "light": "Light"
+    }
   },
   "mapPage": {
     "title": "Crisis Map",
@@ -122,7 +132,12 @@
     "watchlistTopPriorityLabel": "Top priority",
     "watchlistNearbyAlertsLabel": "nearby alerts",
     "watchlistHighestSeverityLabel": "Highest severity",
-    "watchlistNearestAlertLabel": "Nearest alert"
+    "watchlistNearestAlertLabel": "Nearest alert",
+    "themeSwitcher": {
+      "label": "Theme",
+      "dark": "Dark",
+      "light": "Light"
+    }
   },
   "localeSwitcher": {
     "label": "Language",

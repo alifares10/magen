@@ -34,7 +34,7 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
     <div className={className}>
       <label
         htmlFor="locale-switcher"
-        className="block text-xs font-semibold uppercase tracking-wide text-zinc-700"
+        className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
       >
         {t("label")}
       </label>
@@ -54,7 +54,7 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
             },
           );
         }}
-        className="mt-1 h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900"
+        className="mt-1 h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100"
       >
         {routing.locales.map((supportedLocale) => (
           <option key={supportedLocale} value={supportedLocale}>

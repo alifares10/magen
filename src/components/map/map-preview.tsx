@@ -3,6 +3,7 @@
 import { CrisisMap } from "@/components/map/crisis-map";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { BrowserNotificationOptIn } from "@/components/notifications/browser-notification-opt-in";
+import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { MapLegend } from "@/components/map/map-legend";
 import { MapOverlayControls } from "@/components/map/map-overlay-controls";
 import { MapPanel } from "@/components/map/map-panel";
@@ -62,6 +63,11 @@ type MapPreviewContent = {
   watchlistNearbyAlertsLabel: string;
   watchlistHighestSeverityLabel: string;
   watchlistNearestAlertLabel: string;
+  themeSwitcher: {
+    label: string;
+    dark: string;
+    light: string;
+  };
 };
 
 type MapPreviewProps = {
@@ -114,16 +120,17 @@ export function MapPreview({
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-      <header className="mb-4 flex flex-col gap-3">
+      <header className="mb-4 flex flex-col gap-3 rounded-2xl border border-amber-200/70 bg-white/80 p-4 shadow-[0_12px_30px_-22px_rgba(15,23,42,0.45)] backdrop-blur dark:border-amber-800/45 dark:bg-transparent dark:shadow-[0_12px_30px_-22px_rgba(2,6,23,0.92)]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
               {content.title}
             </h1>
-            <p className="mt-1 text-sm text-slate-600">{content.description}</p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{content.description}</p>
           </div>
 
           <div className="flex flex-wrap items-start gap-3">
+            <ThemeSwitcher content={content.themeSwitcher} className="min-w-36" />
             <BrowserNotificationOptIn className="min-w-47.5" />
             <LocaleSwitcher className="min-w-32.5" />
           </div>

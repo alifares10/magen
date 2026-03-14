@@ -62,6 +62,11 @@ export async function LocalizedDashboardShell() {
           down: t("sourceHealthStatuses.down"),
           unknown: t("sourceHealthStatuses.unknown"),
         },
+        themeSwitcher: {
+          label: t("themeSwitcher.label"),
+          dark: t("themeSwitcher.dark"),
+          light: t("themeSwitcher.light"),
+        },
       }}
     />
   );

@@ -13,7 +13,7 @@ Phase 8 — overlay ingestion automation
 
 ## Current sprint goal
 
-Add the first ingestion path for map overlays (manual refresh script or worker slice) while keeping validation green.
+Stabilize Phase 8 in temporary manual-data mode for official guidance and map overlays while keeping validation green.
 
 ## Locked decisions
 
@@ -166,9 +166,9 @@ Use these unless a later task explicitly changes them.
 - [x] Deploy Railway `worker:rss` as a long-lived loop service and verify successful `rss_news` ingestion runs
 - [x] Add Supabase scheduled cleanup for operational tables (every 10 minutes): delete resolved alerts older than 3 hours and ingestion runs older than 2 hours
 - [x] Deactivate failing RSS sources `times-of-israel-main` and `jns-main` after repeated `403` responses
-- [ ] Resolve Israel-only access path for official guidance source and deploy Railway `worker:official`
-- [ ] Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records
-- [ ] Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice
+- [!] Resolve Israel-only access path for official guidance source and deploy Railway `worker:official` (deferred: manual DB updates for now)
+- [!] Add first overlay ingestion path (manual seed refresh script or worker slice) so overlay data updates through ingestion flow rather than static seed-only records (deferred: manual DB updates for now)
+- [x] Keep full validation (`lint`, `test`, `typecheck`, `build`) green on each follow-up slice
 - [x] Harden notification delivery reliability: add realtime subscription diagnostics/status visibility and fallback polling when realtime is unavailable
 - [x] Fix public Supabase env resolution in client runtime (`NEXT_PUBLIC_*`) so realtime/notifications initialize correctly in both dev and deployed builds
 - [x] Improve browser notification delivery behavior: retry pending items after tab visibility changes and after transient dispatch failures
@@ -176,6 +176,7 @@ Use these unless a later task explicitly changes them.
 - [x] Enhance in-app alert notification prominence: show alert location metadata and use a stronger red background for `official_alert` cards only
 - [x] Add auto-dismiss timers for in-app notifications (official guidance faster, official alerts slower)
 - [x] Adopt the 21st.dev toast UI for top-center in-app notifications while preserving notification queueing, browser alerts, and focused validation
+- [x] Refine dark-mode visual system across dashboard/feed/map surfaces with a cohesive midnight palette and corrected contrast for status cards/tabs/badges
 
 ## Open items to revisit later
 

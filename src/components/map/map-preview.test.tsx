@@ -174,6 +174,11 @@ const content = {
   watchlistNearbyAlertsLabel: "nearby alerts",
   watchlistHighestSeverityLabel: "Highest severity",
   watchlistNearestAlertLabel: "Nearest alert",
+  themeSwitcher: {
+    label: "Theme",
+    dark: "Dark",
+    light: "Light",
+  },
 };
 
 const emptyOverlays = {

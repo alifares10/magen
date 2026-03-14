@@ -141,6 +141,11 @@ const content = {
     down: "Down",
     unknown: "Unknown",
   },
+  themeSwitcher: {
+    label: "Theme",
+    dark: "Dark",
+    light: "Light",
+  },
 };
 
 function createJsonResponse(payload: unknown, status = 200): Response {
@@ -1034,7 +1039,7 @@ describe("AppShell", () => {
 
     expect(rightRail.className).toContain("order-last");
     expect(rightRail.className).toContain("w-full");
-    expect(tabPanel.className).toContain("lg:h-[560px]");
+    expect(tabPanel.className).toContain("lg:h-140");
   });
 
   it("filters feed items by selected region", async () => {

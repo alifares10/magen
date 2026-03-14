@@ -24,6 +24,11 @@ export default async function LocalizedFeedPage() {
         severityLabel: t("severityLabel"),
         locationLabel: t("locationLabel"),
         updatedLabel: t("updatedLabel"),
+        themeSwitcher: {
+          label: t("themeSwitcher.label"),
+          dark: t("themeSwitcher.dark"),
+          light: t("themeSwitcher.light"),
+        },
       }}
     />
   );

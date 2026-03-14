@@ -135,17 +135,17 @@ export function CrisisMap({
                   <MarkerLabel className="font-semibold text-slate-900">{roadClosure.name}</MarkerLabel>
 
                   <MarkerPopup closeButton>
-                    <div className="w-64 space-y-2 rounded-md border border-slate-200 bg-white p-3">
-                      <p className="text-sm font-semibold text-slate-900">{roadClosure.name}</p>
-                      <p className="text-xs text-slate-700">
+                    <div className="w-64 space-y-2 rounded-md border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-950/92">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{roadClosure.name}</p>
+                      <p className="text-xs text-slate-700 dark:text-slate-300">
                         {overlayStatusLabel}: {roadClosure.status}
                       </p>
                       {roadClosure.reason ? (
-                        <p className="text-xs text-slate-700">
+                        <p className="text-xs text-slate-700 dark:text-slate-300">
                           {overlayRoadReasonLabel}: {roadClosure.reason}
                         </p>
                       ) : null}
-                      <p className="text-xs text-slate-700">
+                      <p className="text-xs text-slate-700 dark:text-slate-300">
                         {overlayLastUpdatedLabel}: {formatPublishedAt(roadClosure.lastUpdatedAt)}
                       </p>
                     </div>
@@ -168,15 +168,15 @@ export function CrisisMap({
               <MarkerLabel className="font-semibold text-sky-900">{shelter.name}</MarkerLabel>
 
               <MarkerPopup closeButton>
-                <div className="w-64 space-y-2 rounded-md border border-sky-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-sky-900">{shelter.name}</p>
-                  <p className="text-xs text-slate-700">
+                <div className="w-64 space-y-2 rounded-md border border-sky-200 bg-white p-3 dark:border-sky-800/70 dark:bg-slate-950/92">
+                  <p className="text-sm font-semibold text-sky-900 dark:text-sky-100">{shelter.name}</p>
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {overlayStatusLabel}: {shelter.status}
                   </p>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {shelter.city ?? shelter.region ?? "IL"}
                   </p>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {overlayLastUpdatedLabel}: {formatPublishedAt(shelter.lastUpdatedAt)}
                   </p>
                 </div>
@@ -197,18 +197,18 @@ export function CrisisMap({
               <MarkerLabel className="font-semibold text-emerald-900">{hospital.name}</MarkerLabel>
 
               <MarkerPopup closeButton>
-                <div className="w-64 space-y-2 rounded-md border border-emerald-200 bg-white p-3">
-                  <p className="text-sm font-semibold text-emerald-900">{hospital.name}</p>
-                  <p className="text-xs text-slate-700">
+                <div className="w-64 space-y-2 rounded-md border border-emerald-200 bg-white p-3 dark:border-emerald-800/70 dark:bg-slate-950/92">
+                  <p className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">{hospital.name}</p>
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {overlayStatusLabel}: {hospital.status}
                   </p>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {hospital.city ?? hospital.region ?? "IL"}
                   </p>
                   {hospital.hasEmergencyRoom ? (
-                    <p className="text-xs text-slate-700">{overlayEmergencyRoomLabel}</p>
+                    <p className="text-xs text-slate-700 dark:text-slate-300">{overlayEmergencyRoomLabel}</p>
                   ) : null}
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {overlayLastUpdatedLabel}: {formatPublishedAt(hospital.lastUpdatedAt)}
                   </p>
                 </div>
@@ -245,16 +245,16 @@ export function CrisisMap({
           <MarkerLabel className="font-semibold text-amber-900">{item.location.name}</MarkerLabel>
 
           <MarkerPopup closeButton>
-            <div className="w-60 space-y-1 rounded-md border border-amber-200 bg-white p-3">
-              <p className="text-sm font-semibold text-amber-900">{item.location.name}</p>
-              <p className="text-xs text-slate-700">
+            <div className="w-60 space-y-1 rounded-md border border-amber-200 bg-white p-3 dark:border-amber-800/70 dark:bg-slate-950/92">
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">{item.location.name}</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">
                 {watchRadiusLabel}: {item.location.radiusKm.toFixed(1)} km
               </p>
-              <p className="text-xs text-slate-700">
+              <p className="text-xs text-slate-700 dark:text-slate-300">
                 {item.location.city ?? item.location.region ?? item.location.country}
               </p>
               {item.rank ? (
-                <p className="text-xs font-semibold text-amber-900">
+                <p className="text-xs font-semibold text-amber-900 dark:text-amber-100">
                   {item.rank === 1
                     ? watchlistTopPriorityLabel
                     : `${watchlistPriorityLabel} #${item.rank}`}
@@ -262,13 +262,13 @@ export function CrisisMap({
               ) : null}
               {item.matchedAlertCount > 0 ? (
                 <>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {item.matchedAlertCount} {watchlistNearbyAlertsLabel}
                   </p>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {watchlistHighestSeverityLabel}: {item.highestSeverity}
                   </p>
-                  <p className="text-xs text-slate-700">
+                  <p className="text-xs text-slate-700 dark:text-slate-300">
                     {watchlistNearestAlertLabel}: {item.nearestAlertDistanceKm?.toFixed(1)} km
                   </p>
                 </>
@@ -291,11 +291,11 @@ export function CrisisMap({
           </MarkerLabel>
 
           <MarkerPopup closeButton>
-            <div className="w-64 space-y-2 rounded-md border border-rose-200 bg-white p-3">
-              <p className="text-sm font-semibold text-rose-900">{marker.title}</p>
-              <p className="text-xs text-slate-700">{formatAlertLocation(marker)}</p>
-              {marker.message ? <p className="text-xs text-slate-700">{marker.message}</p> : null}
-              <div className="flex items-center gap-1 text-[11px] text-slate-600">
+            <div className="w-64 space-y-2 rounded-md border border-rose-200 bg-white p-3 dark:border-rose-800/70 dark:bg-slate-950/92">
+              <p className="text-sm font-semibold text-rose-900 dark:text-rose-100">{marker.title}</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">{formatAlertLocation(marker)}</p>
+              {marker.message ? <p className="text-xs text-slate-700 dark:text-slate-300">{marker.message}</p> : null}
+              <div className="flex items-center gap-1 text-[11px] text-slate-600 dark:text-slate-400">
                 <Clock3 className="size-3" />
                 <span>{formatPublishedAt(marker.publishedAt)}</span>
               </div>
