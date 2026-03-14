@@ -175,6 +175,7 @@ Use these unless a later task explicitly changes them.
 - [x] Strengthen browser notification dispatch: request persistent banners (`requireInteraction`) and retry on async `onerror` by clearing seen marker
 - [x] Enhance in-app alert notification prominence: show alert location metadata and use a stronger red background for `official_alert` cards only
 - [x] Add auto-dismiss timers for in-app notifications (official guidance faster, official alerts slower)
+- [x] Adopt the 21st.dev toast UI for top-center in-app notifications while preserving notification queueing, browser alerts, and focused validation
 
 ## Open items to revisit later
 

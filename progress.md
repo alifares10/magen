@@ -3,11 +3,11 @@
 ## Latest snapshot
 
 Date:
-2026-03-13
+2026-03-14
 Phase:
 Phase 8 in progress
 Current focus:
-Phase 8 ops stabilization follow-up: keep ingestion automation moving while hardening realtime notification delivery reliability.
+Phase 8 ops stabilization follow-up: keep ingestion automation moving while refining toast-based notification presentation and delivery reliability.
 
 Done:
 
@@ -208,6 +208,9 @@ Done:
 - Updated in-app notification UI for better alert prominence: `official_alert` cards now use a stronger red background and render location metadata (`src/components/notifications/notification-center.tsx`).
 - Added/updated tests for location rendering and location propagation in notification hooks (`src/components/notifications/notification-center.test.tsx`, `src/components/notifications/use-notification-center.test.tsx`) and re-ran `lint`, `typecheck`, plus targeted notification/message tests.
 - Added in-app notification auto-dismiss timers in `src/components/notifications/notification-center.tsx` (official guidance: 12s, official alerts: 20s) with timeout cleanup and regression coverage in `src/components/notifications/notification-center.test.tsx`.
+- Replaced the custom top-center in-app notification card stack with the 21st.dev Sonner-based toast UI (`src/components/ui/toast.tsx`, `src/components/ui/button.tsx`) and wired `src/components/notifications/notification-center.tsx` to drive it imperatively while preserving browser Notification API behavior.
+- Kept notification lifecycle behavior intact during the toast migration: official alerts still map to the strongest variant, top-center placement remains global, metadata is included in toast copy, manual dismiss clears state, and auto-dismiss timers still remove queued items after 20s/12s.
+- Re-validated the toast migration with focused checks: `npx vitest run src/components/notifications/notification-center.test.tsx src/components/notifications/use-notification-center.test.tsx`, `npx eslint src/components/ui/toast.tsx src/components/notifications/notification-center.tsx src/components/notifications/notification-center.test.tsx`, and `npm run typecheck`.
 
 In progress:
 

@@ -3,31 +3,35 @@ import { act, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 
-const { notificationCenterState, browserPreferenceState, browserPermissionState } = vi.hoisted(
-  () => ({
-    notificationCenterState: {
-      notifications: [] as Array<{
-        id: string;
-        type: "official_alert" | "official_guidance";
-        title: string;
-        body: string;
-        location: string | null;
-        severity: "low" | "medium" | "high" | "critical" | null;
-        publishedAt: string;
-        createdAt: number;
-      }>,
-      dismissNotification: vi.fn(),
-    },
-    browserPreferenceState: {
-      browserNotificationsEnabled: true,
-    },
-    browserPermissionState: {
-      isSupported: true,
-      permission: "granted" as NotificationPermission,
-      requestPermission: vi.fn<() => Promise<NotificationPermission>>(),
-    },
-  }),
-);
+const {
+  notificationCenterState,
+  browserPreferenceState,
+  browserPermissionState,
+  toastShowMock,
+} = vi.hoisted(() => ({
+  notificationCenterState: {
+    notifications: [] as Array<{
+      id: string;
+      type: "official_alert" | "official_guidance";
+      title: string;
+      body: string;
+      location: string | null;
+      severity: "low" | "medium" | "high" | "critical" | null;
+      publishedAt: string;
+      createdAt: number;
+    }>,
+    dismissNotification: vi.fn(),
+  },
+  browserPreferenceState: {
+    browserNotificationsEnabled: true,
+  },
+  browserPermissionState: {
+    isSupported: true,
+    permission: "granted" as NotificationPermission,
+    requestPermission: vi.fn<() => Promise<NotificationPermission>>(),
+  },
+  toastShowMock: vi.fn(),
+}));
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => {
@@ -58,18 +62,41 @@ vi.mock("@/store/use-notification-preferences-store", () => ({
     }) => T,
   ) =>
     selector({
-      browserNotificationsEnabled: browserPreferenceState.browserNotificationsEnabled,
+      browserNotificationsEnabled:
+        browserPreferenceState.browserNotificationsEnabled,
       setBrowserNotificationsEnabled: () => undefined,
     }),
 }));
 
-vi.mock("@/components/notifications/use-browser-notification-permission", () => ({
-  useBrowserNotificationPermission: () => browserPermissionState,
-}));
+vi.mock(
+  "@/components/notifications/use-browser-notification-permission",
+  () => ({
+    useBrowserNotificationPermission: () => browserPermissionState,
+  }),
+);
+
+vi.mock("@/components/ui/toast", async () => {
+  const ReactModule = await import("react");
+
+  return {
+    __esModule: true,
+    default: ReactModule.forwardRef<
+      { show: typeof toastShowMock },
+      { defaultPosition?: string }
+    >(function MockToaster({ defaultPosition }, ref) {
+      ReactModule.useImperativeHandle(ref, () => ({
+        show: toastShowMock,
+      }));
+
+      return <div data-position={defaultPosition} data-testid="mock-toaster" />;
+    }),
+  };
+});
 
 describe("NotificationCenter browser notifications", () => {
   beforeEach(() => {
     notificationCenterState.dismissNotification.mockClear();
+    toastShowMock.mockClear();
     notificationCenterState.notifications = [
       {
         id: "official_alert-1",
@@ -126,7 +153,10 @@ describe("NotificationCenter browser notifications", () => {
   });
 
   it("sends a pending browser notification after tab becomes hidden", async () => {
-    const notificationMock = vi.fn(function MockNotification(this: { onclick: (() => void) | null; close: () => void }) {
+    const notificationMock = vi.fn(function MockNotification(this: {
+      onclick: (() => void) | null;
+      close: () => void;
+    }) {
       this.onclick = null;
       this.close = vi.fn();
     });
@@ -161,7 +191,10 @@ describe("NotificationCenter browser notifications", () => {
 
   it("retries browser notification delivery after a dispatch failure", async () => {
     let callCount = 0;
-    const notificationMock = vi.fn(function MockNotification(this: { onclick: (() => void) | null; close: () => void }) {
+    const notificationMock = vi.fn(function MockNotification(this: {
+      onclick: (() => void) | null;
+      close: () => void;
+    }) {
       callCount += 1;
 
       if (callCount === 1) {
@@ -211,17 +244,53 @@ describe("NotificationCenter browser notifications", () => {
     });
   });
 
-  it("renders alert location when available", async () => {
+  it("shows top-center toast alerts with mapped metadata", async () => {
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
       value: "visible",
     });
 
-    const view = render(<NotificationCenter />);
+    render(<NotificationCenter />);
 
     await waitFor(() => {
-      expect(view.getByText("Location: Tel Aviv")).toBeInTheDocument();
+      expect(toastShowMock).toHaveBeenCalledTimes(1);
     });
+
+    const toastConfig = toastShowMock.mock.calls[0]?.[0];
+
+    expect(toastConfig).toMatchObject({
+      title: "Tel Aviv",
+      variant: "error",
+      position: "top-center",
+      duration: 20_000,
+      dismissLabel: "Dismiss",
+    });
+    expect(toastConfig?.message).toContain("Official alert");
+    expect(toastConfig?.message).toContain("Severity: critical");
+    expect(toastConfig?.message).toContain("Take shelter now");
+  });
+
+  it("bridges manual toast dismissal back to notification state", async () => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+
+    render(<NotificationCenter />);
+
+    await waitFor(() => {
+      expect(toastShowMock).toHaveBeenCalledTimes(1);
+    });
+
+    const toastConfig = toastShowMock.mock.calls[0]?.[0];
+
+    await act(async () => {
+      toastConfig?.onDismiss?.();
+    });
+
+    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith(
+      "official_alert-1",
+    );
   });
 
   it("auto-dismisses guidance before alert by configured timers", async () => {
@@ -262,12 +331,16 @@ describe("NotificationCenter browser notifications", () => {
       await vi.advanceTimersByTimeAsync(12_000);
     });
 
-    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith("official_guidance-1");
+    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith(
+      "official_guidance-1",
+    );
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(8_000);
     });
 
-    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith("official_alert-1");
+    expect(notificationCenterState.dismissNotification).toHaveBeenCalledWith(
+      "official_alert-1",
+    );
   });
 });
