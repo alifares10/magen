@@ -89,10 +89,18 @@ function getMapCenter(
   return [35.2137, 31.7683];
 }
 
-export function MapPreview({ content, alertMarkers, overlays }: MapPreviewProps) {
+export function MapPreview({
+  content,
+  alertMarkers,
+  overlays,
+}: MapPreviewProps) {
   const watchedLocations = useWatchlistStore((state) => state.watchedLocations);
-  const addWatchedLocation = useWatchlistStore((state) => state.addWatchedLocation);
-  const removeWatchedLocation = useWatchlistStore((state) => state.removeWatchedLocation);
+  const addWatchedLocation = useWatchlistStore(
+    (state) => state.addWatchedLocation,
+  );
+  const removeWatchedLocation = useWatchlistStore(
+    (state) => state.removeWatchedLocation,
+  );
   const [overlayVisibility, setOverlayVisibility] = useState({
     shelters: true,
     roadClosures: true,
@@ -116,8 +124,8 @@ export function MapPreview({ content, alertMarkers, overlays }: MapPreviewProps)
           </div>
 
           <div className="flex flex-wrap items-start gap-3">
-            <BrowserNotificationOptIn className="min-w-[190px]" />
-            <LocaleSwitcher className="min-w-[130px]" />
+            <BrowserNotificationOptIn className="min-w-47.5" />
+            <LocaleSwitcher className="min-w-32.5" />
           </div>
         </div>
 

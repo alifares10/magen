@@ -215,7 +215,9 @@ function buildTickerItems(overview: DashboardOverview | null): TickerItem[] {
       severity: overview.latestAlert.severity,
       region: overview.latestAlert.region,
       locationName:
-        overview.latestAlert.locationName ?? overview.latestAlert.city ?? overview.latestAlert.region,
+        overview.latestAlert.locationName ??
+        overview.latestAlert.city ??
+        overview.latestAlert.region,
       isBreaking: true,
     });
   }
@@ -257,7 +259,10 @@ function normalizeFilterText(value: string): string {
   return value.trim().toLowerCase();
 }
 
-function matchesRegionFilter(region: string | null, selectedRegion: string): boolean {
+function matchesRegionFilter(
+  region: string | null,
+  selectedRegion: string,
+): boolean {
   if (selectedRegion === ALL_REGIONS_FILTER_VALUE) {
     return true;
   }
@@ -269,7 +274,10 @@ function matchesRegionFilter(region: string | null, selectedRegion: string): boo
   return normalizeFilterText(region) === normalizeFilterText(selectedRegion);
 }
 
-function matchesSearchFilter(searchQuery: string, values: Array<string | null | undefined>): boolean {
+function matchesSearchFilter(
+  searchQuery: string,
+  values: Array<string | null | undefined>,
+): boolean {
   if (!searchQuery) {
     return true;
   }
@@ -308,7 +316,12 @@ function matchesNewsFilters(
 ): boolean {
   return (
     matchesRegionFilter(item.region, selectedRegion) &&
-    matchesSearchFilter(searchQuery, [item.title, item.summary, item.sourceName, item.region])
+    matchesSearchFilter(searchQuery, [
+      item.title,
+      item.summary,
+      item.sourceName,
+      item.region,
+    ])
   );
 }
 
@@ -319,10 +332,14 @@ function matchesOfficialFilters(
 ): boolean {
   return (
     matchesRegionFilter(item.region, selectedRegion) &&
-    matchesSearchFilter(searchQuery, [item.title, item.body, item.sourceName, item.region])
+    matchesSearchFilter(searchQuery, [
+      item.title,
+      item.body,
+      item.sourceName,
+      item.region,
+    ])
   );
 }
-
 
 function UpdatedAtLabel({
   updatedLabel,
@@ -344,7 +361,9 @@ function UpdatedAtLabel({
 
 export function AppShell({ content }: AppShellProps) {
   const watchedLocations = useWatchlistStore((state) => state.watchedLocations);
-  const [selectedRegion, setSelectedRegion] = useState<string>(ALL_REGIONS_FILTER_VALUE);
+  const [selectedRegion, setSelectedRegion] = useState<string>(
+    ALL_REGIONS_FILTER_VALUE,
+  );
   const [locationSearchQuery, setLocationSearchQuery] = useState("");
   const [overviewRefreshNonce, setOverviewRefreshNonce] = useState(0);
   const [sourceHealthRefreshNonce, setSourceHealthRefreshNonce] = useState(0);
@@ -583,17 +602,20 @@ export function AppShell({ content }: AppShellProps) {
 
   const latestAlert = overviewState.data?.latestAlert ?? null;
   const latestOfficialUpdate = overviewState.data?.latestOfficialUpdate ?? null;
-  const watchedLocationMatches = overviewState.data?.watchedLocationMatches ?? [];
+  const watchedLocationMatches =
+    overviewState.data?.watchedLocationMatches ?? [];
   const tickerItems = buildTickerItems(overviewState.data);
-  const normalizedLocationSearchQuery = normalizeFilterText(locationSearchQuery);
+  const normalizedLocationSearchQuery =
+    normalizeFilterText(locationSearchQuery);
   const hasActiveFilters =
-    selectedRegion !== ALL_REGIONS_FILTER_VALUE || normalizedLocationSearchQuery.length > 0;
+    selectedRegion !== ALL_REGIONS_FILTER_VALUE ||
+    normalizedLocationSearchQuery.length > 0;
   const availableRegions = Array.from(
     new Set(
       [
         overviewState.data?.latestAlert?.region,
         overviewState.data?.latestOfficialUpdate?.region,
-        ...((overviewState.data?.topNews ?? []).map((item) => item.region)),
+        ...(overviewState.data?.topNews ?? []).map((item) => item.region),
         ...alertsState.data.map((item) => item.region),
         ...newsState.data.map((item) => item.region),
         ...officialState.data.map((item) => item.region),
@@ -601,7 +623,12 @@ export function AppShell({ content }: AppShellProps) {
     ),
   ).sort((left, right) => left.localeCompare(right));
   const filteredLatestAlert =
-    latestAlert && matchesAlertFilters(latestAlert, selectedRegion, normalizedLocationSearchQuery)
+    latestAlert &&
+    matchesAlertFilters(
+      latestAlert,
+      selectedRegion,
+      normalizedLocationSearchQuery,
+    )
       ? latestAlert
       : null;
   const filteredLatestOfficialUpdate =
@@ -625,9 +652,13 @@ export function AppShell({ content }: AppShellProps) {
       ])
     );
   });
-  const filteredWatchedLocationMatches = watchedLocationMatches.filter((match) => {
-    return matchesSearchFilter(normalizedLocationSearchQuery, [match.locationName]);
-  });
+  const filteredWatchedLocationMatches = watchedLocationMatches.filter(
+    (match) => {
+      return matchesSearchFilter(normalizedLocationSearchQuery, [
+        match.locationName,
+      ]);
+    },
+  );
   const filteredAlerts = alertsState.data.filter((item) =>
     matchesAlertFilters(item, selectedRegion, normalizedLocationSearchQuery),
   );
@@ -647,7 +678,8 @@ export function AppShell({ content }: AppShellProps) {
   const sourceHealthCategoriesByType = new Map(
     sourceHealthCategories.map((category) => [category.sourceType, category]),
   );
-  const overallSourceHealthStatus = sourceHealthState.data?.overallStatus ?? "unknown";
+  const overallSourceHealthStatus =
+    sourceHealthState.data?.overallStatus ?? "unknown";
   const sourceHealthTypeLabels: Record<SourceHealthType, string> = {
     official_alerts: content.sourceHealthTypes.officialAlerts,
     official_guidance: content.sourceHealthTypes.officialGuidance,
@@ -663,12 +695,14 @@ export function AppShell({ content }: AppShellProps) {
               <h1 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
                 {content.title}
               </h1>
-              <p className="mt-1 text-sm text-slate-700 md:text-base">{content.subtitle}</p>
+              <p className="mt-1 text-sm text-slate-700 md:text-base">
+                {content.subtitle}
+              </p>
             </div>
 
             <div className="flex flex-wrap items-start gap-3">
-              <BrowserNotificationOptIn className="min-w-[190px]" />
-              <LocaleSwitcher className="min-w-[130px]" />
+              <BrowserNotificationOptIn className="min-w-47.5" />
+              <LocaleSwitcher className="min-w-32.5" />
             </div>
           </div>
 
@@ -689,7 +723,9 @@ export function AppShell({ content }: AppShellProps) {
                   }}
                   className="h-9 w-full rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900"
                 >
-                  <option value={ALL_REGIONS_FILTER_VALUE}>{content.regionFilterAll}</option>
+                  <option value={ALL_REGIONS_FILTER_VALUE}>
+                    {content.regionFilterAll}
+                  </option>
                   {availableRegions.map((region) => (
                     <option key={region} value={region}>
                       {region}
@@ -718,7 +754,10 @@ export function AppShell({ content }: AppShellProps) {
               </div>
 
               <p className="text-xs text-slate-600 md:text-end">
-                {content.updatedLabel}: {overviewState.lastUpdated ? formatDateTime(overviewState.lastUpdated) : content.statusLoading}
+                {content.updatedLabel}:{" "}
+                {overviewState.lastUpdated
+                  ? formatDateTime(overviewState.lastUpdated)
+                  : content.statusLoading}
               </p>
             </div>
           </div>
@@ -731,7 +770,11 @@ export function AppShell({ content }: AppShellProps) {
               <span
                 className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${getSourceHealthStatusClasses(overallSourceHealthStatus)}`}
               >
-                {content.sourceHealthOverallLabel}: {getSourceHealthStatusLabel(overallSourceHealthStatus, content.sourceHealthStatuses)}
+                {content.sourceHealthOverallLabel}:{" "}
+                {getSourceHealthStatusLabel(
+                  overallSourceHealthStatus,
+                  content.sourceHealthStatuses,
+                )}
               </span>
             </div>
 
@@ -745,14 +788,20 @@ export function AppShell({ content }: AppShellProps) {
                     key={sourceType}
                     className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium ${getSourceHealthStatusClasses(status)}`}
                   >
-                    {sourceHealthTypeLabels[sourceType]}: {getSourceHealthStatusLabel(status, content.sourceHealthStatuses)}
+                    {sourceHealthTypeLabels[sourceType]}:{" "}
+                    {getSourceHealthStatusLabel(
+                      status,
+                      content.sourceHealthStatuses,
+                    )}
                   </span>
                 );
               })}
             </div>
 
             {sourceHealthState.errorMessage ? (
-              <p className="mt-2 text-xs text-rose-700">{content.statusError}</p>
+              <p className="mt-2 text-xs text-rose-700">
+                {content.statusError}
+              </p>
             ) : null}
 
             <UpdatedAtLabel
@@ -781,7 +830,7 @@ export function AppShell({ content }: AppShellProps) {
                 return (
                   <article
                     key={item.id}
-                    className="w-[280px] shrink-0 rounded-lg border border-amber-200 bg-white/80 px-3 py-2"
+                    className="w-70 shrink-0 rounded-lg border border-amber-200 bg-white/80 px-3 py-2"
                   >
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
                       <span
@@ -841,7 +890,9 @@ export function AppShell({ content }: AppShellProps) {
               </h2>
 
               {overviewState.isLoading && !latestAlert ? (
-                <p className="mt-2 text-sm text-rose-900/80">{content.statusLoading}</p>
+                <p className="mt-2 text-sm text-rose-900/80">
+                  {content.statusLoading}
+                </p>
               ) : filteredLatestAlert ? (
                 <div className="mt-2 space-y-2 text-sm text-rose-950">
                   <p className="font-semibold">{filteredLatestAlert.title}</p>
@@ -852,7 +903,8 @@ export function AppShell({ content }: AppShellProps) {
                   </p>
                   <div className="grid gap-1 rounded-lg border border-rose-200/80 bg-white/70 px-3 py-2 text-xs text-rose-950/90 sm:grid-cols-2">
                     <p>
-                      {content.locationLabel}: {getAlertLocation(filteredLatestAlert)}
+                      {content.locationLabel}:{" "}
+                      {getAlertLocation(filteredLatestAlert)}
                     </p>
                     <p>
                       {content.sourceLabel}: {filteredLatestAlert.sourceName}
@@ -861,18 +913,23 @@ export function AppShell({ content }: AppShellProps) {
                       {content.severityLabel}: {filteredLatestAlert.severity}
                     </p>
                     <p>
-                      {content.publishedLabel}: {formatDateTime(filteredLatestAlert.publishedAt)}
+                      {content.publishedLabel}:{" "}
+                      {formatDateTime(filteredLatestAlert.publishedAt)}
                     </p>
                   </div>
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-rose-950">
-                  {hasActiveFilters && latestAlert ? content.filterNoMatches : content.latestAlertEmpty}
+                  {hasActiveFilters && latestAlert
+                    ? content.filterNoMatches
+                    : content.latestAlertEmpty}
                 </p>
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-rose-800">{overviewState.errorMessage}</p>
+                <p className="mt-3 text-xs text-rose-800">
+                  {overviewState.errorMessage}
+                </p>
               ) : null}
 
               <UpdatedAtLabel
@@ -887,28 +944,38 @@ export function AppShell({ content }: AppShellProps) {
               </h2>
 
               {overviewState.isLoading && !latestOfficialUpdate ? (
-                <p className="mt-2 text-sm text-sky-900/80">{content.statusLoading}</p>
+                <p className="mt-2 text-sm text-sky-900/80">
+                  {content.statusLoading}
+                </p>
               ) : filteredLatestOfficialUpdate ? (
                 <div className="mt-2 space-y-2 text-sm text-sky-950">
-                  <p className="font-semibold">{filteredLatestOfficialUpdate.title}</p>
+                  <p className="font-semibold">
+                    {filteredLatestOfficialUpdate.title}
+                  </p>
                   <p>{filteredLatestOfficialUpdate.body}</p>
                   <div className="grid gap-1 rounded-lg border border-sky-200/80 bg-white/70 px-3 py-2 text-xs text-sky-950/90 sm:grid-cols-2">
                     <p>
-                      {content.sourceLabel}: {filteredLatestOfficialUpdate.sourceName}
+                      {content.sourceLabel}:{" "}
+                      {filteredLatestOfficialUpdate.sourceName}
                     </p>
                     <p>
-                      {content.publishedLabel}: {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
+                      {content.publishedLabel}:{" "}
+                      {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
                     </p>
                   </div>
                 </div>
               ) : (
                 <p className="mt-2 text-sm text-sky-950">
-                  {hasActiveFilters && latestOfficialUpdate ? content.filterNoMatches : content.officialEmpty}
+                  {hasActiveFilters && latestOfficialUpdate
+                    ? content.filterNoMatches
+                    : content.officialEmpty}
                 </p>
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-sky-800">{overviewState.errorMessage}</p>
+                <p className="mt-3 text-xs text-sky-800">
+                  {overviewState.errorMessage}
+                </p>
               ) : null}
 
               <UpdatedAtLabel
@@ -922,8 +989,11 @@ export function AppShell({ content }: AppShellProps) {
                 {content.watchlistTitle}
               </h2>
 
-              {overviewState.isLoading && watchedLocationMatches.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-800">{content.statusLoading}</p>
+              {overviewState.isLoading &&
+              watchedLocationMatches.length === 0 ? (
+                <p className="mt-2 text-sm text-zinc-800">
+                  {content.statusLoading}
+                </p>
               ) : filteredWatchedLocationMatches.length > 0 ? (
                 <ul className="mt-2 space-y-2 text-sm text-zinc-900">
                   {filteredWatchedLocationMatches.map((match, index) => (
@@ -952,7 +1022,9 @@ export function AppShell({ content }: AppShellProps) {
               )}
 
               {overviewState.errorMessage ? (
-                <p className="mt-3 text-xs text-zinc-700">{overviewState.errorMessage}</p>
+                <p className="mt-3 text-xs text-zinc-700">
+                  {overviewState.errorMessage}
+                </p>
               ) : null}
 
               <UpdatedAtLabel
@@ -962,8 +1034,10 @@ export function AppShell({ content }: AppShellProps) {
             </article>
           </section>
 
-          <aside className="order-last w-full rounded-2xl border border-zinc-300/80 bg-white/85 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] lg:order-none">
-            <h2 className="text-base font-semibold text-slate-900">{content.feedTitle}</h2>
+          <aside className="order-last w-full rounded-2xl border border-zinc-300/80 bg-white/85 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] lg:order-0">
+            <h2 className="text-base font-semibold text-slate-900">
+              {content.feedTitle}
+            </h2>
 
             <div
               className="mt-3 grid grid-cols-3 gap-2"
@@ -1017,9 +1091,11 @@ export function AppShell({ content }: AppShellProps) {
               </button>
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 lg:h-[560px]" role="tabpanel">
+            <div className="mt-4 flex flex-col gap-2 lg:h-140" role="tabpanel">
               {shouldShowFeedLoading ? (
-                <p className="text-sm text-slate-700">{content.statusLoading}</p>
+                <p className="text-sm text-slate-700">
+                  {content.statusLoading}
+                </p>
               ) : null}
 
               {shouldShowFeedError ? (
@@ -1031,30 +1107,45 @@ export function AppShell({ content }: AppShellProps) {
                 !shouldShowFeedError &&
                 activeTabFilteredCount === 0 ? (
                   <p className="text-sm text-slate-700">
-                    {hasActiveFilters ? content.filterNoMatches : content.noFeedItems}
+                    {hasActiveFilters
+                      ? content.filterNoMatches
+                      : content.noFeedItems}
                   </p>
                 ) : null}
 
-                {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "alerts" ? (
+                {!shouldShowFeedLoading &&
+                !shouldShowFeedError &&
+                activeTab === "alerts" ? (
                   <ul className="space-y-2">
                     {filteredAlerts.map((item) => (
-                      <li key={item.id} className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2">
-                        <p className="text-sm font-semibold text-rose-950">{item.title}</p>
+                      <li
+                        key={item.id}
+                        className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2"
+                      >
+                        <p className="text-sm font-semibold text-rose-950">
+                          {item.title}
+                        </p>
                         <p className="mt-1 text-xs text-rose-900/90">
                           {content.locationLabel}: {getAlertLocation(item)}
                         </p>
                         <p className="text-xs text-rose-900/90">
-                          {content.publishedLabel}: {formatDateTime(item.publishedAt)}
+                          {content.publishedLabel}:{" "}
+                          {formatDateTime(item.publishedAt)}
                         </p>
                       </li>
                     ))}
                   </ul>
                 ) : null}
 
-                {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "news" ? (
+                {!shouldShowFeedLoading &&
+                !shouldShowFeedError &&
+                activeTab === "news" ? (
                   <ul className="space-y-2">
                     {filteredNews.map((item) => (
-                      <li key={item.id} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                      <li
+                        key={item.id}
+                        className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+                      >
                         <a
                           href={item.url}
                           target="_blank"
@@ -1067,21 +1158,32 @@ export function AppShell({ content }: AppShellProps) {
                           {content.sourceLabel}: {item.sourceName}
                         </p>
                         <p className="text-xs text-zinc-700">
-                          {content.publishedLabel}: {formatDateTime(item.publishedAt)}
+                          {content.publishedLabel}:{" "}
+                          {formatDateTime(item.publishedAt)}
                         </p>
                       </li>
                     ))}
                   </ul>
                 ) : null}
 
-                {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "official" ? (
+                {!shouldShowFeedLoading &&
+                !shouldShowFeedError &&
+                activeTab === "official" ? (
                   <ul className="space-y-2">
                     {filteredOfficial.map((item) => (
-                      <li key={item.id} className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2">
-                        <p className="text-sm font-semibold text-sky-950">{item.title}</p>
-                        <p className="mt-1 text-xs text-sky-900/90">{item.body}</p>
+                      <li
+                        key={item.id}
+                        className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2"
+                      >
+                        <p className="text-sm font-semibold text-sky-950">
+                          {item.title}
+                        </p>
                         <p className="mt-1 text-xs text-sky-900/90">
-                          {content.publishedLabel}: {formatDateTime(item.publishedAt)}
+                          {item.body}
+                        </p>
+                        <p className="mt-1 text-xs text-sky-900/90">
+                          {content.publishedLabel}:{" "}
+                          {formatDateTime(item.publishedAt)}
                         </p>
                       </li>
                     ))}
