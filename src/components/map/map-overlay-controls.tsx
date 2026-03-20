@@ -15,10 +15,10 @@ type MapOverlayControlsProps = {
 
 function getToggleClasses(isActive: boolean): string {
   if (isActive) {
-    return "border-slate-900 bg-slate-900 text-white dark:border-amber-800/70 dark:bg-amber-950/60 dark:text-amber-100";
+    return "border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-700/50 dark:bg-amber-950/40 dark:text-amber-300";
   }
 
-  return "border-slate-300 bg-white text-slate-800 hover:bg-slate-50 dark:border-slate-700/80 dark:bg-slate-950/75 dark:text-slate-200 dark:hover:bg-slate-900";
+  return "border-[var(--border-panel)] bg-[var(--surface-raised)] text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200";
 }
 
 export function MapOverlayControls({
@@ -33,12 +33,12 @@ export function MapOverlayControls({
 }: MapOverlayControlsProps) {
   return (
     <section className="flex flex-wrap items-center gap-2">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300">{title}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-400">{title}</p>
 
       <button
         type="button"
         aria-pressed={visibility.shelters}
-        className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${getToggleClasses(visibility.shelters)}`}
+        className={`rounded-sm border px-2 py-0.5 text-[10px] font-semibold transition-colors ${getToggleClasses(visibility.shelters)}`}
         onClick={onToggleShelters}
       >
         {sheltersLabel}
@@ -47,7 +47,7 @@ export function MapOverlayControls({
       <button
         type="button"
         aria-pressed={visibility.roadClosures}
-        className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${getToggleClasses(visibility.roadClosures)}`}
+        className={`rounded-sm border px-2 py-0.5 text-[10px] font-semibold transition-colors ${getToggleClasses(visibility.roadClosures)}`}
         onClick={onToggleRoadClosures}
       >
         {roadClosuresLabel}
@@ -56,7 +56,7 @@ export function MapOverlayControls({
       <button
         type="button"
         aria-pressed={visibility.hospitals}
-        className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${getToggleClasses(visibility.hospitals)}`}
+        className={`rounded-sm border px-2 py-0.5 text-[10px] font-semibold transition-colors ${getToggleClasses(visibility.hospitals)}`}
         onClick={onToggleHospitals}
       >
         {hospitalsLabel}

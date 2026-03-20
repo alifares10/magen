@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useLiveFeedTabs } from "@/components/feed/use-live-feed-tabs";
+import { FeedTabButton } from "@/components/dashboard/feed-tab-button";
+import { FeedItemCard } from "@/components/dashboard/feed-item-card";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { BrowserNotificationOptIn } from "@/components/notifications/browser-notification-opt-in";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
@@ -44,6 +47,8 @@ type LiveFeedPageProps = {
 };
 
 export function LiveFeedPage({ content }: LiveFeedPageProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const [latestAlertState, setLatestAlertState] = useState<
     AsyncState<AlertFeedItem | null>
   >({
@@ -65,6 +70,13 @@ export function LiveFeedPage({ content }: LiveFeedPageProps) {
     statusErrorMessage: content.statusError,
     initialAlertsLoading: true,
   });
+
+  const activeItems =
+    activeTab === "alerts"
+      ? alertsState.data
+      : activeTab === "news"
+        ? newsState.data
+        : officialState.data;
 
   useEffect(() => {
     let isActive = true;
@@ -116,211 +128,161 @@ export function LiveFeedPage({ content }: LiveFeedPageProps) {
     };
   }, [content.statusError]);
 
+  const hasAlert = Boolean(latestAlertState.data);
+
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">
-      <header className="mb-4 rounded-2xl border border-amber-200/70 bg-white/85 px-5 py-4 shadow-[0_12px_30px_-22px_rgba(15,23,42,0.45)] backdrop-blur dark:border-amber-800/45 dark:bg-transparent dark:shadow-[0_12px_30px_-22px_rgba(2,6,23,0.9)]">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl dark:text-slate-50">
-              {content.title}
-            </h1>
-            <p className="mt-1 text-sm text-slate-700 md:text-base dark:text-slate-300">
-              {content.description}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-start gap-3">
-            <ThemeSwitcher content={content.themeSwitcher} className="min-w-[144px]" />
-            <BrowserNotificationOptIn className="min-w-[190px]" />
-            <LocaleSwitcher className="min-w-[130px]" />
-          </div>
+    <div className="flex min-h-screen flex-col bg-[var(--background)] text-slate-900 dark:text-slate-100">
+      {/* Command Bar */}
+      <motion.header
+        initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="sticky top-0 z-50 flex h-12 items-center justify-between border-b border-[var(--border-panel)] bg-[var(--surface-raised)] px-4 backdrop-blur"
+      >
+        <div className="flex items-center gap-3">
+          <h1 className="font-[family-name:var(--font-display)] text-xs font-bold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-200">
+            <span className="text-amber-500 dark:text-amber-400">{content.title}</span>
+          </h1>
+          <span className="hidden text-xs text-slate-500 md:inline">{content.description}</span>
         </div>
-      </header>
 
-      <article className="mb-4 rounded-2xl border border-rose-300/70 bg-rose-50 p-5 dark:border-rose-800/65 dark:bg-transparent">
-        <h2 className="text-base font-semibold text-rose-900 dark:text-rose-100">
-          {content.latestAlertTitle}
-        </h2>
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher content={content.themeSwitcher} className="text-xs" toggleSize={12} compact />
+          <BrowserNotificationOptIn className="text-xs" compact />
+          <LocaleSwitcher className="text-xs" compact />
+        </div>
+      </motion.header>
 
-        {latestAlertState.isLoading && !latestAlertState.data ? (
-          <p className="mt-2 text-sm text-rose-900/80 dark:text-rose-200">{content.statusLoading}</p>
-        ) : latestAlertState.data ? (
-          <div className="mt-2 space-y-2 text-sm text-rose-950 dark:text-rose-100">
-            <p className="font-semibold">{latestAlertState.data.title}</p>
-            {latestAlertState.data.message ? (
-              <p>{latestAlertState.data.message}</p>
+      {/* Scrollable content */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Latest Alert — AlertHero style */}
+        <motion.article
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.06 }}
+          className={`relative overflow-hidden px-5 pb-5 pt-4 ${
+            hasAlert
+              ? "border-s-4 border-rose-500 bg-rose-50 dark:bg-gradient-to-br dark:from-[oklch(0.18_0.06_15)] dark:to-[oklch(0.12_0.04_20)]"
+              : "bg-[var(--surface-raised)]"
+          }`}
+          style={
+            hasAlert && !prefersReducedMotion
+              ? {
+                  boxShadow: "inset 0 0 30px oklch(0.55 0.22 15 / 8%), 0 0 20px oklch(0.55 0.22 15 / 5%)",
+                }
+              : undefined
+          }
+        >
+          <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-rose-900 dark:text-rose-100">
+            {content.latestAlertTitle}
+          </h2>
+
+          {latestAlertState.isLoading && !latestAlertState.data ? (
+            <p className="mt-2 text-sm text-rose-800/80 dark:text-rose-200/80">{content.statusLoading}</p>
+          ) : latestAlertState.data ? (
+            <div className="mt-3 space-y-3 text-sm">
+              <p className="font-[family-name:var(--font-display)] text-lg font-bold text-rose-950 dark:text-rose-50">
+                {latestAlertState.data.title}
+              </p>
+              {latestAlertState.data.message ? (
+                <p className="text-rose-900/90 dark:text-rose-100/90">{latestAlertState.data.message}</p>
+              ) : null}
+              <div className="grid gap-1 rounded-sm border border-rose-300/50 bg-rose-100/50 px-3 py-2 text-xs text-rose-900 sm:grid-cols-2 dark:border-rose-800/40 dark:bg-black/20 dark:text-rose-200">
+                <p>
+                  {content.locationLabel}: {getAlertLocation(latestAlertState.data)}
+                </p>
+                <p>
+                  {content.sourceLabel}: {latestAlertState.data.sourceName}
+                </p>
+                <p>
+                  {content.severityLabel}: {latestAlertState.data.severity}
+                </p>
+                <p>
+                  {content.publishedLabel}: {formatDateTime(latestAlertState.data.publishedAt)}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-4 flex items-center gap-2">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M3.5 7L6 9.5L10.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{content.latestAlertEmpty}</p>
+            </div>
+          )}
+
+          {latestAlertState.errorMessage ? (
+            <p className="mt-3 text-xs text-rose-700 dark:text-rose-300">{content.statusError}</p>
+          ) : null}
+        </motion.article>
+
+        {/* Feed Panel */}
+        <motion.section
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.12 }}
+          className="flex flex-1 flex-col overflow-hidden bg-[var(--surface-raised)]"
+        >
+          <div className="flex border-b border-[var(--border-panel)]" role="tablist" aria-label={content.title}>
+            <FeedTabButton
+              label={content.feedTabs.alerts}
+              isActive={activeTab === "alerts"}
+              onClick={() => setActiveTab("alerts")}
+            />
+            <FeedTabButton
+              label={content.feedTabs.news}
+              isActive={activeTab === "news"}
+              onClick={() => setActiveTab("news")}
+            />
+            <FeedTabButton
+              label={content.feedTabs.official}
+              isActive={activeTab === "official"}
+              onClick={() => setActiveTab("official")}
+            />
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-y-auto" role="tabpanel">
+            {shouldShowFeedLoading ? (
+              <p className="p-4 text-sm text-slate-500">{content.statusLoading}</p>
             ) : null}
-            <p className="text-xs text-rose-950/90 dark:text-rose-200">
-              {content.locationLabel}: {getAlertLocation(latestAlertState.data)}
-            </p>
-            <p className="text-xs text-rose-950/90 dark:text-rose-200">
-              {content.sourceLabel}: {latestAlertState.data.sourceName}
-            </p>
-            <p className="text-xs text-rose-950/90 dark:text-rose-200">
-              {content.severityLabel}: {latestAlertState.data.severity}
-            </p>
-            <p className="text-xs text-rose-950/90 dark:text-rose-200">
-              {content.publishedLabel}: {formatDateTime(latestAlertState.data.publishedAt)}
-            </p>
+
+            {shouldShowFeedError ? (
+              <p className="p-4 text-sm text-rose-400">{content.statusError}</p>
+            ) : null}
+
+            {!shouldShowFeedLoading && !shouldShowFeedError && activeItems.length === 0 ? (
+              <p className="p-4 text-sm text-slate-500">{content.noFeedItems}</p>
+            ) : null}
+
+            {!shouldShowFeedLoading && !shouldShowFeedError ? (
+              <AnimatePresence mode="popLayout">
+                <ul>
+                  {activeItems.map((item, index) => (
+                    <FeedItemCard
+                      key={item.id}
+                      item={item}
+                      type={activeTab}
+                      locationLabel={content.locationLabel}
+                      sourceLabel={content.sourceLabel}
+                      publishedLabel={content.publishedLabel}
+                      index={index}
+                    />
+                  ))}
+                </ul>
+              </AnimatePresence>
+            ) : null}
           </div>
-        ) : (
-          <p className="mt-2 text-sm text-rose-950 dark:text-rose-100">{content.latestAlertEmpty}</p>
-        )}
-
-        {latestAlertState.errorMessage ? (
-          <p className="mt-3 text-xs text-rose-800 dark:text-rose-200">{content.statusError}</p>
-        ) : null}
-      </article>
-
-      <div className="rounded-2xl border border-zinc-300/80 bg-white/85 p-5 shadow-[0_14px_30px_-24px_rgba(15,23,42,0.45)] dark:border-slate-700/80 dark:bg-transparent dark:shadow-[0_14px_30px_-24px_rgba(2,6,23,0.9)]">
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label={content.title}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "alerts"}
-            onClick={() => {
-              setActiveTab("alerts");
-            }}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              activeTab === "alerts"
-                ? "border-rose-300 bg-rose-100 text-rose-900 dark:border-rose-800/70 dark:bg-rose-950/55 dark:text-rose-100"
-                : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
-            }`}
-          >
-            {content.feedTabs.alerts}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "news"}
-            onClick={() => {
-              setActiveTab("news");
-            }}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              activeTab === "news"
-                ? "border-zinc-300 bg-zinc-200 text-zinc-950 dark:border-slate-600 dark:bg-slate-700/85 dark:text-slate-100"
-                : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
-            }`}
-          >
-            {content.feedTabs.news}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === "official"}
-            onClick={() => {
-              setActiveTab("official");
-            }}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-              activeTab === "official"
-                ? "border-sky-300 bg-sky-100 text-sky-900 dark:border-sky-800/70 dark:bg-sky-950/55 dark:text-sky-100"
-                : "border-zinc-300 bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:bg-slate-800/85"
-            }`}
-          >
-            {content.feedTabs.official}
-          </button>
-        </div>
-
-        <div className="mt-4 space-y-2" role="tabpanel">
-          {shouldShowFeedLoading ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300">{content.statusLoading}</p>
-          ) : null}
-
-          {shouldShowFeedError ? (
-            <p className="text-sm text-rose-700 dark:text-rose-300">{content.statusError}</p>
-          ) : null}
-
-          {!shouldShowFeedLoading &&
-          !shouldShowFeedError &&
-          activeTab === "alerts" &&
-          alertsState.data.length === 0 ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300">{content.noFeedItems}</p>
-          ) : null}
-
-          {!shouldShowFeedLoading &&
-          !shouldShowFeedError &&
-          activeTab === "news" &&
-          newsState.data.length === 0 ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300">{content.noFeedItems}</p>
-          ) : null}
-
-          {!shouldShowFeedLoading &&
-          !shouldShowFeedError &&
-          activeTab === "official" &&
-          officialState.data.length === 0 ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300">{content.noFeedItems}</p>
-          ) : null}
-
-          {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "alerts" ? (
-            <ul className="space-y-2">
-              {alertsState.data.map((item) => (
-                <li
-                  key={item.id}
-                  className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 dark:border-rose-800/55 dark:bg-slate-900/78"
-                >
-                  <p className="text-sm font-semibold text-rose-950 dark:text-rose-100">{item.title}</p>
-                  <p className="mt-1 text-xs text-rose-900/90 dark:text-rose-200">
-                    {content.locationLabel}: {getAlertLocation(item)}
-                  </p>
-                  <p className="text-xs text-rose-900/90 dark:text-rose-200">
-                    {content.publishedLabel}: {formatDateTime(item.publishedAt)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "news" ? (
-            <ul className="space-y-2">
-              {newsState.data.map((item) => (
-                <li
-                  key={item.id}
-                  className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 dark:border-slate-700/80 dark:bg-slate-900/78"
-                >
-                  <a
-                    href={item.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm font-semibold text-zinc-950 underline-offset-2 hover:underline dark:text-zinc-100"
-                  >
-                    {item.title}
-                  </a>
-                  <p className="mt-1 text-xs text-zinc-700 dark:text-zinc-300">
-                    {content.sourceLabel}: {item.sourceName}
-                  </p>
-                  <p className="text-xs text-zinc-700 dark:text-zinc-300">
-                    {content.publishedLabel}: {formatDateTime(item.publishedAt)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-
-          {!shouldShowFeedLoading && !shouldShowFeedError && activeTab === "official" ? (
-            <ul className="space-y-2">
-              {officialState.data.map((item) => (
-                <li
-                  key={item.id}
-                  className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 dark:border-sky-800/55 dark:bg-slate-900/78"
-                >
-                  <p className="text-sm font-semibold text-sky-950 dark:text-sky-100">{item.title}</p>
-                  <p className="mt-1 text-xs text-sky-900/90 dark:text-sky-200">{item.body}</p>
-                  <p className="mt-1 text-xs text-sky-900/90 dark:text-sky-200">
-                    {content.publishedLabel}: {formatDateTime(item.publishedAt)}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : null}
 
           {activeFeedState.lastUpdated ? (
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <p className="border-t border-[var(--border-panel)] px-4 py-2 text-[10px] text-slate-600">
               {content.updatedLabel}: {formatDateTime(activeFeedState.lastUpdated)}
             </p>
           ) : null}
-        </div>
+        </motion.section>
       </div>
-    </section>
+    </div>
   );
 }
 
