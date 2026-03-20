@@ -8,10 +8,12 @@ import { useNotificationRuntimeStore } from "@/store/use-notification-runtime-st
 
 type BrowserNotificationOptInProps = {
   className?: string;
+  compact?: boolean;
 };
 
 export function BrowserNotificationOptIn({
   className,
+  compact,
 }: BrowserNotificationOptInProps) {
   const t = useTranslations("notifications");
   const hasHydrated = useSyncExternalStore(
@@ -111,9 +113,11 @@ export function BrowserNotificationOptIn({
 
   return (
     <div className={className}>
-      <p className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-        {t("browserOptInLabel")}
-      </p>
+      {!compact && (
+        <p className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+          {t("browserOptInLabel")}
+        </p>
+      )}
 
       <button
         type="button"
@@ -126,27 +130,31 @@ export function BrowserNotificationOptIn({
           !isSupported ||
           (!browserNotificationsEnabled && permission === "denied")
         }
-        className="mt-1 h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900"
+        className={`${compact ? "" : "mt-1 "}h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900`}
       >
         {buttonLabel}
       </button>
 
-      <p className="mt-1 text-xs text-zinc-600 dark:text-slate-400">{statusText}</p>
-      <p className={`mt-1 text-xs ${deliveryStatusClassName}`}>
-        {t("deliveryStatusLabel")}: {deliveryStatusText}
-      </p>
-      <p className="mt-1 text-[11px] text-zinc-500 dark:text-slate-400">
-        {t("browserBackgroundOnlyHint")}
-      </p>
+      {!compact && (
+        <>
+          <p className="mt-1 text-xs text-zinc-600 dark:text-slate-400">{statusText}</p>
+          <p className={`mt-1 text-xs ${deliveryStatusClassName}`}>
+            {t("deliveryStatusLabel")}: {deliveryStatusText}
+          </p>
+          <p className="mt-1 text-[11px] text-zinc-500 dark:text-slate-400">
+            {t("browserBackgroundOnlyHint")}
+          </p>
 
-      {hasHydrated &&
-      isSupported &&
-      permission === "denied" &&
-      !browserNotificationsEnabled ? (
-        <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
-          {t("browserBlockedHelp")}
-        </p>
-      ) : null}
+          {hasHydrated &&
+          isSupported &&
+          permission === "denied" &&
+          !browserNotificationsEnabled ? (
+            <p className="mt-1 text-[11px] text-amber-700 dark:text-amber-400">
+              {t("browserBlockedHelp")}
+            </p>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

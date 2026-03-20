@@ -8,6 +8,7 @@ import { routing, type AppLocale } from "@/i18n/routing";
 
 type LocaleSwitcherProps = {
   className?: string;
+  compact?: boolean;
 };
 
 function getLocaleValue(locale: string): AppLocale {
@@ -20,7 +21,7 @@ function getLocaleValue(locale: string): AppLocale {
   return routing.defaultLocale;
 }
 
-export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
+export function LocaleSwitcher({ className, compact }: LocaleSwitcherProps) {
   const t = useTranslations("localeSwitcher");
   const locale = getLocaleValue(useLocale());
   const pathname = usePathname();
@@ -32,15 +33,18 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
 
   return (
     <div className={className}>
-      <label
-        htmlFor="locale-switcher"
-        className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
-      >
-        {t("label")}
-      </label>
+      {!compact && (
+        <label
+          htmlFor="locale-switcher"
+          className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
+        >
+          {t("label")}
+        </label>
+      )}
       <select
         id="locale-switcher"
         value={locale}
+        aria-label={compact ? t("label") : undefined}
         onChange={(event) => {
           const nextLocale = getLocaleValue(event.target.value);
 
@@ -54,7 +58,7 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
             },
           );
         }}
-        className="mt-1 h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100"
+        className={`${compact ? "" : "mt-1 "}h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100`}
       >
         {routing.locales.map((supportedLocale) => (
           <option key={supportedLocale} value={supportedLocale}>

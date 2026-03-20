@@ -13,30 +13,37 @@ type ThemeSwitcherContent = {
 type ThemeSwitcherProps = {
   content: ThemeSwitcherContent;
   className?: string;
+  toggleSize?: number;
+  compact?: boolean;
 };
 
-export function ThemeSwitcher({ content, className }: ThemeSwitcherProps) {
+export function ThemeSwitcher({ content, className, toggleSize, compact }: ThemeSwitcherProps) {
   const { theme, toggleTheme, isHydrated } = useTheme();
   const isDarkTheme = theme === "dark";
   const currentThemeLabel = isDarkTheme ? content.dark : content.light;
 
   return (
     <div className={cn(className)}>
-      <p className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
-        {content.label}
-      </p>
+      {!compact && (
+        <p className="block text-xs font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300">
+          {content.label}
+        </p>
+      )}
 
       <SkyToggle
-        className="mt-1"
+        className={compact ? undefined : "mt-1"}
         checked={isDarkTheme}
         onCheckedChange={() => {
           toggleTheme();
         }}
         label={content.label}
         disabled={!isHydrated}
+        size={toggleSize}
       />
 
-      <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{currentThemeLabel}</p>
+      {!compact && (
+        <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{currentThemeLabel}</p>
+      )}
     </div>
   );
 }

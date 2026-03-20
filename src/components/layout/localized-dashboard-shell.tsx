@@ -1,11 +1,11 @@
 import { getTranslations } from "next-intl/server";
-import { AppShell } from "@/components/layout/app-shell";
+import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 
 export async function LocalizedDashboardShell() {
   const t = await getTranslations("app");
 
   return (
-    <AppShell
+    <DashboardShell
       content={{
         title: t("title"),
         subtitle: t("subtitle"),

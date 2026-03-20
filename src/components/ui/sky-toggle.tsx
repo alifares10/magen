@@ -8,6 +8,7 @@ type SkyToggleProps = {
   label: string;
   className?: string;
   disabled?: boolean;
+  size?: number;
 };
 
 export function SkyToggle({
@@ -16,12 +17,17 @@ export function SkyToggle({
   label,
   className,
   disabled = false,
+  size,
 }: SkyToggleProps) {
   const inputId = useId();
 
   return (
     <div className={cn(styles.root, className)}>
-      <label htmlFor={inputId} className={styles.switch}>
+      <label
+        htmlFor={inputId}
+        className={styles.switch}
+        style={size ? ({ '--toggle-size': `${size}px` } as React.CSSProperties) : undefined}
+      >
         <span className={styles.srOnly}>{label}</span>
         <input
           id={inputId}
