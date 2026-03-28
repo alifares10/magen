@@ -169,11 +169,7 @@ export function useSupabaseSourceHealthRealtime({
     );
 
     void channel.subscribe((status, error) => {
-      if (
-        status === "CHANNEL_ERROR" ||
-        status === "TIMED_OUT" ||
-        status === "CLOSED"
-      ) {
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
         const reason = error?.message ?? `Source health realtime status: ${status}`;
 
         if (process.env.NODE_ENV !== "test") {

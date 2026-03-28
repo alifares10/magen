@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { TickerItem } from "@/lib/feed/filters";
-import { getTickerItemTypeClasses } from "@/lib/feed/filters";
 
 type NewsTickerContent = {
   tickerLabel: string;
@@ -26,6 +25,23 @@ type NewsTickerProps = {
   allItemsCount: number;
 };
 
+function getTickerBadgeClasses(type: TickerItem["type"]): string {
+  switch (type) {
+    case "alert":
+      return "bg-md3-error-container text-md3-error font-black";
+    case "official":
+      return "bg-md3-secondary-container text-md3-on-surface font-black";
+    case "news":
+      return "bg-md3-surface-container-highest text-md3-on-surface-variant font-bold";
+  }
+}
+
+function getTickerBadgeLabel(type: TickerItem["type"], content: NewsTickerContent): string {
+  if (type === "alert") return content.tickerBreakingTag;
+  if (type === "official") return "UPDATE";
+  return content.tickerTypes[type];
+}
+
 function TickerMarquee({ children }: { children: React.ReactNode }) {
   const prefersReducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,7 +58,7 @@ function TickerMarquee({ children }: { children: React.ReactNode }) {
     return (
       <div
         ref={containerRef}
-        className="flex items-center gap-6 overflow-x-auto"
+        className="flex items-center gap-12 overflow-x-auto"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
@@ -59,7 +75,7 @@ function TickerMarquee({ children }: { children: React.ReactNode }) {
     >
       <motion.div
         ref={containerRef}
-        className="flex items-center gap-6"
+        className="flex items-center gap-12"
         animate={{ x: isPaused ? undefined : [0, -contentWidth] }}
         transition={{
           x: {
@@ -78,14 +94,10 @@ function TickerMarquee({ children }: { children: React.ReactNode }) {
 
 export function NewsTicker({ content, items, hasActiveFilters, allItemsCount }: NewsTickerProps) {
   return (
-    <div className="flex h-9 items-center border-b border-[var(--border-panel)] bg-[var(--ticker-bg,oklch(0.12_0.02_40))]">
-      <span className="z-10 shrink-0 bg-rose-600 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
-        {content.tickerLabel}
-      </span>
-
+    <div className="flex items-center bg-md3-surface-container-lowest py-1">
       <div className="min-w-0 flex-1 px-3">
         {items.length === 0 ? (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-md3-on-surface-variant">
             {hasActiveFilters && allItemsCount > 0
               ? content.filterNoMatches
               : content.tickerFallback}
@@ -93,24 +105,13 @@ export function NewsTicker({ content, items, hasActiveFilters, allItemsCount }: 
         ) : (
           <TickerMarquee>
             {items.map((item) => (
-              <span key={item.id} className="inline-flex shrink-0 items-center gap-2">
+              <span key={item.id} className="inline-flex shrink-0 items-center gap-3">
                 <span
-                  className={`inline-flex rounded-sm border px-1.5 py-0.5 text-[10px] font-semibold ${getTickerItemTypeClasses(item.type)}`}
+                  className={`px-2 py-0.5 font-[family-name:var(--font-sans)] text-[10px] tracking-tighter ${getTickerBadgeClasses(item.type)}`}
                 >
-                  {content.tickerTypes[item.type]}
+                  {getTickerBadgeLabel(item.type, content)}
                 </span>
-                {item.isBreaking ? (
-                  <span className="text-[10px] font-bold uppercase text-amber-400">
-                    {content.tickerBreakingTag}
-                  </span>
-                ) : null}
-                <span className="text-xs text-slate-200">{item.title}</span>
-                {item.sourceName ? (
-                  <span className="text-[10px] text-slate-500">
-                    [{item.sourceName}]
-                  </span>
-                ) : null}
-                <span className="text-slate-700">|</span>
+                <span className="text-xs font-medium text-md3-on-surface">{item.title}</span>
               </span>
             ))}
           </TickerMarquee>

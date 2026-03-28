@@ -13,6 +13,7 @@ import { SourceHealthBar } from "@/components/dashboard/source-health-bar";
 import { WatchlistPanel } from "@/components/dashboard/watchlist-panel";
 import { FeedPanel } from "@/components/dashboard/feed-panel";
 import { StreamPanel } from "@/components/streams/stream-panel";
+import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
 type DashboardShellContent = {
   title: string;
   subtitle: string;
@@ -74,6 +75,7 @@ type DashboardShellContent = {
     dark: string;
     light: string;
   };
+  bottomNav: MobileBottomNavContent;
 };
 
 type DashboardShellProps = {
@@ -96,7 +98,9 @@ export function DashboardShell({ content }: DashboardShellProps) {
     overallSourceHealthStatus,
   } = useSourceHealth({ statusErrorMessage: content.statusError });
 
-  const { streamsState } = useStreams({ statusErrorMessage: content.statusError });
+  const { streamsState } = useStreams({
+    statusErrorMessage: content.statusError,
+  });
 
   const {
     selectedRegion,
@@ -126,10 +130,10 @@ export function DashboardShell({ content }: DashboardShellProps) {
   });
 
   return (
-    <div className="flex h-screen flex-col bg-[var(--background)] text-slate-900 dark:text-slate-100">
+    <div className="flex h-screen flex-col bg-md3-surface pt-14 pb-16 text-md3-on-surface md:pb-0">
       <CommandBar
         content={{
-          title: content.title,
+          title: "Magen",
           themeSwitcher: content.themeSwitcher,
           sourceHealthOverallLabel: content.sourceHealthOverallLabel,
           sourceHealthStatuses: content.sourceHealthStatuses,
@@ -167,9 +171,9 @@ export function DashboardShell({ content }: DashboardShellProps) {
       />
 
       {/* Command Center Grid */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr_auto] gap-px bg-slate-800/40 lg:grid-cols-[200px_1fr_380px] lg:grid-rows-[1fr_auto]">
-        {/* Left sidebar: Source Health + Watchlist */}
-        <div className="hidden flex-col lg:flex">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[1fr] gap-2 overflow-hidden p-2 lg:grid-cols-[240px_1fr_380px]">
+        {/* Left sidebar: Intelligence Sources + Watchlist */}
+        <div className="hidden min-h-0 flex-col gap-2 overflow-y-auto lg:flex">
           <SourceHealthBar
             content={{
               sourceHealthTitle: content.sourceHealthTitle,
@@ -198,10 +202,17 @@ export function DashboardShell({ content }: DashboardShellProps) {
             isLoading={overviewState.isLoading}
             hasActiveFilters={hasActiveFilters}
           />
+          {/* Deploy Response — decorative CTA */}
+          <button
+            type="button"
+            className="w-full rounded-lg bg-gradient-to-r from-md3-primary to-md3-primary-container py-3 font-[family-name:var(--font-label)] text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-md3-primary/10"
+          >
+            Deploy Response
+          </button>
         </div>
 
-        {/* Center: Alert Hero + Official Guidance */}
-        <div className="flex flex-col overflow-y-auto">
+        {/* Center: Alert Hero + Official Guidance + Live Stream */}
+        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto">
           <AlertHero
             content={{
               latestAlertTitle: content.latestAlertTitle,
@@ -241,8 +252,23 @@ export function DashboardShell({ content }: DashboardShellProps) {
             hasActiveFilters={hasActiveFilters}
           />
 
+          {/* Live Stream — moved to center column */}
+          <StreamPanel
+            content={{
+              title: content.streamTitle,
+              subtitle: content.streamSubtitle,
+              contextLabel: content.streamContextLabel,
+              empty: content.streamEmpty,
+              watchLabel: content.streamWatchLabel,
+              sourceLabel: content.sourceLabel,
+              updatedLabel: content.updatedLabel,
+              statusLoading: content.statusLoading,
+            }}
+            streamsState={streamsState}
+          />
+
           {/* Mobile-only: Source Health + Watchlist */}
-          <div className="flex flex-col lg:hidden">
+          <div className="flex flex-col gap-2 lg:hidden">
             <SourceHealthBar
               content={{
                 sourceHealthTitle: content.sourceHealthTitle,
@@ -299,24 +325,9 @@ export function DashboardShell({ content }: DashboardShellProps) {
           hasActiveFilters={hasActiveFilters}
           lastUpdated={feedTabs.activeFeedState.lastUpdated}
         />
-
-        {/* Bottom row: Live Streams */}
-        <div className="col-span-full">
-          <StreamPanel
-            content={{
-              title: content.streamTitle,
-              subtitle: content.streamSubtitle,
-              contextLabel: content.streamContextLabel,
-              empty: content.streamEmpty,
-              watchLabel: content.streamWatchLabel,
-              sourceLabel: content.sourceLabel,
-              updatedLabel: content.updatedLabel,
-              statusLoading: content.statusLoading,
-            }}
-            streamsState={streamsState}
-          />
-        </div>
       </div>
+
+      <MobileBottomNav content={content.bottomNav} activeHref="/dashboard" />
     </div>
   );
 }

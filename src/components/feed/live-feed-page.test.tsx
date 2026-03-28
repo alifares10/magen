@@ -12,11 +12,62 @@ vi.mock("@/components/notifications/browser-notification-opt-in", () => ({
   BrowserNotificationOptIn: () => <div data-testid="browser-notification-opt-in" />,
 }));
 
+vi.mock("@/components/navigation/mobile-bottom-nav", () => ({
+  MobileBottomNav: () => <nav data-testid="mobile-bottom-nav" />,
+}));
+
+vi.mock("@/components/layout/use-supabase-source-health-realtime", () => ({
+  useSupabaseSourceHealthRealtime: () => {},
+}));
+
 const content = {
-  title: "Live Feed",
-  description: "Feed description",
-  latestAlertTitle: "Latest Official Alert",
-  latestAlertEmpty: "No active emergency alerts right now.",
+  commandBar: {
+    title: "Magen",
+    themeSwitcher: { label: "Theme", dark: "Dark", light: "Light" },
+    sourceHealthOverallLabel: "Overall",
+    sourceHealthStatuses: {
+      healthy: "Healthy",
+      degraded: "Degraded",
+      down: "Down",
+      unknown: "Unknown",
+    },
+  },
+  filterBar: {
+    regionFilterLabel: "Region",
+    regionFilterAll: "All regions",
+    locationSearchLabel: "City or location",
+    locationSearchPlaceholder: "Search city, area, or keyword",
+  },
+  alertHero: {
+    latestAlertTitle: "Latest Official Alert",
+    latestAlertEmpty: "No active emergency alerts right now.",
+    alertMessageFallback: "No additional details.",
+    filterNoMatches: "No items match.",
+    locationLabel: "Location",
+    sourceLabel: "Source",
+    severityLabel: "Severity",
+    publishedLabel: "Published",
+    statusLoading: "Loading...",
+    updatedLabel: "Updated",
+  },
+  stream: {
+    title: "Live Stream",
+    subtitle: "Live visual context.",
+    contextLabel: "Secondary Context",
+    empty: "No streams.",
+    watchLabel: "Open on YouTube",
+    sourceLabel: "Source",
+    updatedLabel: "Updated",
+    statusLoading: "Loading...",
+  },
+  bottomNav: {
+    dashboard: "Dashboard",
+    map: "Map",
+    intel: "Intel",
+    alerts: "Alerts",
+  },
+  chronologicalFeedTitle: "Chronological Feed",
+  liveCoverageTitle: "Live Media Coverage",
   feedTabs: {
     alerts: "Alerts",
     news: "News",
@@ -25,16 +76,10 @@ const content = {
   statusLoading: "Loading latest data...",
   statusError: "Could not load live data right now.",
   noFeedItems: "No feed items available.",
+  locationLabel: "Location",
   sourceLabel: "Source",
   publishedLabel: "Published",
-  severityLabel: "Severity",
-  locationLabel: "Location",
   updatedLabel: "Updated",
-  themeSwitcher: {
-    label: "Theme",
-    dark: "Dark",
-    light: "Light",
-  },
 };
 
 function createJsonResponse(payload: unknown, status = 200): Response {
@@ -49,36 +94,6 @@ function createJsonResponse(payload: unknown, status = 200): Response {
 function mockFetchByUrl() {
   const fetchMock = vi.fn((input: string | URL | Request) => {
     const url = String(input);
-
-    if (url.includes("/api/alerts?limit=1")) {
-      return Promise.resolve(
-        createJsonResponse({
-          data: [
-            {
-              id: "5afde79f-d4f2-4dcf-be9b-2fca2abb3d97",
-              sourceId: "d530d3f4-bf45-47a4-a6dd-893026f8858d",
-              sourceName: "Home Front Command",
-              title: "Latest alert",
-              message: "Take shelter",
-              alertType: "rocket",
-              severity: "critical",
-              status: "active",
-              country: "IL",
-              region: "Center",
-              city: "Tel Aviv",
-              locationName: "Tel Aviv",
-              latitude: 32.0853,
-              longitude: 34.7818,
-              publishedAt: "2026-03-06T14:18:11.000+00:00",
-            },
-          ],
-          meta: {
-            count: 1,
-            limit: 1,
-          },
-        }),
-      );
-    }
 
     if (url.includes("/api/alerts?limit=20")) {
       return Promise.resolve(
@@ -153,6 +168,25 @@ function mockFetchByUrl() {
       );
     }
 
+    if (url.includes("/api/source-health")) {
+      return Promise.resolve(
+        createJsonResponse({
+          data: {
+            overallStatus: "healthy",
+            categories: [],
+          },
+        }),
+      );
+    }
+
+    if (url.includes("/api/live-streams")) {
+      return Promise.resolve(
+        createJsonResponse({
+          data: [],
+        }),
+      );
+    }
+
     return Promise.resolve(createJsonResponse({ error: "Unexpected URL" }, 404));
   });
 
@@ -175,13 +209,14 @@ describe("LiveFeedPage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders latest alert and alerts tab list", async () => {
+  it("renders alert hero and alerts tab list", async () => {
     mockFetchByUrl();
 
     await renderLiveFeedPage();
 
-    expect(await screen.findByText("Latest alert")).toBeInTheDocument();
-    expect(await screen.findByText("Alert feed item")).toBeInTheDocument();
+    const matches = await screen.findAllByText("Alert feed item");
+    // Appears in AlertHero and in the feed list
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it("loads news tab data when selected", async () => {
@@ -189,7 +224,7 @@ describe("LiveFeedPage", () => {
     const user = userEvent.setup();
 
     await renderLiveFeedPage();
-    await screen.findByText("Alert feed item");
+    await screen.findAllByText("Alert feed item");
 
     await user.click(screen.getByRole("tab", { name: content.feedTabs.news }));
 

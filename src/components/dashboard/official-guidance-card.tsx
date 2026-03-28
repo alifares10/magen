@@ -1,8 +1,10 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { Info, CheckCircle } from "lucide-react";
 import { formatDateTime } from "@/lib/feed/client";
 import type { OfficialUpdateFeedItem } from "@/lib/schemas/feed";
+import { stripHtml } from "@/lib/strip-html";
 
 type OfficialGuidanceContent = {
   officialTitle: string;
@@ -41,30 +43,42 @@ export function OfficialGuidanceCard({
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.18 }}
-      className="border-t border-[var(--border-panel)] bg-[var(--surface-raised)] p-5"
+      className="rounded-xl border-e-4 border-md3-primary bg-md3-surface-container-low p-6"
     >
-      <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-sky-300 dark:text-sky-300">
-        {content.officialTitle}
-      </h2>
+      <div className="mb-4 flex items-center gap-3">
+        <Info className="h-5 w-5 text-md3-primary" />
+        <h2 className="text-lg font-bold text-md3-on-surface">
+          {content.officialTitle}
+        </h2>
+      </div>
 
       {isLoading && !rawLatestOfficialUpdate ? (
-        <p className="mt-2 text-sm text-sky-200/80">{content.statusLoading}</p>
+        <p className="text-sm text-md3-on-surface-variant">{content.statusLoading}</p>
       ) : filteredLatestOfficialUpdate ? (
-        <div className="mt-2 space-y-2 text-sm text-sky-100">
-          <p className="font-semibold">{filteredLatestOfficialUpdate.title}</p>
-          <p className="text-sky-200/90">{filteredLatestOfficialUpdate.body}</p>
-          <div className="grid gap-1 rounded-sm border border-sky-800/30 bg-black/15 px-3 py-2 text-xs text-sky-200 sm:grid-cols-2">
-            <p>
-              {content.sourceLabel}: {filteredLatestOfficialUpdate.sourceName}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <p className="font-semibold text-md3-on-surface">{filteredLatestOfficialUpdate.title}</p>
+            <p className="mt-2 text-sm leading-relaxed text-md3-on-surface-variant">
+              {stripHtml(filteredLatestOfficialUpdate.body)}
             </p>
-            <p>
-              {content.publishedLabel}:{" "}
-              {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
-            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-3 rounded border border-md3-outline-variant/10 bg-md3-surface-container p-2">
+              <CheckCircle className="h-4 w-4 text-md3-on-surface" />
+              <span className="font-[family-name:var(--font-label)] text-xs uppercase">
+                {content.sourceLabel}: {filteredLatestOfficialUpdate.sourceName}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 rounded border border-md3-outline-variant/10 bg-md3-surface-container p-2">
+              <CheckCircle className="h-4 w-4 text-md3-on-surface" />
+              <span className="font-[family-name:var(--font-label)] text-xs uppercase">
+                {content.publishedLabel}: {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
+              </span>
+            </div>
           </div>
         </div>
       ) : (
-        <p className="mt-2 text-sm text-slate-400">
+        <p className="text-sm text-md3-outline">
           {hasActiveFilters && rawLatestOfficialUpdate
             ? content.filterNoMatches
             : content.officialEmpty}
@@ -72,11 +86,11 @@ export function OfficialGuidanceCard({
       )}
 
       {errorMessage ? (
-        <p className="mt-3 text-xs text-sky-300">{errorMessage}</p>
+        <p className="mt-3 text-xs text-md3-error">{errorMessage}</p>
       ) : null}
 
       {lastUpdated ? (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-md3-outline">
           {content.updatedLabel}: {formatDateTime(lastUpdated)}
         </p>
       ) : null}

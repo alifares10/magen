@@ -67,6 +67,12 @@ export async function LocalizedDashboardShell() {
           dark: t("themeSwitcher.dark"),
           light: t("themeSwitcher.light"),
         },
+        bottomNav: {
+          dashboard: t("bottomNav.dashboard"),
+          map: t("bottomNav.map"),
+          intel: t("bottomNav.intel"),
+          alerts: t("bottomNav.alerts"),
+        },
       }}
     />
   );

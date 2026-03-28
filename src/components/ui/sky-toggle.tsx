@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { cn } from "@/lib/utils";
 import styles from "./sky-toggle.module.css";
 
@@ -19,18 +18,14 @@ export function SkyToggle({
   disabled = false,
   size,
 }: SkyToggleProps) {
-  const inputId = useId();
-
   return (
     <div className={cn(styles.root, className)}>
       <label
-        htmlFor={inputId}
         className={styles.switch}
         style={size ? ({ '--toggle-size': `${size}px` } as React.CSSProperties) : undefined}
       >
         <span className={styles.srOnly}>{label}</span>
         <input
-          id={inputId}
           type="checkbox"
           className={styles.checkbox}
           checked={checked}

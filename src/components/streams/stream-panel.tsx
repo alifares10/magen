@@ -25,76 +25,77 @@ export function StreamPanel({ content, streamsState }: StreamPanelProps) {
   const primaryStream = streamsState.data[0] ?? null;
 
   return (
-    <motion.article
+    <motion.section
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.36 }}
-      className="border-t border-[var(--border-panel)] bg-[var(--surface-raised)] p-4"
+      className="rounded-xl bg-md3-surface-container-lowest p-4"
     >
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold text-slate-200 dark:text-slate-200">
-            {content.title}
-          </h2>
-          <p className="mt-0.5 text-xs text-slate-400">{content.subtitle}</p>
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex h-2 w-2 rounded-full bg-md3-error animate-pulse" />
+          <h3 className="font-[family-name:var(--font-label)] text-xs font-bold uppercase tracking-widest">
+            {primaryStream ? `Live Feed: ${primaryStream.title}` : content.title}
+          </h3>
         </div>
-        <span className="inline-flex rounded-sm border border-amber-700/50 bg-amber-950/40 px-2 py-0.5 text-[10px] font-medium text-amber-300">
+        <span className="font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest text-md3-outline">
           {content.contextLabel}
         </span>
       </div>
 
       {streamsState.isLoading && !primaryStream ? (
-        <p className="mt-3 text-xs text-slate-500">{content.statusLoading}</p>
+        <p className="text-xs text-md3-outline">{content.statusLoading}</p>
       ) : null}
 
       {!streamsState.isLoading && !primaryStream ? (
-        <p className="mt-3 text-xs text-slate-400">{content.empty}</p>
+        <p className="text-xs text-md3-on-surface-variant">{content.empty}</p>
       ) : null}
 
       {primaryStream ? (
-        <div className="mt-3 flex flex-col gap-3 lg:flex-row">
+        <div className="group relative aspect-video overflow-hidden rounded-lg bg-md3-surface-container-highest">
           <iframe
-            className="h-48 w-full border border-slate-700/40 bg-black lg:h-56 lg:w-96"
+            className="h-full w-full"
             src={primaryStream.embedUrl}
             title={primaryStream.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
-
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-slate-100">{primaryStream.title}</p>
-
-            {primaryStream.sourceName ? (
-              <p className="text-xs text-slate-400">
-                {content.sourceLabel}: {primaryStream.sourceName}
+          {/* Signal strength indicator */}
+          <div className="absolute bottom-4 start-4 flex gap-4">
+            <div className="rounded bg-md3-surface-container/80 p-2 backdrop-blur">
+              <p className="font-[family-name:var(--font-label)] text-[10px] uppercase text-md3-outline">
+                {content.sourceLabel}
               </p>
-            ) : null}
-
-            {primaryStream.watchUrl ? (
-              <a
-                href={primaryStream.watchUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex text-xs font-semibold text-amber-400 underline-offset-2 hover:underline"
-              >
-                {content.watchLabel}
-              </a>
-            ) : null}
+              <p className="text-xs font-bold text-emerald-400">
+                {primaryStream.sourceName ?? "LIVE"}
+              </p>
+            </div>
           </div>
         </div>
       ) : null}
 
+      {primaryStream?.watchUrl ? (
+        <a
+          href={primaryStream.watchUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-2 inline-flex text-xs font-semibold text-md3-primary underline-offset-2 hover:underline"
+        >
+          {content.watchLabel}
+        </a>
+      ) : null}
+
       {streamsState.errorMessage ? (
-        <p className="mt-3 text-xs text-rose-400">{streamsState.errorMessage}</p>
+        <p className="mt-3 text-xs text-md3-error">{streamsState.errorMessage}</p>
       ) : null}
 
       {streamsState.lastUpdated ? (
-        <p className="mt-3 text-[10px] text-slate-600">
+        <p className="mt-3 text-[10px] text-md3-outline">
           {content.updatedLabel}: {formatDateTime(streamsState.lastUpdated)}
         </p>
       ) : null}
-    </motion.article>
+    </motion.section>
   );
 }
 

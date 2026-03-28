@@ -146,6 +146,12 @@ const content = {
     dark: "Dark",
     light: "Light",
   },
+  bottomNav: {
+    dashboard: "Dashboard",
+    map: "Map",
+    intel: "Intel",
+    alerts: "Alerts",
+  },
 };
 
 function createJsonResponse(payload: unknown, status = 200): Response {
