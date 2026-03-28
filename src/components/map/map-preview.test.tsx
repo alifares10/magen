@@ -18,6 +18,26 @@ vi.mock("@/components/notifications/browser-notification-opt-in", () => ({
   BrowserNotificationOptIn: () => <div data-testid="browser-notification-opt-in" />,
 }));
 
+vi.mock("@/components/dashboard/command-bar", () => ({
+  CommandBar: ({ activeHref }: { activeHref?: string }) => (
+    <div data-testid="command-bar" data-active-href={activeHref} />
+  ),
+}));
+
+vi.mock("@/components/navigation/mobile-bottom-nav", () => ({
+  MobileBottomNav: ({ activeHref }: { activeHref?: string }) => (
+    <div data-testid="mobile-bottom-nav" data-active-href={activeHref} />
+  ),
+}));
+
+vi.mock("@/components/dashboard/hooks/use-source-health", () => ({
+  useSourceHealth: () => ({
+    sourceHealthState: { data: null, isLoading: false, errorMessage: null, lastUpdated: null },
+    sourceHealthCategoriesByType: new Map(),
+    overallSourceHealthStatus: "unknown" as const,
+  }),
+}));
+
 vi.mock("@/components/ui/map", () => {
   return {
     Map: ({
@@ -126,29 +146,40 @@ vi.mock("@/store/use-watchlist-store", async () => {
 });
 
 const content = {
-  title: "Crisis Map",
-  description:
-    "Official alerts and local watched locations are rendered on top of the mapcn base map.",
-  legendTitle: "Legend",
-  alertsLegend: "Official Alerts",
-  watchlistLegend: "Watched Locations",
-  sheltersLegend: "Shelters",
-  roadClosuresLegend: "Road Closures",
-  hospitalsLegend: "Hospitals",
-  overlayControlsTitle: "Map overlays",
+  commandBar: {
+    title: "Magen",
+    themeSwitcher: { label: "Theme", dark: "Dark", light: "Light" },
+    sourceHealthOverallLabel: "Overall",
+    sourceHealthStatuses: {
+      healthy: "Active",
+      degraded: "Degraded",
+      down: "Down",
+      unknown: "Unknown",
+    },
+  },
+  bottomNav: {
+    dashboard: "Dashboard",
+    map: "Map",
+    intel: "Intel",
+    alerts: "Alerts",
+  },
+  statusBar: {
+    activeAlertsLabel: "Active Alerts",
+    watchedAreasAffectedLabel: "Watched Areas Affected",
+  },
+  statusError: "Failed to load source health",
+  mapLayersTitle: "MAP LAYERS",
+  alertZonesLabel: "Alert Zones",
+  alertsLegend: "Alert",
+  sheltersLegend: "Shelter",
+  hospitalsLegend: "Hospital",
   overlaySheltersToggleLabel: "Shelters",
-  overlayRoadClosuresToggleLabel: "Road closures",
+  overlayRoadClosuresToggleLabel: "Road Closures",
   overlayHospitalsToggleLabel: "Hospitals",
   overlayStatusLabel: "Status",
   overlayLastUpdatedLabel: "Last updated",
   overlayRoadReasonLabel: "Reason",
   overlayEmergencyRoomLabel: "Emergency room available",
-  alertsEmptyTitle: "Official Alerts",
-  alertsEmptyBody: "No map-ready alert coordinates yet.",
-  alertsCountLabel: "Official alerts on map",
-  watchlistEmptyTitle: "Watched Locations",
-  watchlistEmptyBody: "No local watched locations yet.",
-  watchlistCountLabel: "Watched locations on map",
   mapControlsLabels: {
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
@@ -157,28 +188,22 @@ const content = {
     resetBearing: "Reset bearing to north",
   },
   watchRadiusLabel: "Radius",
-  watchlistManagerTitle: "Watchlist Manager",
-  watchlistManagerDescription: "Save locations from active official alerts and remove them anytime.",
-  watchlistSuggestedTitle: "Suggested from official alerts",
-  watchlistSuggestedEmptyBody: "No alert-based map locations are available to add right now.",
-  watchlistSuggestedAlertsLabel: "active alerts",
-  watchlistAddActionLabel: "Watch",
-  watchlistWatchingBadgeLabel: "Watching",
-  watchlistCurrentTitle: "Current watched locations",
-  watchlistCurrentEmptyBody: "No saved watched locations yet.",
-  watchlistRemoveActionLabel: "Remove",
-  watchlistPriorityTitle: "Priority cues",
-  watchlistPriorityEmptyBody: "No watched areas currently overlap active alerts.",
+  watchlist: {
+    title: "WATCHLIST",
+    addLabel: "Add",
+    activeAlertBadge: "Active Alert Zone",
+    emptyBody: "No watched locations yet.",
+    removeActionLabel: "Remove",
+    watchRadiusLabel: "Radius",
+    watchlistPriorityLabel: "Priority",
+    watchlistTopPriorityLabel: "Top priority",
+    watchlistNearbyAlertsLabel: "nearby alerts",
+  },
   watchlistPriorityLabel: "Priority",
   watchlistTopPriorityLabel: "Top priority",
   watchlistNearbyAlertsLabel: "nearby alerts",
   watchlistHighestSeverityLabel: "Highest severity",
   watchlistNearestAlertLabel: "Nearest alert",
-  themeSwitcher: {
-    label: "Theme",
-    dark: "Dark",
-    light: "Light",
-  },
 };
 
 const emptyOverlays = {
@@ -312,43 +337,34 @@ describe("MapPreview", () => {
     useWatchlistStore.setState({ watchedLocations: [] });
   });
 
-  it("renders map legend, marker content, and summary counts", () => {
-    useWatchlistStore.setState({
-      watchedLocations: [
-        {
-          id: "haifa-32.794-34.9896",
-          name: "Haifa",
-          latitude: 32.794,
-          longitude: 34.9896,
-          radiusKm: 12,
-          country: "IL",
-          region: "North",
-          city: "Haifa",
-        },
-      ],
-    });
-
+  it("renders shared command bar and status bar with alert counts", () => {
     render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
 
-    expect(screen.getByText(content.legendTitle)).toBeInTheDocument();
-    expect(screen.getAllByText(content.alertsLegend).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(content.watchlistLegend).length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Radius: 12.0 km").length).toBeGreaterThan(0);
-    expect(
-      screen.getByText(`${content.alertsCountLabel}: ${alertMarkers.length}`),
-    ).toBeInTheDocument();
-    expect(screen.getByText(`${content.watchlistCountLabel}: 1`)).toBeInTheDocument();
+    expect(screen.getByTestId("command-bar")).toHaveAttribute("data-active-href", "/map");
+    expect(screen.getByTestId("mobile-bottom-nav")).toHaveAttribute("data-active-href", "/map");
+    expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText(content.statusBar.activeAlertsLabel)).toBeInTheDocument();
+    expect(screen.getByText(content.statusBar.watchedAreasAffectedLabel)).toBeInTheDocument();
+  });
+
+  it("renders map with correct center from alert markers", () => {
+    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
+
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.7818,32.0853");
-    expect(screen.getAllByTestId("map-marker")).toHaveLength(3);
     expect(screen.getByTestId("map-controls")).toHaveAttribute("data-position", "bottom-end");
     expect(screen.getByTestId("map-controls")).toHaveAttribute(
       "data-zoom-in-label",
       content.mapControlsLabels.zoomIn,
     );
-    expect(screen.getByTestId("map-controls")).toHaveAttribute(
-      "data-fullscreen-label",
-      content.mapControlsLabels.fullscreen,
-    );
+  });
+
+  it("renders map legend and overlay controls", () => {
+    render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
+
+    expect(screen.getByText(content.alertsLegend)).toBeInTheDocument();
+    expect(screen.getByText(content.sheltersLegend)).toBeInTheDocument();
+    expect(screen.getByText(content.hospitalsLegend)).toBeInTheDocument();
+    expect(screen.getByText(content.mapLayersTitle)).toBeInTheDocument();
   });
 
   it("centers on first watched location when no alert markers exist", () => {
@@ -370,31 +386,16 @@ describe("MapPreview", () => {
     render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
 
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.7915,31.2529");
-    expect(screen.getByText(content.alertsEmptyBody)).toBeInTheDocument();
-    expect(screen.getByText(`${content.watchlistCountLabel}: 1`)).toBeInTheDocument();
   });
 
   it("falls back to default map center with empty alerts and watchlist", () => {
     render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
 
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "35.2137,31.7683");
-    expect(screen.getByText(content.alertsEmptyBody)).toBeInTheDocument();
-    expect(screen.getByText(content.watchlistEmptyBody)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.emptyBody)).toBeInTheDocument();
   });
 
-  it("adds a suggested alert location to the watchlist", async () => {
-    const user = userEvent.setup();
-
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
-
-    await user.click(screen.getByRole("button", { name: "Watch Tel Aviv" }));
-
-    expect(screen.getByText(`${content.watchlistCountLabel}: 1`)).toBeInTheDocument();
-    expect(screen.getByText(content.watchlistWatchingBadgeLabel)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Remove Tel Aviv" })).toBeInTheDocument();
-  });
-
-  it("removes a watched location from the current watchlist", async () => {
+  it("removes a watched location from the watchlist panel", async () => {
     const user = userEvent.setup();
 
     useWatchlistStore.setState({
@@ -416,30 +417,7 @@ describe("MapPreview", () => {
 
     await user.click(screen.getByRole("button", { name: "Remove Haifa" }));
 
-    expect(screen.getByText(content.watchlistCurrentEmptyBody)).toBeInTheDocument();
-    expect(screen.getByText(content.watchlistEmptyBody)).toBeInTheDocument();
-  });
-
-  it("marks already-watched candidates without showing add action", () => {
-    useWatchlistStore.setState({
-      watchedLocations: [
-        {
-          id: "tel-aviv-32.0853-34.7818",
-          name: "Tel Aviv",
-          latitude: 32.0853,
-          longitude: 34.7818,
-          radiusKm: 15,
-          country: "IL",
-          region: "Center",
-          city: "Tel Aviv",
-        },
-      ],
-    });
-
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
-
-    expect(screen.queryByRole("button", { name: "Watch Tel Aviv" })).not.toBeInTheDocument();
-    expect(screen.getByText(content.watchlistWatchingBadgeLabel)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.emptyBody)).toBeInTheDocument();
   });
 
   it("shows watched-area prioritization cues across map surfaces", () => {
@@ -471,7 +449,6 @@ describe("MapPreview", () => {
     render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
 
     expect(screen.getAllByText(content.watchlistTopPriorityLabel).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(`${content.watchlistPriorityLabel} #2`).length).toBeGreaterThan(0);
     expect(screen.getAllByText(`${content.watchlistHighestSeverityLabel}: critical`).length).toBeGreaterThan(0);
     expect(screen.getAllByText(`${content.watchlistHighestSeverityLabel}: high`).length).toBeGreaterThan(
       0,
@@ -486,14 +463,14 @@ describe("MapPreview", () => {
     expect(screen.getAllByTestId("map-marker")).toHaveLength(3);
     expect(screen.getAllByTestId("map-route")).toHaveLength(1);
 
-    await user.click(screen.getByRole("button", { name: content.overlaySheltersToggleLabel }));
+    await user.click(screen.getByRole("switch", { name: content.overlaySheltersToggleLabel }));
     expect(screen.getAllByTestId("map-marker")).toHaveLength(2);
 
-    await user.click(screen.getByRole("button", { name: content.overlayRoadClosuresToggleLabel }));
+    await user.click(screen.getByRole("switch", { name: content.overlayRoadClosuresToggleLabel }));
     expect(screen.queryByTestId("map-route")).not.toBeInTheDocument();
     expect(screen.getAllByTestId("map-marker")).toHaveLength(1);
 
-    await user.click(screen.getByRole("button", { name: content.overlayHospitalsToggleLabel }));
+    await user.click(screen.getByRole("switch", { name: content.overlayHospitalsToggleLabel }));
     expect(screen.queryAllByTestId("map-marker")).toHaveLength(0);
   });
 

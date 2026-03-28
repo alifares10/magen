@@ -1,31 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 import { CrisisMap } from "@/components/map/crisis-map";
-import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
-import { BrowserNotificationOptIn } from "@/components/notifications/browser-notification-opt-in";
-import { ThemeSwitcher } from "@/components/theme/theme-switcher";
 import { MapLegend } from "@/components/map/map-legend";
 import { MapOverlayControls } from "@/components/map/map-overlay-controls";
-import { MapPanel } from "@/components/map/map-panel";
-import { MapSummaryCards } from "@/components/map/map-summary-cards";
-import { MapWatchlistManager } from "@/components/map/map-watchlist-manager";
+import { MapStatusBar, type MapStatusBarContent } from "@/components/map/map-status-bar";
+import { MapWatchlistManager, type MapWatchlistManagerContent } from "@/components/map/map-watchlist-manager";
+import { CommandBar, type CommandBarContent } from "@/components/dashboard/command-bar";
+import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
+import { useSourceHealth } from "@/components/dashboard/hooks/use-source-health";
 import { getPrioritizedWatchedLocations } from "@/lib/map/watch-priority";
 import type { MapOverlayFixtures } from "@/lib/schemas/map-overlays";
 import type { MapAlertMarker, WatchedLocationMarker } from "@/lib/schemas/map";
 import { useWatchlistStore } from "@/store/use-watchlist-store";
 
 type MapPreviewContent = {
-  title: string;
-  description: string;
-  legendTitle: string;
+  commandBar: CommandBarContent;
+  bottomNav: MobileBottomNavContent;
+  statusBar: MapStatusBarContent;
+  statusError: string;
+  mapLayersTitle: string;
+  alertZonesLabel?: string;
   alertsLegend: string;
-  watchlistLegend: string;
   sheltersLegend: string;
-  roadClosuresLegend: string;
   hospitalsLegend: string;
-  overlayControlsTitle: string;
   overlaySheltersToggleLabel: string;
   overlayRoadClosuresToggleLabel: string;
   overlayHospitalsToggleLabel: string;
@@ -33,12 +31,6 @@ type MapPreviewContent = {
   overlayLastUpdatedLabel: string;
   overlayRoadReasonLabel: string;
   overlayEmergencyRoomLabel: string;
-  alertsEmptyTitle: string;
-  alertsEmptyBody: string;
-  alertsCountLabel: string;
-  watchlistEmptyTitle: string;
-  watchlistEmptyBody: string;
-  watchlistCountLabel: string;
   mapControlsLabels: {
     zoomIn: string;
     zoomOut: string;
@@ -47,28 +39,12 @@ type MapPreviewContent = {
     resetBearing: string;
   };
   watchRadiusLabel: string;
-  watchlistManagerTitle: string;
-  watchlistManagerDescription: string;
-  watchlistSuggestedTitle: string;
-  watchlistSuggestedEmptyBody: string;
-  watchlistSuggestedAlertsLabel: string;
-  watchlistAddActionLabel: string;
-  watchlistWatchingBadgeLabel: string;
-  watchlistCurrentTitle: string;
-  watchlistCurrentEmptyBody: string;
-  watchlistRemoveActionLabel: string;
-  watchlistPriorityTitle: string;
-  watchlistPriorityEmptyBody: string;
+  watchlist: MapWatchlistManagerContent;
   watchlistPriorityLabel: string;
   watchlistTopPriorityLabel: string;
   watchlistNearbyAlertsLabel: string;
   watchlistHighestSeverityLabel: string;
   watchlistNearestAlertLabel: string;
-  themeSwitcher: {
-    label: string;
-    dark: string;
-    light: string;
-  };
 };
 
 type MapPreviewProps = {
@@ -101,11 +77,7 @@ export function MapPreview({
   alertMarkers,
   overlays,
 }: MapPreviewProps) {
-  const prefersReducedMotion = useReducedMotion();
   const watchedLocations = useWatchlistStore((state) => state.watchedLocations);
-  const addWatchedLocation = useWatchlistStore(
-    (state) => state.addWatchedLocation,
-  );
   const removeWatchedLocation = useWatchlistStore(
     (state) => state.removeWatchedLocation,
   );
@@ -120,156 +92,106 @@ export function MapPreview({
     alertMarkers,
   );
 
-  return (
-    <div className="flex min-h-screen flex-col bg-[var(--background)] text-slate-900 dark:text-slate-100">
-      {/* Command Bar */}
-      <motion.header
-        initial={prefersReducedMotion ? false : { opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="sticky top-0 z-50 border-b border-[var(--border-panel)] bg-[var(--surface-raised)] backdrop-blur"
-      >
-        {/* Title row */}
-        <div className="flex h-12 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <h1 className="font-[family-name:var(--font-display)] text-xs font-bold uppercase tracking-[0.25em] text-slate-400 dark:text-slate-200">
-              <span className="text-amber-500 dark:text-amber-400">{content.title}</span>
-            </h1>
-            <span className="hidden text-xs text-slate-500 md:inline">{content.description}</span>
-          </div>
+  const { overallSourceHealthStatus } = useSourceHealth({
+    statusErrorMessage: content.statusError,
+  });
 
-          <div className="flex items-center gap-2">
-            <ThemeSwitcher content={content.themeSwitcher} className="text-xs" toggleSize={12} compact />
-            <BrowserNotificationOptIn className="text-xs" compact />
-            <LocaleSwitcher className="text-xs" compact />
-          </div>
+  const affectedWatchlistCount = prioritizedWatchedLocations.filter(
+    (item) => item.rank !== null,
+  ).length;
+
+  return (
+    <div className="flex h-screen flex-col bg-md3-surface pt-14 pb-16 text-md3-on-surface md:pb-0">
+      {/* Shared CommandBar */}
+      <CommandBar
+        content={content.commandBar}
+        overallSourceHealthStatus={overallSourceHealthStatus}
+        activeHref="/map"
+      />
+
+      {/* Full-screen map with floating panels */}
+      <div className="relative flex-1">
+        {/* Map fills all available space */}
+        <CrisisMap
+          center={mapCenter}
+          alertMarkers={alertMarkers}
+          prioritizedWatchedLocations={prioritizedWatchedLocations}
+          mapControlLabels={content.mapControlsLabels}
+          watchRadiusLabel={content.watchRadiusLabel}
+          watchlistPriorityLabel={content.watchlistPriorityLabel}
+          watchlistTopPriorityLabel={content.watchlistTopPriorityLabel}
+          watchlistNearbyAlertsLabel={content.watchlistNearbyAlertsLabel}
+          watchlistHighestSeverityLabel={content.watchlistHighestSeverityLabel}
+          watchlistNearestAlertLabel={content.watchlistNearestAlertLabel}
+          overlays={overlays}
+          overlayVisibility={overlayVisibility}
+          overlayStatusLabel={content.overlayStatusLabel}
+          overlayLastUpdatedLabel={content.overlayLastUpdatedLabel}
+          overlayRoadReasonLabel={content.overlayRoadReasonLabel}
+          overlayEmergencyRoomLabel={content.overlayEmergencyRoomLabel}
+        />
+
+        {/* Floating: Status bar (top-start) */}
+        <div className="absolute top-4 z-10 start-4">
+          <MapStatusBar
+            content={content.statusBar}
+            alertCount={alertMarkers.length}
+            affectedWatchlistCount={affectedWatchlistCount}
+          />
         </div>
 
-        {/* Legend + Overlay controls */}
-        <div className="flex flex-wrap items-center gap-3 border-t border-[var(--border-panel)] px-4 py-2">
-          <MapLegend
-            title={content.legendTitle}
-            alertsLabel={content.alertsLegend}
-            watchlistLabel={content.watchlistLegend}
-            sheltersLabel={content.sheltersLegend}
-            roadClosuresLabel={content.roadClosuresLegend}
-            hospitalsLabel={content.hospitalsLegend}
-          />
-
+        {/* Floating: Map layers (bottom-start) */}
+        <div className="absolute bottom-4 z-10 start-4">
           <MapOverlayControls
-            title={content.overlayControlsTitle}
+            title={content.mapLayersTitle}
             sheltersLabel={content.overlaySheltersToggleLabel}
             roadClosuresLabel={content.overlayRoadClosuresToggleLabel}
             hospitalsLabel={content.overlayHospitalsToggleLabel}
+            alertZonesLabel={content.alertZonesLabel}
             visibility={overlayVisibility}
             onToggleShelters={() => {
-              setOverlayVisibility((previousVisibility) => ({
-                ...previousVisibility,
-                shelters: !previousVisibility.shelters,
+              setOverlayVisibility((prev) => ({
+                ...prev,
+                shelters: !prev.shelters,
               }));
             }}
             onToggleRoadClosures={() => {
-              setOverlayVisibility((previousVisibility) => ({
-                ...previousVisibility,
-                roadClosures: !previousVisibility.roadClosures,
+              setOverlayVisibility((prev) => ({
+                ...prev,
+                roadClosures: !prev.roadClosures,
               }));
             }}
             onToggleHospitals={() => {
-              setOverlayVisibility((previousVisibility) => ({
-                ...previousVisibility,
-                hospitals: !previousVisibility.hospitals,
+              setOverlayVisibility((prev) => ({
+                ...prev,
+                hospitals: !prev.hospitals,
               }));
             }}
           />
         </div>
-      </motion.header>
 
-      {/* Scrollable content */}
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.06 }}
-        >
-          <MapPanel>
-            <CrisisMap
-              center={mapCenter}
-              alertMarkers={alertMarkers}
-              prioritizedWatchedLocations={prioritizedWatchedLocations}
-              mapControlLabels={content.mapControlsLabels}
-              watchRadiusLabel={content.watchRadiusLabel}
-              watchlistPriorityLabel={content.watchlistPriorityLabel}
-              watchlistTopPriorityLabel={content.watchlistTopPriorityLabel}
-              watchlistNearbyAlertsLabel={content.watchlistNearbyAlertsLabel}
-              watchlistHighestSeverityLabel={content.watchlistHighestSeverityLabel}
-              watchlistNearestAlertLabel={content.watchlistNearestAlertLabel}
-              overlays={overlays}
-              overlayVisibility={overlayVisibility}
-              overlayStatusLabel={content.overlayStatusLabel}
-              overlayLastUpdatedLabel={content.overlayLastUpdatedLabel}
-              overlayRoadReasonLabel={content.overlayRoadReasonLabel}
-              overlayEmergencyRoomLabel={content.overlayEmergencyRoomLabel}
-            />
-          </MapPanel>
-        </motion.div>
+        {/* Floating: Legend (bottom-center) */}
+        <div className="absolute bottom-4 z-10 start-1/2 -translate-x-1/2">
+          <MapLegend
+            alertsLabel={content.alertsLegend}
+            sheltersLabel={content.sheltersLegend}
+            hospitalsLabel={content.hospitalsLegend}
+          />
+        </div>
 
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.12 }}
-        >
+        {/* Floating: Watchlist (top-end) */}
+        <div className="absolute top-4 z-10 end-4">
           <MapWatchlistManager
-            content={{
-              title: content.watchlistManagerTitle,
-              description: content.watchlistManagerDescription,
-              suggestedTitle: content.watchlistSuggestedTitle,
-              suggestedEmptyBody: content.watchlistSuggestedEmptyBody,
-              suggestedAlertsLabel: content.watchlistSuggestedAlertsLabel,
-              addWatchActionLabel: content.watchlistAddActionLabel,
-              watchingBadgeLabel: content.watchlistWatchingBadgeLabel,
-              currentTitle: content.watchlistCurrentTitle,
-              currentEmptyBody: content.watchlistCurrentEmptyBody,
-              removeWatchActionLabel: content.watchlistRemoveActionLabel,
-              watchRadiusLabel: content.watchRadiusLabel,
-              watchlistPriorityLabel: content.watchlistPriorityLabel,
-              watchlistTopPriorityLabel: content.watchlistTopPriorityLabel,
-              watchlistNearbyAlertsLabel: content.watchlistNearbyAlertsLabel,
-            }}
-            alertMarkers={alertMarkers}
+            content={content.watchlist}
             watchedLocations={watchedLocations}
             prioritizedWatchedLocations={prioritizedWatchedLocations}
-            onAddWatchedLocation={addWatchedLocation}
             onRemoveWatchedLocation={removeWatchedLocation}
           />
-        </motion.div>
-
-        <motion.div
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.18 }}
-        >
-          <MapSummaryCards
-            content={{
-              alertsEmptyTitle: content.alertsEmptyTitle,
-              alertsEmptyBody: content.alertsEmptyBody,
-              alertsCountLabel: content.alertsCountLabel,
-              watchlistEmptyTitle: content.watchlistEmptyTitle,
-              watchlistEmptyBody: content.watchlistEmptyBody,
-              watchlistCountLabel: content.watchlistCountLabel,
-              watchlistPriorityTitle: content.watchlistPriorityTitle,
-              watchlistPriorityEmptyBody: content.watchlistPriorityEmptyBody,
-              watchlistPriorityLabel: content.watchlistPriorityLabel,
-              watchlistTopPriorityLabel: content.watchlistTopPriorityLabel,
-              watchlistNearbyAlertsLabel: content.watchlistNearbyAlertsLabel,
-              watchlistHighestSeverityLabel: content.watchlistHighestSeverityLabel,
-              watchlistNearestAlertLabel: content.watchlistNearestAlertLabel,
-            }}
-            alertCount={alertMarkers.length}
-            watchlistCount={watchedLocations.length}
-            prioritizedWatchedLocations={prioritizedWatchedLocations}
-          />
-        </motion.div>
+        </div>
       </div>
+
+      {/* Mobile bottom nav */}
+      <MobileBottomNav content={content.bottomNav} activeHref="/map" />
     </div>
   );
 }

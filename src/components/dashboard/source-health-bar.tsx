@@ -33,10 +33,10 @@ type SourceHealthBarProps = {
 };
 
 const healthDotColor: Record<SourceHealthStatus, string> = {
-  healthy: "bg-emerald-400",
-  degraded: "bg-amber-400",
+  healthy: "bg-emerald-500",
+  degraded: "bg-md3-secondary",
   down: "bg-rose-500",
-  unknown: "bg-slate-500",
+  unknown: "bg-md3-outline",
 };
 
 export function SourceHealthBar({
@@ -53,57 +53,55 @@ export function SourceHealthBar({
   };
 
   return (
-    <motion.div
+    <motion.section
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.06 }}
-      className="flex flex-col gap-3 border-b border-[var(--border-panel)] bg-[var(--surface-raised)] p-4"
+      className="rounded-lg bg-md3-surface-container-low p-4"
     >
-      <h2 className="font-[family-name:var(--font-display)] text-xs font-semibold uppercase tracking-wider text-slate-400">
+      <h3 className="mb-4 font-[family-name:var(--font-label)] text-[10px] uppercase tracking-[0.2em] text-md3-outline">
         {content.sourceHealthTitle}
-      </h2>
+      </h3>
 
-      <div className="flex flex-col gap-2">
+      <ul className="space-y-3">
         {sourceHealthTypeOrder.map((sourceType) => {
           const category = sourceHealthCategoriesByType.get(sourceType);
           const status = category?.status ?? "unknown";
 
           return (
-            <div key={sourceType} className="flex items-center justify-between gap-2 text-xs">
-              <span className="text-slate-400">{sourceHealthTypeLabels[sourceType]}</span>
-              <span className="flex items-center gap-1.5">
-                <motion.span
-                  className={`inline-block h-1.5 w-1.5 rounded-full ${healthDotColor[status]}`}
-                  animate={
-                    status === "healthy" && !prefersReducedMotion
-                      ? { scale: [1, 1.3, 1] }
-                      : undefined
-                  }
-                  transition={
-                    status === "healthy"
-                      ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                      : undefined
-                  }
-                />
-                <span className="text-slate-300">
-                  {getSourceHealthStatusLabel(status, content.sourceHealthStatuses)}
-                </span>
+            <li key={sourceType} className="flex items-center justify-between">
+              <span className="text-xs font-medium text-md3-on-surface">
+                {sourceHealthTypeLabels[sourceType]}
               </span>
-            </div>
+              <motion.span
+                className={`inline-block h-2 w-2 rounded-full ${healthDotColor[status]}`}
+                animate={
+                  status === "healthy" && !prefersReducedMotion
+                    ? { scale: [1, 1.3, 1] }
+                    : undefined
+                }
+                transition={
+                  status === "healthy"
+                    ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                    : undefined
+                }
+                title={getSourceHealthStatusLabel(status, content.sourceHealthStatuses)}
+              />
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       {errorMessage ? (
-        <p className="text-xs text-rose-400">{content.statusError}</p>
+        <p className="mt-3 text-xs text-md3-error">{content.statusError}</p>
       ) : null}
 
       {lastUpdated ? (
-        <p className="text-[10px] text-slate-600">
+        <p className="mt-3 text-[10px] text-md3-outline">
           {content.updatedLabel}: {formatDateTime(lastUpdated)}
         </p>
       ) : null}
-    </motion.div>
+    </motion.section>
   );
 }
 

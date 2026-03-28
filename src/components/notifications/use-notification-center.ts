@@ -462,7 +462,7 @@ export function useNotificationCenter({
         return;
       }
 
-      if (typedStatus === "CHANNEL_ERROR" || typedStatus === "TIMED_OUT" || typedStatus === "CLOSED") {
+      if (typedStatus === "CHANNEL_ERROR" || typedStatus === "TIMED_OUT") {
         ensureFallbackPolling(reason);
 
         if (process.env.NODE_ENV !== "test") {

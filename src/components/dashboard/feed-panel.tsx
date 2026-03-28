@@ -65,15 +65,10 @@ export function FeedPanel({
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.3 }}
-      className="flex flex-col overflow-hidden bg-[var(--surface-raised)]"
+      className="flex h-full flex-col overflow-hidden rounded-xl bg-md3-surface-container-low"
     >
-      <div className="flex items-center justify-between border-b border-[var(--border-panel)] px-4 pt-4 pb-0">
-        <h2 className="font-[family-name:var(--font-display)] text-sm font-semibold text-slate-200">
-          {content.feedTitle}
-        </h2>
-      </div>
-
-      <div className="flex border-b border-[var(--border-panel)]" role="tablist" aria-label={content.feedTitle}>
+      {/* Tabs */}
+      <nav className="flex border-b border-md3-outline-variant/10" role="tablist" aria-label={content.feedTitle}>
         <FeedTabButton
           label={content.feedTabs.alerts}
           isActive={activeTab === "alerts"}
@@ -89,26 +84,27 @@ export function FeedPanel({
           isActive={activeTab === "official"}
           onClick={() => setActiveTab("official")}
         />
-      </div>
+      </nav>
 
-      <div className="min-h-0 flex-1 overflow-y-auto" role="tabpanel">
+      {/* Scrollable Feed */}
+      <div className="min-h-0 flex-1 overflow-y-auto p-4" role="tabpanel">
         {shouldShowFeedLoading ? (
-          <p className="p-4 text-sm text-slate-500">{content.statusLoading}</p>
+          <p className="text-sm text-md3-outline">{content.statusLoading}</p>
         ) : null}
 
         {shouldShowFeedError ? (
-          <p className="p-4 text-sm text-rose-400">{content.statusError}</p>
+          <p className="text-sm text-md3-error">{content.statusError}</p>
         ) : null}
 
         {!shouldShowFeedLoading && !shouldShowFeedError && activeTabFilteredCount === 0 ? (
-          <p className="p-4 text-sm text-slate-500">
+          <p className="text-sm text-md3-outline">
             {hasActiveFilters ? content.filterNoMatches : content.noFeedItems}
           </p>
         ) : null}
 
         {!shouldShowFeedLoading && !shouldShowFeedError ? (
           <AnimatePresence mode="popLayout">
-            <ul>
+            <div className="space-y-4">
               {activeItems.map((item, index) => (
                 <FeedItemCard
                   key={item.id}
@@ -120,16 +116,25 @@ export function FeedPanel({
                   index={index}
                 />
               ))}
-            </ul>
+            </div>
           </AnimatePresence>
         ) : null}
       </div>
 
-      {lastUpdated ? (
-        <p className="border-t border-[var(--border-panel)] px-4 py-2 text-[10px] text-slate-600">
-          {content.updatedLabel}: {formatDateTime(lastUpdated)}
-        </p>
-      ) : null}
+      {/* Feed Control */}
+      <div className="bg-md3-surface-container p-4">
+        {lastUpdated ? (
+          <p className="mb-2 text-[10px] text-md3-outline">
+            {content.updatedLabel}: {formatDateTime(lastUpdated)}
+          </p>
+        ) : null}
+        <button
+          type="button"
+          className="w-full rounded border border-md3-outline-variant/20 bg-md3-surface-container-highest py-2 font-[family-name:var(--font-label)] text-xs font-bold uppercase transition-colors hover:bg-md3-surface-container-high"
+        >
+          View Full History
+        </button>
+      </div>
     </motion.aside>
   );
 }

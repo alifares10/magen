@@ -17,13 +17,17 @@ export function FeedTabButton({ label, isActive, onClick }: FeedTabButtonProps) 
       role="tab"
       aria-selected={isActive}
       onClick={onClick}
-      className="relative px-3 py-1.5 text-xs font-medium text-slate-400 transition hover:text-slate-200"
+      className={`relative flex-1 py-4 font-[family-name:var(--font-label)] text-[10px] font-bold uppercase tracking-widest transition ${
+        isActive
+          ? "border-b-2 border-md3-primary text-md3-primary"
+          : "text-md3-outline hover:text-md3-on-surface"
+      }`}
     >
       {label}
-      {isActive ? (
+      {isActive && !prefersReducedMotion ? (
         <motion.span
-          layoutId={prefersReducedMotion ? undefined : "feed-tab-indicator"}
-          className="absolute inset-x-0 -bottom-px h-0.5 bg-amber-400"
+          layoutId="feed-tab-indicator"
+          className="absolute inset-x-0 -bottom-px h-0.5 bg-md3-primary"
           transition={{ type: "spring", stiffness: 380, damping: 30 }}
         />
       ) : null}

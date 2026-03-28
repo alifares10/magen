@@ -44,63 +44,80 @@ export function AlertHero({
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.12 }}
-      className={`relative min-h-48 overflow-hidden px-5 pb-5 pt-4 ${
+      className={`relative min-h-48 overflow-hidden rounded-xl p-6 ${
         hasAlert
-          ? "border-s-4 border-rose-500 bg-gradient-to-br from-[oklch(0.18_0.06_15)] to-[oklch(0.12_0.04_20)]"
-          : "bg-[var(--surface-raised)]"
+          ? "border-e-4 border-md3-error bg-md3-surface-container-high shadow-[0_0_40px_-10px_rgba(255,180,171,0.15)]"
+          : "flex flex-col justify-center bg-md3-surface-container-low"
       }`}
-      style={
-        hasAlert && !prefersReducedMotion
-          ? {
-              boxShadow: "inset 0 0 30px oklch(0.55 0.22 15 / 8%), 0 0 20px oklch(0.55 0.22 15 / 5%)",
-            }
-          : undefined
-      }
     >
-      <h2 className="font-[family-name:var(--font-display)] text-base font-semibold text-rose-100 dark:text-rose-100">
-        {content.latestAlertTitle}
-      </h2>
-
+      {/* Alert present state */}
       {isLoading && !rawLatestAlert ? (
-        <p className="mt-2 text-sm text-rose-200/80">{content.statusLoading}</p>
+        <p className="text-sm text-md3-on-surface-variant">{content.statusLoading}</p>
       ) : filteredLatestAlert ? (
-        <div className="mt-3 space-y-3 text-sm">
-          <p className="font-[family-name:var(--font-display)] text-lg font-bold text-rose-50">
-            {filteredLatestAlert.title}
-          </p>
-          <p className="text-rose-100/90">
+        <div className="relative z-10">
+          <div className="mb-6 flex items-start justify-between">
+            <div className="flex flex-col gap-1">
+              <span className="inline-block w-fit bg-md3-error-container px-2 py-1 font-[family-name:var(--font-sans)] text-[10px] font-black uppercase tracking-widest text-md3-error">
+                {content.latestAlertTitle}
+              </span>
+              <h1 className="mt-2 text-3xl font-black tracking-tighter lg:text-4xl">
+                {filteredLatestAlert.title}
+              </h1>
+              <p className="mt-1 font-[family-name:var(--font-label)] text-sm uppercase tracking-wide text-md3-on-surface-variant">
+                {getAlertLocation(filteredLatestAlert)}
+              </p>
+            </div>
+            <div className="text-end">
+              <p className="font-mono text-2xl font-bold text-md3-error lg:text-3xl">
+                {formatDateTime(filteredLatestAlert.publishedAt)}
+              </p>
+              <p className="font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest text-md3-outline">
+                UTC+3 (ISR)
+              </p>
+            </div>
+          </div>
+
+          {/* Stats grid */}
+          <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="rounded-lg bg-md3-surface-container p-4">
+              <p className="font-[family-name:var(--font-label)] text-[10px] uppercase text-md3-outline">
+                {content.locationLabel}: {getAlertLocation(filteredLatestAlert)}
+              </p>
+            </div>
+            <div className="rounded-lg bg-md3-surface-container p-4">
+              <p className="font-[family-name:var(--font-label)] text-[10px] uppercase text-md3-outline">
+                {content.severityLabel}: <span className="text-md3-secondary">{filteredLatestAlert.severity}</span>
+              </p>
+            </div>
+            <div className="rounded-lg bg-md3-surface-container p-4">
+              <p className="font-[family-name:var(--font-label)] text-[10px] uppercase text-md3-outline">
+                {content.sourceLabel}: {filteredLatestAlert.sourceName}
+              </p>
+            </div>
+          </div>
+
+          {/* Message */}
+          <p className="text-sm leading-relaxed text-md3-on-surface-variant">
             {filteredLatestAlert.message?.trim().length
               ? filteredLatestAlert.message
               : content.alertMessageFallback}
           </p>
-          <div className="grid gap-1 rounded-sm border border-rose-800/40 bg-black/20 px-3 py-2 text-xs text-rose-200 sm:grid-cols-2">
-            <p>
-              {content.locationLabel}: {getAlertLocation(filteredLatestAlert)}
-            </p>
-            <p>
-              {content.sourceLabel}: {filteredLatestAlert.sourceName}
-            </p>
-            <p>
-              {content.severityLabel}: {filteredLatestAlert.severity}
-            </p>
-            <p>
-              {content.publishedLabel}: {formatDateTime(filteredLatestAlert.publishedAt)}
-            </p>
-          </div>
         </div>
       ) : (
-        <div className="mt-4 flex items-center gap-2">
+        <div className="flex flex-col items-center justify-center gap-3 py-6">
           {!hasActiveFilters && !rawLatestAlert ? (
             <>
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
+                <svg width="24" height="24" viewBox="0 0 14 14" fill="none">
                   <path d="M3.5 7L6 9.5L10.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
-              <p className="text-sm text-slate-300">{content.latestAlertEmpty}</p>
+              <p className="font-[family-name:var(--font-label)] text-sm uppercase tracking-wide text-md3-on-surface-variant">
+                {content.latestAlertEmpty}
+              </p>
             </>
           ) : (
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-md3-outline">
               {hasActiveFilters && rawLatestAlert
                 ? content.filterNoMatches
                 : content.latestAlertEmpty}
@@ -110,11 +127,11 @@ export function AlertHero({
       )}
 
       {errorMessage ? (
-        <p className="mt-3 text-xs text-rose-300">{errorMessage}</p>
+        <p className="mt-3 text-xs text-md3-error">{errorMessage}</p>
       ) : null}
 
       {lastUpdated ? (
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-md3-outline">
           {content.updatedLabel}: {formatDateTime(lastUpdated)}
         </p>
       ) : null}
