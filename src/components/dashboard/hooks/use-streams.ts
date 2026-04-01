@@ -10,16 +10,22 @@ import {
 
 type UseStreamsOptions = {
   statusErrorMessage: string;
+  initialData?: DashboardOverview["activeStreams"];
+  initialDataLoadedAt?: number | null;
 };
 
-export function useStreams({ statusErrorMessage }: UseStreamsOptions) {
+export function useStreams({
+  statusErrorMessage,
+  initialData = [],
+  initialDataLoadedAt = null,
+}: UseStreamsOptions) {
   const [streamsState, setStreamsState] = useState<
     AsyncState<DashboardOverview["activeStreams"]>
   >({
-    data: [],
-    isLoading: true,
+    data: initialData,
+    isLoading: initialData.length === 0,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialData.length > 0 ? initialDataLoadedAt : null,
   });
 
   useEffect(() => {
@@ -28,7 +34,7 @@ export function useStreams({ statusErrorMessage }: UseStreamsOptions) {
     const loadStreams = async () => {
       setStreamsState((prevState) => ({
         ...prevState,
-        isLoading: true,
+        isLoading: prevState.data.length === 0,
         errorMessage: null,
       }));
 

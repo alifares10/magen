@@ -117,6 +117,8 @@ type MapProps = {
   children?: ReactNode;
   /** Additional CSS classes for the map container */
   className?: string;
+  /** Fallback UI rendered when the map cannot be initialized. */
+  fallback?: ReactNode;
   /**
    * Theme for the map. If not provided, automatically detects system preference.
    * Pass your theme value here.
@@ -168,6 +170,7 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
   {
     children,
     className,
+    fallback,
     theme: themeProp,
     styles,
     projection,
@@ -181,6 +184,7 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
   const [mapInstance, setMapInstance] = useState<MapLibreGL.Map | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isStyleLoaded, setIsStyleLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const currentStyleRef = useRef<MapStyleOption | null>(null);
   const styleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const internalUpdateRef = useRef(false);
@@ -216,17 +220,31 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
     const initialStyle =
       resolvedTheme === "dark" ? mapStyles.dark : mapStyles.light;
     currentStyleRef.current = initialStyle;
+    setLoadError(null);
 
-    const map = new MapLibreGL.Map({
-      container: containerRef.current,
-      style: initialStyle,
-      renderWorldCopies: false,
-      attributionControl: {
-        compact: true,
-      },
-      ...props,
-      ...viewport,
-    });
+    let map: MapLibreGL.Map;
+
+    try {
+      map = new MapLibreGL.Map({
+        container: containerRef.current,
+        style: initialStyle,
+        renderWorldCopies: false,
+        attributionControl: {
+          compact: true,
+        },
+        ...props,
+        ...viewport,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Map initialization failed";
+      console.error("Failed to initialize map", error);
+      setLoadError(message);
+      setIsLoaded(false);
+      setIsStyleLoaded(false);
+      setMapInstance(null);
+      return;
+    }
 
     const styleDataHandler = () => {
       clearStyleTimeout();
@@ -324,9 +342,9 @@ const Map = forwardRef<MapRef, MapProps>(function Map(
         ref={containerRef}
         className={cn("relative w-full h-full", className)}
       >
-        {!isLoaded && <DefaultLoader />}
+        {loadError ? fallback : !isLoaded ? <DefaultLoader /> : null}
         {/* SSR-safe: children render only when map is loaded on client */}
-        {mapInstance && children}
+        {mapInstance && !loadError && children}
       </div>
     </MapContext.Provider>
   );

@@ -6,9 +6,11 @@ import type { LiveStreamOverviewItem } from "@/lib/schemas/feed";
 
 type StreamPanelContent = {
   title: string;
+  liveTitlePrefix: string;
   subtitle: string;
   contextLabel: string;
   empty: string;
+  sourceFallbackLabel: string;
   watchLabel: string;
   sourceLabel: string;
   updatedLabel: string;
@@ -29,13 +31,15 @@ export function StreamPanel({ content, streamsState }: StreamPanelProps) {
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.36 }}
-      className="rounded-xl bg-md3-surface-container-lowest p-4"
+      className="shrink-0 rounded-xl bg-md3-surface-container-lowest p-4"
     >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="flex h-2 w-2 rounded-full bg-md3-error animate-pulse" />
           <h3 className="font-[family-name:var(--font-label)] text-xs font-bold uppercase tracking-widest">
-            {primaryStream ? `Live Feed: ${primaryStream.title}` : content.title}
+            {primaryStream
+              ? `${content.liveTitlePrefix}: ${primaryStream.title}`
+              : content.title}
           </h3>
         </div>
         <span className="font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest text-md3-outline">
@@ -68,7 +72,7 @@ export function StreamPanel({ content, streamsState }: StreamPanelProps) {
                 {content.sourceLabel}
               </p>
               <p className="text-xs font-bold text-emerald-400">
-                {primaryStream.sourceName ?? "LIVE"}
+                {primaryStream.sourceName ?? content.sourceFallbackLabel}
               </p>
             </div>
           </div>
@@ -80,14 +84,16 @@ export function StreamPanel({ content, streamsState }: StreamPanelProps) {
           href={primaryStream.watchUrl}
           target="_blank"
           rel="noreferrer"
-          className="mt-2 inline-flex text-xs font-semibold text-md3-primary underline-offset-2 hover:underline"
+          className="mt-2 inline-flex min-h-11 items-center rounded-md px-2 text-xs font-semibold text-md3-primary underline-offset-2 hover:bg-md3-primary/10 hover:underline"
         >
           {content.watchLabel}
         </a>
       ) : null}
 
       {streamsState.errorMessage ? (
-        <p className="mt-3 text-xs text-md3-error">{streamsState.errorMessage}</p>
+        <p className="mt-3 text-xs text-md3-error">
+          {streamsState.errorMessage}
+        </p>
       ) : null}
 
       {streamsState.lastUpdated ? (

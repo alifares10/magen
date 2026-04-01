@@ -24,10 +24,16 @@
     "watchlistBody": "Watchlist support is scaffolded. Saved places will surface prioritized alerts.",
     "watchlistMatchSuffix": "active alerts",
     "feedTitle": "Live Feed",
+    "viewFullHistoryLabel": "View Full History",
     "feedTabs": {
       "alerts": "Alerts",
       "news": "News",
       "official": "Official"
+    },
+    "feedItemTypeLabels": {
+      "alerts": "Critical",
+      "official": "Official",
+      "news": "Update"
     },
     "statusLoading": "Loading latest data...",
     "statusError": "Could not load live data right now.",
@@ -38,9 +44,11 @@
     "severityLabel": "Severity",
     "locationLabel": "Location",
     "streamTitle": "Live Stream",
+    "streamLiveTitlePrefix": "Live Feed",
     "streamSubtitle": "Live visual context from trusted broadcasters.",
     "streamContextLabel": "Secondary Context",
     "streamEmpty": "No live streams are available right now.",
+    "streamSourceFallbackLabel": "Live",
     "streamWatchLabel": "Open on YouTube",
     "sourceHealthTitle": "Source Health",
     "sourceHealthOverallLabel": "Overall",
@@ -80,10 +88,16 @@
     "locationSearchPlaceholder": "Search city, area, or keyword",
     "chronologicalFeedTitle": "Chronological Feed",
     "liveCoverageTitle": "Live Media Coverage",
+    "viewFullHistoryLabel": "View Full History",
     "feedTabs": {
       "alerts": "Alerts",
       "news": "News",
       "official": "Official"
+    },
+    "feedItemTypeLabels": {
+      "alerts": "Critical",
+      "official": "Official",
+      "news": "Update"
     },
     "statusLoading": "Loading latest data...",
     "statusError": "Could not load live data right now.",
@@ -101,9 +115,11 @@
       "unknown": "Unknown"
     },
     "streamTitle": "Live Stream",
+    "streamLiveTitlePrefix": "Live Feed",
     "streamSubtitle": "Live visual context from trusted broadcasters.",
     "streamContextLabel": "Secondary Context",
     "streamEmpty": "No live streams are available right now.",
+    "streamSourceFallbackLabel": "Live",
     "streamWatchLabel": "Open on YouTube",
     "bottomNav": {
       "dashboard": "Dashboard",
@@ -154,6 +170,8 @@
       "fullscreen": "Toggle fullscreen",
       "resetBearing": "Reset bearing to north"
     },
+    "mapUnavailableTitle": "Map unavailable",
+    "mapUnavailableBody": "The map surface could not load on this device right now. Live alert counts, overlays, and watchlist controls remain available below and around it.",
     "watchRadiusLabel": "Radius",
     "watchlistTitle": "WATCHLIST",
     "watchlistAddLabel": "Add",

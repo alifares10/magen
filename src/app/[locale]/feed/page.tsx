@@ -1,11 +1,44 @@
 import { getTranslations } from "next-intl/server";
 import { LiveFeedPage } from "@/components/feed/live-feed-page";
+import type { AppLocale } from "@/i18n/routing";
+import {
+  getAlertsFeed,
+  getNewsFeed,
+  getOfficialUpdatesFeed,
+} from "@/lib/db/feed";
 
-export default async function LocalizedFeedPage() {
-  const t = await getTranslations("feedPage");
+export const dynamic = "force-dynamic";
+
+async function loadInitialFeedData() {
+  const [alerts, news, official] = await Promise.all([
+    getAlertsFeed({ limit: 20 }).catch(() => []),
+    getNewsFeed(20).catch(() => []),
+    getOfficialUpdatesFeed({ limit: 20, activeOnly: true }).catch(() => []),
+  ]);
+
+  return {
+    alerts,
+    news,
+    official,
+    loadedAt: Date.now(),
+  };
+}
+
+type LocalizedFeedPageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function LocalizedFeedPage({ params }: LocalizedFeedPageProps) {
+  const { locale } = await params;
+  const appLocale = locale as AppLocale;
+  const [t, initialFeedData] = await Promise.all([
+    getTranslations({ locale: appLocale, namespace: "feedPage" }),
+    loadInitialFeedData(),
+  ]);
 
   return (
     <LiveFeedPage
+      initialFeedData={initialFeedData}
       content={{
         commandBar: {
           title: "Magen",
@@ -42,9 +75,11 @@ export default async function LocalizedFeedPage() {
         },
         stream: {
           title: t("streamTitle"),
+          liveTitlePrefix: t("streamLiveTitlePrefix"),
           subtitle: t("streamSubtitle"),
           contextLabel: t("streamContextLabel"),
           empty: t("streamEmpty"),
+          sourceFallbackLabel: t("streamSourceFallbackLabel"),
           watchLabel: t("streamWatchLabel"),
           sourceLabel: t("sourceLabel"),
           updatedLabel: t("updatedLabel"),
@@ -58,10 +93,16 @@ export default async function LocalizedFeedPage() {
         },
         chronologicalFeedTitle: t("chronologicalFeedTitle"),
         liveCoverageTitle: t("liveCoverageTitle"),
+        viewFullHistoryLabel: t("viewFullHistoryLabel"),
         feedTabs: {
           alerts: t("feedTabs.alerts"),
           news: t("feedTabs.news"),
           official: t("feedTabs.official"),
+        },
+        feedItemTypeLabels: {
+          alerts: t("feedItemTypeLabels.alerts"),
+          official: t("feedItemTypeLabels.official"),
+          news: t("feedItemTypeLabels.news"),
         },
         statusLoading: t("statusLoading"),
         statusError: t("statusError"),

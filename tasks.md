@@ -177,6 +177,8 @@ Use these unless a later task explicitly changes them.
 - [x] Add auto-dismiss timers for in-app notifications (official guidance faster, official alerts slower)
 - [x] Adopt the 21st.dev toast UI for top-center in-app notifications while preserving notification queueing, browser alerts, and focused validation
 - [x] Refine dark-mode visual system across dashboard/feed/map surfaces with a cohesive midnight palette and corrected contrast for status cards/tabs/badges
+- [x] Fix mobile blockers across dashboard/feed/map: add safe map fallback handling, improve tap-target sizing/layout, and restore full Hebrew mobile localization on locale routes
+- [x] Remove the `ThemeProvider` effect-driven theme sync lint violation and restore full `lint` / `test` / `typecheck` / `build` green status
 
 ## Open items to revisit later
 

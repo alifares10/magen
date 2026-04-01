@@ -130,7 +130,7 @@ export function BrowserNotificationOptIn({
           !isSupported ||
           (!browserNotificationsEnabled && permission === "denied")
         }
-        className={`${compact ? "" : "mt-1 "}h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900`}
+        className={`${compact ? "" : "mt-1 "}min-h-11 rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900`}
       >
         {buttonLabel}
       </button>

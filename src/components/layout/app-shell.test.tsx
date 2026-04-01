@@ -52,6 +52,12 @@ vi.mock("@/components/notifications/browser-notification-opt-in", () => ({
   BrowserNotificationOptIn: () => <div data-testid="browser-notification-opt-in" />,
 }));
 
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
+
 vi.mock("@/store/use-watchlist-store", async () => {
   const { create } = await import("zustand");
 
@@ -110,10 +116,16 @@ const content = {
   watchlistEmpty: "No watched location matches",
   watchlistMatchSuffix: "active alerts",
   feedTitle: "Live Feed",
+  viewFullHistoryLabel: "View Full History",
   feedTabs: {
     alerts: "Alerts",
     news: "News",
     official: "Official",
+  },
+  feedItemTypeLabels: {
+    alerts: "Critical",
+    official: "Official",
+    news: "Update",
   },
   statusLoading: "Loading latest data...",
   statusError: "Could not load live data right now.",
@@ -124,9 +136,11 @@ const content = {
   severityLabel: "Severity",
   locationLabel: "Location",
   streamTitle: "Live Stream",
+  streamLiveTitlePrefix: "Live Feed",
   streamSubtitle: "Live visual context from trusted broadcasters.",
   streamContextLabel: "Secondary Context",
   streamEmpty: "No live streams are available right now.",
+  streamSourceFallbackLabel: "Live",
   streamWatchLabel: "Open on YouTube",
   sourceHealthTitle: "Source Health",
   sourceHealthOverallLabel: "Overall",

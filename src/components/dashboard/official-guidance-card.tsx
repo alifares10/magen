@@ -43,7 +43,7 @@ export function OfficialGuidanceCard({
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.18 }}
-      className="rounded-xl border-e-4 border-md3-primary bg-md3-surface-container-low p-6"
+      className="shrink-0 rounded-xl border-e-4 border-md3-primary bg-md3-surface-container-low p-6"
     >
       <div className="mb-4 flex items-center gap-3">
         <Info className="h-5 w-5 text-md3-primary" />
@@ -53,11 +53,15 @@ export function OfficialGuidanceCard({
       </div>
 
       {isLoading && !rawLatestOfficialUpdate ? (
-        <p className="text-sm text-md3-on-surface-variant">{content.statusLoading}</p>
+        <p className="text-sm text-md3-on-surface-variant">
+          {content.statusLoading}
+        </p>
       ) : filteredLatestOfficialUpdate ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <p className="font-semibold text-md3-on-surface">{filteredLatestOfficialUpdate.title}</p>
+            <p className="font-semibold text-md3-on-surface">
+              {filteredLatestOfficialUpdate.title}
+            </p>
             <p className="mt-2 text-sm leading-relaxed text-md3-on-surface-variant">
               {stripHtml(filteredLatestOfficialUpdate.body)}
             </p>
@@ -72,7 +76,8 @@ export function OfficialGuidanceCard({
             <div className="flex items-center gap-3 rounded border border-md3-outline-variant/10 bg-md3-surface-container p-2">
               <CheckCircle className="h-4 w-4 text-md3-on-surface" />
               <span className="font-[family-name:var(--font-label)] text-xs uppercase">
-                {content.publishedLabel}: {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
+                {content.publishedLabel}:{" "}
+                {formatDateTime(filteredLatestOfficialUpdate.publishedAt)}
               </span>
             </div>
           </div>

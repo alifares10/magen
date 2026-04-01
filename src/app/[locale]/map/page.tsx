@@ -2,9 +2,16 @@ import { getTranslations } from "next-intl/server";
 import { MapPreview } from "@/components/map/map-preview";
 import { getMapAlertMarkers } from "@/lib/db/map-alerts";
 import { getMapOverlays } from "@/lib/db/map-overlays";
+import type { AppLocale } from "@/i18n/routing";
 
-export default async function LocalizedMapPage() {
-  const t = await getTranslations("mapPage");
+type LocalizedMapPageProps = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function LocalizedMapPage({ params }: LocalizedMapPageProps) {
+  const { locale } = await params;
+  const appLocale = locale as AppLocale;
+  const t = await getTranslations({ locale: appLocale, namespace: "mapPage" });
   const alertMarkers = await getMapAlertMarkers();
   const overlays = await getMapOverlays();
 
@@ -55,6 +62,10 @@ export default async function LocalizedMapPage() {
           locate: t("mapControlsLabels.locate"),
           fullscreen: t("mapControlsLabels.fullscreen"),
           resetBearing: t("mapControlsLabels.resetBearing"),
+        },
+        mapUnavailable: {
+          title: t("mapUnavailableTitle"),
+          body: t("mapUnavailableBody"),
         },
         watchRadiusLabel: t("watchRadiusLabel"),
         watchlist: {

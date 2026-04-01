@@ -19,17 +19,23 @@ export const sourceHealthTypeOrder: SourceHealthType[] = [
 
 type UseSourceHealthOptions = {
   statusErrorMessage: string;
+  initialData?: SourceHealthOverview | null;
+  initialDataLoadedAt?: number | null;
 };
 
-export function useSourceHealth({ statusErrorMessage }: UseSourceHealthOptions) {
+export function useSourceHealth({
+  statusErrorMessage,
+  initialData = null,
+  initialDataLoadedAt = null,
+}: UseSourceHealthOptions) {
   const [sourceHealthRefreshNonce, setSourceHealthRefreshNonce] = useState(0);
   const [sourceHealthState, setSourceHealthState] = useState<
     AsyncState<SourceHealthOverview | null>
   >({
-    data: null,
-    isLoading: true,
+    data: initialData,
+    isLoading: initialData === null,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialData ? initialDataLoadedAt : null,
   });
   const sourceHealthRealtimeRefreshTimerRef = useRef<number | null>(null);
 

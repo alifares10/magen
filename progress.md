@@ -3,11 +3,11 @@
 ## Latest snapshot
 
 Date:
-2026-03-14
+2026-04-01
 Phase:
 Phase 8 in progress
 Current focus:
-Phase 8 ops stabilization follow-up: run official guidance and overlays in temporary manual DB mode, keep tracking/docs aligned, and keep validation green.
+Phase 8 mobile polish follow-up: document the completed mobile blocker pass, keep validation green, and clear the remaining theme-provider lint issue.
 
 Done:
 
@@ -223,6 +223,14 @@ Done:
 - Re-validated successfully after dark-mode refinement: `lint`, `test`, `typecheck`, `build`.
 - Applied a follow-up dark-card cleanup pass to remove muddy tinted dark card bodies in favor of neutral slate surfaces with semantic accent borders/chips (`src/components/layout/app-shell.tsx`, `src/components/feed/live-feed-page.tsx`, `src/components/map/map-summary-cards.tsx`, `src/components/map/map-watchlist-manager.tsx`).
 - Re-validated the follow-up card-surface pass: `lint`, targeted `vitest` (`app-shell`, `live-feed-page`, `map-preview`), `typecheck`, `build`.
+- Added safe MapLibre failure handling in `src/components/ui/map.tsx` and localized map-unavailable fallback copy so `/[locale]/map` stays usable on mobile/headless WebGL failures.
+- Improved mobile hit areas and narrow-screen layout across dashboard/feed/map surfaces (`command-bar`, `locale-switcher`, `browser-notification-opt-in`, `theme-switcher`, `filter-bar`, feed tabs/CTA, stream link, map overlay controls, legend, and status bar).
+- Removed remaining mobile-visible hardcoded English by wiring localized feed badge labels, stream live labels/fallback source labels, and feed CTA text through dashboard/feed locale content.
+- Fixed locale route translation resolution by passing explicit locale params into `getTranslations(...)` for `[locale]`, `[locale]/dashboard`, `[locale]/feed`, and `[locale]/map`, and updated shared dashboard shell usage accordingly.
+- Wrapped the compact `LocaleSwitcher` mount in `Suspense` inside `src/components/dashboard/command-bar.tsx` to satisfy Next.js static prerender requirements around `useSearchParams()`.
+- Verified mobile behavior in `agent-browser` on `/en`, `/en/feed`, `/en/map`, `/he`, `/he/feed`, and `/he/map`: no horizontal overflow, no visible undersized tap targets, localized Hebrew labels render correctly, and map routes no longer crash.
+- Removed the `src/components/providers/theme-provider.tsx` effect-time `setThemeState(...)` call by switching to a lazy `useState(getStoredTheme)` initializer.
+- Re-validated successfully after the theme-provider cleanup: `lint`, `test`, `typecheck`, and `build` are green again.
 
 In progress:
 

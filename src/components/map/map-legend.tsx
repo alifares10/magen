@@ -12,7 +12,7 @@ export function MapLegend({
   hospitalsLabel,
 }: MapLegendProps) {
   return (
-    <div className="flex items-center gap-5 rounded-lg bg-md3-surface-container-low/90 px-4 py-2 backdrop-blur-sm">
+    <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 rounded-lg bg-md3-surface-container-low/90 px-4 py-2 backdrop-blur-sm">
       <span className="inline-flex items-center gap-1.5">
         <AlertTriangle className="h-3.5 w-3.5 text-md3-error" />
         <span className="font-[family-name:var(--font-label)] text-[11px] uppercase tracking-wider text-md3-on-surface-variant">

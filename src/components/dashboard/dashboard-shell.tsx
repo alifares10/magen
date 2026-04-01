@@ -13,7 +13,17 @@ import { SourceHealthBar } from "@/components/dashboard/source-health-bar";
 import { WatchlistPanel } from "@/components/dashboard/watchlist-panel";
 import { FeedPanel } from "@/components/dashboard/feed-panel";
 import { StreamPanel } from "@/components/streams/stream-panel";
-import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
+import {
+  MobileBottomNav,
+  type MobileBottomNavContent,
+} from "@/components/navigation/mobile-bottom-nav";
+import type {
+  AlertFeedItem,
+  DashboardOverview,
+  NewsFeedItem,
+  OfficialUpdateFeedItem,
+  SourceHealthOverview,
+} from "@/lib/schemas/feed";
 type DashboardShellContent = {
   title: string;
   subtitle: string;
@@ -39,10 +49,16 @@ type DashboardShellContent = {
   watchlistEmpty: string;
   watchlistMatchSuffix: string;
   feedTitle: string;
+  viewFullHistoryLabel: string;
   feedTabs: {
     alerts: string;
     news: string;
     official: string;
+  };
+  feedItemTypeLabels: {
+    alerts: string;
+    official: string;
+    news: string;
   };
   statusLoading: string;
   statusError: string;
@@ -53,9 +69,11 @@ type DashboardShellContent = {
   severityLabel: string;
   locationLabel: string;
   streamTitle: string;
+  streamLiveTitlePrefix: string;
   streamSubtitle: string;
   streamContextLabel: string;
   streamEmpty: string;
+  streamSourceFallbackLabel: string;
   streamWatchLabel: string;
   sourceHealthTitle: string;
   sourceHealthOverallLabel: string;
@@ -80,9 +98,17 @@ type DashboardShellContent = {
 
 type DashboardShellProps = {
   content: DashboardShellContent;
+  initialData?: {
+    overview: DashboardOverview;
+    sourceHealth: SourceHealthOverview;
+    alerts: AlertFeedItem[];
+    news: NewsFeedItem[];
+    official: OfficialUpdateFeedItem[];
+    loadedAt: number;
+  };
 };
 
-export function DashboardShell({ content }: DashboardShellProps) {
+export function DashboardShell({ content, initialData }: DashboardShellProps) {
   const {
     overviewState,
     latestAlert,
@@ -90,16 +116,29 @@ export function DashboardShell({ content }: DashboardShellProps) {
     watchedLocationMatches,
     tickerItems,
     feedTabs,
-  } = useDashboardOverview({ statusErrorMessage: content.statusError });
+  } = useDashboardOverview({
+    statusErrorMessage: content.statusError,
+    initialOverviewData: initialData?.overview,
+    initialAlertsData: initialData?.alerts,
+    initialNewsData: initialData?.news,
+    initialOfficialData: initialData?.official,
+    initialDataLoadedAt: initialData?.loadedAt ?? null,
+  });
 
   const {
     sourceHealthState,
     sourceHealthCategoriesByType,
     overallSourceHealthStatus,
-  } = useSourceHealth({ statusErrorMessage: content.statusError });
+  } = useSourceHealth({
+    statusErrorMessage: content.statusError,
+    initialData: initialData?.sourceHealth ?? null,
+    initialDataLoadedAt: initialData?.loadedAt ?? null,
+  });
 
   const { streamsState } = useStreams({
     statusErrorMessage: content.statusError,
+    initialData: initialData?.overview.activeStreams ?? [],
+    initialDataLoadedAt: initialData?.loadedAt ?? null,
   });
 
   const {
@@ -257,8 +296,10 @@ export function DashboardShell({ content }: DashboardShellProps) {
             content={{
               title: content.streamTitle,
               subtitle: content.streamSubtitle,
+              liveTitlePrefix: content.streamLiveTitlePrefix,
               contextLabel: content.streamContextLabel,
               empty: content.streamEmpty,
+              sourceFallbackLabel: content.streamSourceFallbackLabel,
               watchLabel: content.streamWatchLabel,
               sourceLabel: content.sourceLabel,
               updatedLabel: content.updatedLabel,
@@ -268,7 +309,7 @@ export function DashboardShell({ content }: DashboardShellProps) {
           />
 
           {/* Mobile-only: Source Health + Watchlist */}
-          <div className="flex flex-col gap-2 lg:hidden">
+          <div className="flex shrink-0 flex-col gap-2 lg:hidden">
             <SourceHealthBar
               content={{
                 sourceHealthTitle: content.sourceHealthTitle,
@@ -304,7 +345,9 @@ export function DashboardShell({ content }: DashboardShellProps) {
         <FeedPanel
           content={{
             feedTitle: content.feedTitle,
+            viewFullHistoryLabel: content.viewFullHistoryLabel,
             feedTabs: content.feedTabs,
+            feedItemTypeLabels: content.feedItemTypeLabels,
             statusLoading: content.statusLoading,
             statusError: content.statusError,
             noFeedItems: content.noFeedItems,

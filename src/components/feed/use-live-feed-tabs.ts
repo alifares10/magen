@@ -23,6 +23,10 @@ type UseLiveFeedTabsOptions = {
   statusErrorMessage: string;
   initialActiveTab?: FeedTabKey;
   initialAlertsLoading?: boolean;
+  initialAlertsData?: AlertFeedItem[];
+  initialNewsData?: NewsFeedItem[];
+  initialOfficialData?: OfficialUpdateFeedItem[];
+  initialDataLoadedAt?: number | null;
   onFeedRealtimeChange?: (event: FeedRealtimeEvent) => void;
 };
 
@@ -44,29 +48,33 @@ export function useLiveFeedTabs({
   statusErrorMessage,
   initialActiveTab = "alerts",
   initialAlertsLoading = false,
+  initialAlertsData = [],
+  initialNewsData = [],
+  initialOfficialData = [],
+  initialDataLoadedAt = null,
   onFeedRealtimeChange,
 }: UseLiveFeedTabsOptions) {
   const [activeTab, setActiveTab] = useState<FeedTabKey>(initialActiveTab);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const [alertsState, setAlertsState] = useState<AsyncState<AlertFeedItem[]>>({
-    data: [],
-    isLoading: initialAlertsLoading,
+    data: initialAlertsData,
+    isLoading: initialAlertsLoading && initialAlertsData.length === 0,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialAlertsData.length > 0 ? initialDataLoadedAt : null,
   });
   const [newsState, setNewsState] = useState<AsyncState<NewsFeedItem[]>>({
-    data: [],
+    data: initialNewsData,
     isLoading: false,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialNewsData.length > 0 ? initialDataLoadedAt : null,
   });
   const [officialState, setOfficialState] = useState<
     AsyncState<OfficialUpdateFeedItem[]>
   >({
-    data: [],
+    data: initialOfficialData,
     isLoading: false,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialOfficialData.length > 0 ? initialDataLoadedAt : null,
   });
   const activeTabRef = useRef(activeTab);
   const realtimeRefreshTimerRef = useRef<number | null>(null);

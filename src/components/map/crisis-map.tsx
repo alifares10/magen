@@ -24,6 +24,10 @@ type CrisisMapProps = {
     fullscreen: string;
     resetBearing: string;
   };
+  mapUnavailable: {
+    title: string;
+    body: string;
+  };
   watchRadiusLabel: string;
   watchlistPriorityLabel: string;
   watchlistTopPriorityLabel: string;
@@ -88,6 +92,7 @@ export function CrisisMap({
   alertMarkers,
   prioritizedWatchedLocations,
   mapControlLabels,
+  mapUnavailable,
   watchRadiusLabel,
   watchlistPriorityLabel,
   watchlistTopPriorityLabel,
@@ -102,7 +107,25 @@ export function CrisisMap({
   overlayEmergencyRoomLabel,
 }: CrisisMapProps) {
   return (
-    <Map center={center} zoom={7.2}>
+    <Map
+      center={center}
+      zoom={7.2}
+      fallback={
+        <div className="flex h-full items-center justify-center p-4 sm:p-6">
+          <div className="max-w-sm rounded-2xl border border-md3-outline-variant/20 bg-md3-surface-container/95 p-5 text-center shadow-lg backdrop-blur">
+            <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-amber-500/12 text-amber-300">
+              <AlertTriangle className="size-6" />
+            </div>
+            <p className="font-[family-name:var(--font-label)] text-sm font-bold uppercase tracking-[0.18em] text-md3-on-surface">
+              {mapUnavailable.title}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-md3-on-surface-variant">
+              {mapUnavailable.body}
+            </p>
+          </div>
+        </div>
+      }
+    >
       <MapControls
         position="bottom-end"
         showZoom

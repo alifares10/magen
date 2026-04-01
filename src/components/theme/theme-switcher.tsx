@@ -39,6 +39,7 @@ export function ThemeSwitcher({ content, className, toggleSize, compact }: Theme
         label={content.label}
         disabled={!isHydrated}
         size={toggleSize}
+        touchTarget={compact}
       />
 
       {!compact && (

@@ -7,7 +7,12 @@ import {
   dashboardOverviewApiResponseSchema,
 } from "@/lib/schemas/api-responses";
 import type { DashboardOverviewRequestBody } from "@/lib/schemas/api-responses";
-import type { DashboardOverview } from "@/lib/schemas/feed";
+import type {
+  AlertFeedItem,
+  DashboardOverview,
+  NewsFeedItem,
+  OfficialUpdateFeedItem,
+} from "@/lib/schemas/feed";
 import { TAB_FETCH_INTERVALS, type AsyncState } from "@/lib/feed/client";
 import { useLiveFeedTabs } from "@/components/feed/use-live-feed-tabs";
 import { useWatchlistStore } from "@/store/use-watchlist-store";
@@ -49,21 +54,37 @@ async function getDashboardOverviewData(
 
 type UseDashboardOverviewOptions = {
   statusErrorMessage: string;
+  initialOverviewData?: DashboardOverview | null;
+  initialAlertsData?: AlertFeedItem[];
+  initialNewsData?: NewsFeedItem[];
+  initialOfficialData?: OfficialUpdateFeedItem[];
+  initialDataLoadedAt?: number | null;
 };
 
-export function useDashboardOverview({ statusErrorMessage }: UseDashboardOverviewOptions) {
+export function useDashboardOverview({
+  statusErrorMessage,
+  initialOverviewData = null,
+  initialAlertsData = [],
+  initialNewsData = [],
+  initialOfficialData = [],
+  initialDataLoadedAt = null,
+}: UseDashboardOverviewOptions) {
   const watchedLocations = useWatchlistStore((state) => state.watchedLocations);
   const [overviewRefreshNonce, setOverviewRefreshNonce] = useState(0);
   const [overviewState, setOverviewState] = useState<AsyncState<DashboardOverview | null>>({
-    data: null,
-    isLoading: true,
+    data: initialOverviewData,
+    isLoading: initialOverviewData === null,
     errorMessage: null,
-    lastUpdated: null,
+    lastUpdated: initialOverviewData ? initialDataLoadedAt : null,
   });
   const overviewRealtimeRefreshTimerRef = useRef<number | null>(null);
 
   const feedTabs = useLiveFeedTabs({
     statusErrorMessage,
+    initialAlertsData,
+    initialNewsData,
+    initialOfficialData,
+    initialDataLoadedAt,
     onFeedRealtimeChange: () => {
       if (overviewRealtimeRefreshTimerRef.current !== null) {
         window.clearTimeout(overviewRealtimeRefreshTimerRef.current);
@@ -90,7 +111,7 @@ export function useDashboardOverview({ statusErrorMessage }: UseDashboardOvervie
     const loadOverview = async () => {
       setOverviewState((prevState) => ({
         ...prevState,
-        isLoading: true,
+        isLoading: prevState.data === null,
         errorMessage: null,
       }));
 

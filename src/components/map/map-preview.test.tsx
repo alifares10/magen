@@ -187,6 +187,10 @@ const content = {
     fullscreen: "Toggle fullscreen",
     resetBearing: "Reset bearing to north",
   },
+  mapUnavailable: {
+    title: "Map unavailable",
+    body: "The map surface could not load on this device right now.",
+  },
   watchRadiusLabel: "Radius",
   watchlist: {
     title: "WATCHLIST",
@@ -460,6 +464,8 @@ describe("MapPreview", () => {
 
     render(<MapPreview content={content} alertMarkers={[]} overlays={sampleOverlays} />);
 
+    await user.click(screen.getByRole("button", { name: content.mapLayersTitle }));
+
     expect(screen.getAllByTestId("map-marker")).toHaveLength(3);
     expect(screen.getAllByTestId("map-route")).toHaveLength(1);
 
@@ -472,6 +478,26 @@ describe("MapPreview", () => {
 
     await user.click(screen.getByRole("switch", { name: content.overlayHospitalsToggleLabel }));
     expect(screen.queryAllByTestId("map-marker")).toHaveLength(0);
+  });
+
+  it("starts with mobile map layers collapsed and expands on demand", async () => {
+    const user = userEvent.setup();
+
+    render(<MapPreview content={content} alertMarkers={[]} overlays={sampleOverlays} />);
+
+    const toggleButton = screen.getByRole("button", { name: content.mapLayersTitle });
+
+    expect(toggleButton).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("switch", { name: content.overlaySheltersToggleLabel }),
+    ).not.toBeInTheDocument();
+
+    await user.click(toggleButton);
+
+    expect(toggleButton).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("switch", { name: content.overlaySheltersToggleLabel }),
+    ).toBeInTheDocument();
   });
 
   it("renders DB-backed overlays while keeping official alerts visible", () => {

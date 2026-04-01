@@ -28,8 +28,8 @@ export function FilterBar({
   availableRegions,
 }: FilterBarProps) {
   return (
-    <div className="flex items-center gap-4 border-b border-md3-outline-variant/10 bg-md3-surface-container-low px-6 py-2">
-      <div className="relative">
+    <div className="flex flex-col gap-3 border-b border-md3-outline-variant/10 bg-md3-surface-container-low px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-2">
+      <div className="relative w-full sm:w-auto">
         <label htmlFor="dashboard-region-filter" className="sr-only">
           {content.regionFilterLabel}
         </label>
@@ -37,7 +37,7 @@ export function FilterBar({
           id="dashboard-region-filter"
           value={selectedRegion}
           onChange={(event) => onRegionChange(event.target.value)}
-          className="appearance-none rounded-lg border-none bg-md3-surface-container py-2 pe-8 ps-4 font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest text-md3-on-surface focus:ring-1 focus:ring-md3-primary"
+          className="h-11 w-full appearance-none rounded-lg border-none bg-md3-surface-container pe-10 ps-4 font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.16em] text-md3-on-surface focus:ring-1 focus:ring-md3-primary sm:w-auto sm:min-w-40 sm:py-2 sm:text-[10px] sm:tracking-widest"
         >
           <option value={ALL_REGIONS_FILTER_VALUE}>{content.regionFilterAll}</option>
           {availableRegions.map((region) => (
@@ -46,7 +46,7 @@ export function FilterBar({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute top-1/2 end-2 h-3.5 w-3.5 -translate-y-1/2 text-md3-outline" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 end-3 h-4 w-4 -translate-y-1/2 text-md3-outline sm:end-2 sm:h-3.5 sm:w-3.5" />
       </div>
 
       <div className="relative flex-1">
@@ -60,7 +60,7 @@ export function FilterBar({
           value={locationSearchQuery}
           onChange={(event) => onLocationSearchChange(event.target.value)}
           placeholder={content.locationSearchPlaceholder}
-          className="w-full rounded-lg border-none bg-md3-surface-container py-2 pe-4 ps-10 font-[family-name:var(--font-label)] text-[10px] uppercase tracking-widest text-md3-on-surface placeholder:text-md3-outline focus:bg-md3-surface-container-high focus:ring-1 focus:ring-md3-primary"
+          className="h-11 w-full rounded-lg border-none bg-md3-surface-container pe-4 ps-10 font-[family-name:var(--font-label)] text-xs uppercase tracking-[0.16em] text-md3-on-surface placeholder:text-md3-outline focus:bg-md3-surface-container-high focus:ring-1 focus:ring-md3-primary sm:py-2 sm:text-[10px] sm:tracking-widest"
         />
       </div>
     </div>

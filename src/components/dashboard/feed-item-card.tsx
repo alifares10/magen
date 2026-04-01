@@ -9,6 +9,11 @@ import { stripHtml } from "@/lib/strip-html";
 type FeedItemCardProps = {
   item: AlertFeedItem | NewsFeedItem | OfficialUpdateFeedItem;
   type: FeedTabKey;
+  typeLabels: {
+    alerts: string;
+    official: string;
+    news: string;
+  };
   locationLabel: string;
   sourceLabel: string;
   publishedLabel: string;
@@ -27,14 +32,17 @@ function getSeverityClasses(type: FeedTabKey): string {
   }
 }
 
-function getSeverityLabel(type: FeedTabKey): string {
+function getSeverityLabel(
+  type: FeedTabKey,
+  typeLabels: FeedItemCardProps["typeLabels"],
+): string {
   switch (type) {
     case "alerts":
-      return "Critical";
+      return typeLabels.alerts;
     case "official":
-      return "Official";
+      return typeLabels.official;
     case "news":
-      return "Update";
+      return typeLabels.news;
   }
 }
 
@@ -68,6 +76,7 @@ function getItemDescription(
 export function FeedItemCard({
   item,
   type,
+  typeLabels,
   locationLabel,
   sourceLabel,
   publishedLabel,
@@ -91,11 +100,11 @@ export function FeedItemCard({
         </span>
         {isFull ? (
           <span className={`rounded px-2 py-0.5 font-[family-name:var(--font-label)] text-[10px] font-bold uppercase tracking-widest ${getBadgeClasses(type)}`}>
-            {getSeverityLabel(type)}
+            {getSeverityLabel(type, typeLabels)}
           </span>
         ) : (
           <span className={`font-[family-name:var(--font-label)] text-[10px] font-bold uppercase ${getSeverityClasses(type)}`}>
-            {getSeverityLabel(type)}
+            {getSeverityLabel(type, typeLabels)}
           </span>
         )}
       </div>

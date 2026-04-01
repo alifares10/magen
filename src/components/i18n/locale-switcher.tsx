@@ -57,10 +57,10 @@ export function LocaleSwitcher({ className, compact }: LocaleSwitcherProps) {
             type="button"
             aria-label={t(`locales.${supportedLocale}`)}
             onClick={() => switchTo(supportedLocale)}
-            className={`px-3 py-1 font-[family-name:var(--font-label)] text-[10px] uppercase transition-colors ${
+            className={`flex min-h-11 min-w-11 items-center justify-center rounded-md px-3 font-[family-name:var(--font-label)] text-[10px] uppercase transition-colors ${
               locale === supportedLocale
-                ? "border-b-2 border-md3-primary text-md3-primary"
-                : "text-md3-outline hover:text-md3-on-surface"
+                ? "bg-md3-primary-container/10 text-md3-primary"
+                : "text-md3-outline hover:bg-md3-surface-container-high hover:text-md3-on-surface"
             }`}
           >
             {localeShortLabels[supportedLocale]}

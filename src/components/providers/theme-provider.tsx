@@ -50,17 +50,12 @@ function applyThemeToDocument(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: PropsWithChildren) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
   const isHydrated = useSyncExternalStore(
     () => () => undefined,
     () => true,
     () => false,
   );
-
-  useEffect(() => {
-    const stored = getStoredTheme();
-    setThemeState(stored);
-  }, []);
 
   useEffect(() => {
     applyThemeToDocument(theme);

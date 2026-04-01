@@ -227,4 +227,46 @@ describe("useLiveFeedTabs", () => {
       expect(result.current.alertsState.data[0]?.title).toBe("Alert feed item v2");
     });
   });
+
+  it("uses seeded initial feed data without showing an empty loading state", async () => {
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>(() => {
+          // Intentionally unresolved to verify seeded state renders immediately.
+        }),
+    );
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() =>
+      useLiveFeedTabs({
+        statusErrorMessage: "Could not load live data right now.",
+        initialAlertsLoading: true,
+        initialAlertsData: [
+          {
+            id: "2930c4f6-4f57-49f4-9ccb-6959d4a54bf8",
+            sourceId: "d530d3f4-bf45-47a4-a6dd-893026f8858d",
+            sourceName: "Home Front Command",
+            title: "Seeded alert item",
+            message: null,
+            alertType: "rocket",
+            severity: "high",
+            status: "active",
+            country: "IL",
+            region: "South",
+            city: "Sderot",
+            locationName: null,
+            latitude: 31.522,
+            longitude: 34.595,
+            publishedAt: "2026-03-06T14:22:11.000+00:00",
+          },
+        ],
+        initialDataLoadedAt: 123,
+      }),
+    );
+
+    expect(result.current.alertsState.data[0]?.title).toBe("Seeded alert item");
+    expect(result.current.alertsState.lastUpdated).toBe(123);
+    expect(result.current.shouldShowFeedLoading).toBe(false);
+  });
 });

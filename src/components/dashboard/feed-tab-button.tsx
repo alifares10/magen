@@ -17,7 +17,7 @@ export function FeedTabButton({ label, isActive, onClick }: FeedTabButtonProps) 
       role="tab"
       aria-selected={isActive}
       onClick={onClick}
-      className={`relative flex-1 py-4 font-[family-name:var(--font-label)] text-[10px] font-bold uppercase tracking-widest transition ${
+      className={`relative flex min-h-11 flex-1 items-center justify-center px-2 py-3 font-[family-name:var(--font-label)] text-[10px] font-bold uppercase tracking-widest transition ${
         isActive
           ? "border-b-2 border-md3-primary text-md3-primary"
           : "text-md3-outline hover:text-md3-on-surface"

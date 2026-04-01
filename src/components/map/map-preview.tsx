@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { CrisisMap } from "@/components/map/crisis-map";
 import { MapLegend } from "@/components/map/map-legend";
 import { MapOverlayControls } from "@/components/map/map-overlay-controls";
@@ -38,6 +38,10 @@ type MapPreviewContent = {
     fullscreen: string;
     resetBearing: string;
   };
+  mapUnavailable: {
+    title: string;
+    body: string;
+  };
   watchRadiusLabel: string;
   watchlist: MapWatchlistManagerContent;
   watchlistPriorityLabel: string;
@@ -52,6 +56,32 @@ type MapPreviewProps = {
   alertMarkers: MapAlertMarker[];
   overlays: MapOverlayFixtures;
 };
+
+function getDesktopMediaQueryList() {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return null;
+  }
+
+  return window.matchMedia("(min-width: 768px)");
+}
+
+function subscribeToDesktopBreakpoint(callback: () => void) {
+  const mediaQueryList = getDesktopMediaQueryList();
+
+  if (!mediaQueryList) {
+    return () => undefined;
+  }
+
+  mediaQueryList.addEventListener("change", callback);
+
+  return () => {
+    mediaQueryList.removeEventListener("change", callback);
+  };
+}
+
+function getDesktopBreakpointSnapshot() {
+  return getDesktopMediaQueryList()?.matches ?? false;
+}
 
 function getMapCenter(
   alertMarkers: MapAlertMarker[],
@@ -86,6 +116,12 @@ export function MapPreview({
     roadClosures: true,
     hospitals: true,
   });
+  const [isMobileLayersOpen, setIsMobileLayersOpen] = useState(false);
+  const isDesktop = useSyncExternalStore(
+    subscribeToDesktopBreakpoint,
+    getDesktopBreakpointSnapshot,
+    () => false,
+  );
   const mapCenter = getMapCenter(alertMarkers, watchedLocations);
   const prioritizedWatchedLocations = getPrioritizedWatchedLocations(
     watchedLocations,
@@ -99,6 +135,7 @@ export function MapPreview({
   const affectedWatchlistCount = prioritizedWatchedLocations.filter(
     (item) => item.rank !== null,
   ).length;
+  const isOverlayControlsCollapsed = !isDesktop && !isMobileLayersOpen;
 
   return (
     <div className="flex h-screen flex-col bg-md3-surface pt-14 pb-16 text-md3-on-surface md:pb-0">
@@ -117,6 +154,7 @@ export function MapPreview({
           alertMarkers={alertMarkers}
           prioritizedWatchedLocations={prioritizedWatchedLocations}
           mapControlLabels={content.mapControlsLabels}
+          mapUnavailable={content.mapUnavailable}
           watchRadiusLabel={content.watchRadiusLabel}
           watchlistPriorityLabel={content.watchlistPriorityLabel}
           watchlistTopPriorityLabel={content.watchlistTopPriorityLabel}
@@ -132,7 +170,7 @@ export function MapPreview({
         />
 
         {/* Floating: Status bar (top-start) */}
-        <div className="absolute top-4 z-10 start-4">
+        <div className="absolute inset-x-4 top-4 z-10 md:inset-x-auto md:start-4">
           <MapStatusBar
             content={content.statusBar}
             alertCount={alertMarkers.length}
@@ -141,9 +179,17 @@ export function MapPreview({
         </div>
 
         {/* Floating: Map layers (bottom-start) */}
-        <div className="absolute bottom-4 z-10 start-4">
+        <div className="absolute inset-x-4 bottom-20 z-10 md:inset-x-auto md:bottom-4 md:start-4">
           <MapOverlayControls
             title={content.mapLayersTitle}
+            collapsed={isOverlayControlsCollapsed}
+            onToggleCollapsed={
+              isDesktop
+                ? undefined
+                : () => {
+                    setIsMobileLayersOpen((currentValue) => !currentValue);
+                  }
+            }
             sheltersLabel={content.overlaySheltersToggleLabel}
             roadClosuresLabel={content.overlayRoadClosuresToggleLabel}
             hospitalsLabel={content.overlayHospitalsToggleLabel}
@@ -171,7 +217,7 @@ export function MapPreview({
         </div>
 
         {/* Floating: Legend (bottom-center) */}
-        <div className="absolute bottom-4 z-10 start-1/2 -translate-x-1/2">
+        <div className="absolute inset-x-4 bottom-4 z-10 md:inset-x-auto md:bottom-4 md:start-1/2 md:-translate-x-1/2">
           <MapLegend
             alertsLabel={content.alertsLegend}
             sheltersLabel={content.sheltersLegend}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { motion } from "framer-motion";
 import { Shield, Map, Database, Crosshair, Terminal, Radar, Bell, Settings } from "lucide-react";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
@@ -44,14 +45,18 @@ const navTabs = [
   { label: "Logs", icon: Terminal, href: "#" },
 ] as const;
 
+function LocaleSwitcherFallback() {
+  return <div className="h-[52px] w-[98px] shrink-0 rounded-lg bg-md3-surface-container" aria-hidden="true" />;
+}
+
 export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/map" }: CommandBarProps) {
   return (
-    <header className="fixed top-0 left-0 z-50 flex h-14 w-full items-center justify-between border-b border-md3-outline-variant/10 bg-md3-surface px-3 sm:px-6">
-      <div className="flex items-center gap-4 sm:gap-8">
+    <header className="fixed top-0 left-0 z-50 flex h-14 w-full items-center justify-between border-b border-md3-outline-variant/10 bg-md3-surface px-2 sm:px-6">
+      <div className="flex min-w-0 items-center gap-3 sm:gap-8">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 py-1 sm:px-2">
           <Shield className="h-6 w-6 text-md3-primary" />
-          <span className="font-[family-name:var(--font-sans)] text-base font-black tracking-tighter text-md3-primary sm:text-xl">
+          <span className="font-[family-name:var(--font-sans)] text-sm font-black tracking-tighter text-md3-primary sm:text-xl">
             {content.title}
           </span>
         </Link>
@@ -77,7 +82,7 @@ export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/
         </nav>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {/* Status Indicator */}
         <div className="hidden items-center gap-4 lg:flex ltr:mr-4 rtl:ml-4">
           <div className="flex items-center gap-2 rounded-lg bg-md3-surface-container px-3 py-1">
@@ -102,28 +107,32 @@ export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/
         </div>
 
         {/* Language Toggle */}
-        <LocaleSwitcher className="text-xs" compact />
+        <Suspense fallback={<LocaleSwitcherFallback />}>
+          <LocaleSwitcher className="shrink-0 text-xs" compact />
+        </Suspense>
 
         {/* Action Icons */}
         <div className="flex items-center gap-1">
-          <ThemeSwitcher content={content.themeSwitcher} className="text-xs" toggleSize={12} compact />
-          <BrowserNotificationOptIn className="text-xs" compact />
+          <ThemeSwitcher content={content.themeSwitcher} className="text-xs" toggleSize={14} compact />
+          <div className="hidden md:block">
+            <BrowserNotificationOptIn className="text-xs" compact />
+          </div>
           <button
             type="button"
-            className="hidden h-10 w-10 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
           >
             <Radar className="h-5 w-5" />
           </button>
           <button
             type="button"
-            className="relative flex h-10 w-10 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high"
+            className="relative flex h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high"
           >
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-md3-error" />
           </button>
           <button
             type="button"
-            className="hidden h-10 w-10 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
+            className="hidden h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
           >
             <Settings className="h-5 w-5" />
           </button>

@@ -1,4 +1,3 @@
-import React from "react";
 import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -25,14 +24,16 @@ describe("dashboard routing", () => {
     redirectMock.mockClear();
   });
 
-  it("renders shared localized dashboard shell on /[locale]", () => {
-    render(<LocaleHomePage />);
+  it("renders shared localized dashboard shell on /[locale]", async () => {
+    render(await LocaleHomePage({ params: Promise.resolve({ locale: "he" }) }));
 
     expect(localizedDashboardShellMock).toHaveBeenCalledTimes(1);
   });
 
-  it("renders shared localized dashboard shell on /[locale]/dashboard", () => {
-    render(<LocalizedDashboardPage />);
+  it("renders shared localized dashboard shell on /[locale]/dashboard", async () => {
+    render(
+      await LocalizedDashboardPage({ params: Promise.resolve({ locale: "he" }) }),
+    );
 
     expect(localizedDashboardShellMock).toHaveBeenCalledTimes(1);
   });

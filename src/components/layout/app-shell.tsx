@@ -73,9 +73,11 @@ type AppShellContent = {
   severityLabel: string;
   locationLabel: string;
   streamTitle: string;
+  streamLiveTitlePrefix: string;
   streamSubtitle: string;
   streamContextLabel: string;
   streamEmpty: string;
+  streamSourceFallbackLabel: string;
   streamWatchLabel: string;
   sourceHealthTitle: string;
   sourceHealthOverallLabel: string;
@@ -880,9 +882,11 @@ export function AppShell({ content }: AppShellProps) {
             <StreamPanel
               content={{
                 title: content.streamTitle,
+                liveTitlePrefix: content.streamLiveTitlePrefix,
                 subtitle: content.streamSubtitle,
                 contextLabel: content.streamContextLabel,
                 empty: content.streamEmpty,
+                sourceFallbackLabel: content.streamSourceFallbackLabel,
                 watchLabel: content.streamWatchLabel,
                 sourceLabel: content.sourceLabel,
                 updatedLabel: content.updatedLabel,

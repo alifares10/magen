@@ -44,7 +44,7 @@ export function AlertHero({
       initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.12 }}
-      className={`relative min-h-48 overflow-hidden rounded-xl p-6 ${
+      className={`relative shrink-0 min-h-48 overflow-hidden rounded-xl p-6 ${
         hasAlert
           ? "border-e-4 border-md3-error bg-md3-surface-container-high shadow-[0_0_40px_-10px_rgba(255,180,171,0.15)]"
           : "flex flex-col justify-center bg-md3-surface-container-low"
@@ -52,7 +52,9 @@ export function AlertHero({
     >
       {/* Alert present state */}
       {isLoading && !rawLatestAlert ? (
-        <p className="text-sm text-md3-on-surface-variant">{content.statusLoading}</p>
+        <p className="text-sm text-md3-on-surface-variant">
+          {content.statusLoading}
+        </p>
       ) : filteredLatestAlert ? (
         <div className="relative z-10">
           <div className="mb-6 flex items-start justify-between">
@@ -86,7 +88,10 @@ export function AlertHero({
             </div>
             <div className="rounded-lg bg-md3-surface-container p-4">
               <p className="font-[family-name:var(--font-label)] text-[10px] uppercase text-md3-outline">
-                {content.severityLabel}: <span className="text-md3-secondary">{filteredLatestAlert.severity}</span>
+                {content.severityLabel}:{" "}
+                <span className="text-md3-secondary">
+                  {filteredLatestAlert.severity}
+                </span>
               </p>
             </div>
             <div className="rounded-lg bg-md3-surface-container p-4">
@@ -109,7 +114,13 @@ export function AlertHero({
             <>
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
                 <svg width="24" height="24" viewBox="0 0 14 14" fill="none">
-                  <path d="M3.5 7L6 9.5L10.5 4.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path
+                    d="M3.5 7L6 9.5L10.5 4.5"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </span>
               <p className="font-[family-name:var(--font-label)] text-sm uppercase tracking-wide text-md3-on-surface-variant">

@@ -1,11 +1,56 @@
 import { getTranslations } from "next-intl/server";
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
+import type { AppLocale } from "@/i18n/routing";
+import {
+  getAlertsFeed,
+  getDashboardOverview,
+  getNewsFeed,
+  getOfficialUpdatesFeed,
+  getSourceHealthOverview,
+} from "@/lib/db/feed";
 
-export async function LocalizedDashboardShell() {
-  const t = await getTranslations("app");
+type LocalizedDashboardShellProps = {
+  locale: AppLocale;
+};
+
+async function loadInitialDashboardData() {
+  const [overview, sourceHealth, alerts, news, official] = await Promise.all([
+    getDashboardOverview().catch(() => ({
+      latestAlert: null,
+      latestOfficialUpdate: null,
+      topNews: [],
+      activeStreams: [],
+      watchedLocationMatches: [],
+    })),
+    getSourceHealthOverview().catch(() => ({
+      overallStatus: "unknown" as const,
+      updatedAt: new Date(0).toISOString(),
+      categories: [],
+    })),
+    getAlertsFeed({ limit: 20, activeOnly: false }).catch(() => []),
+    getNewsFeed(20).catch(() => []),
+    getOfficialUpdatesFeed({ limit: 20, activeOnly: true }).catch(() => []),
+  ]);
+
+  return {
+    overview,
+    sourceHealth,
+    alerts,
+    news,
+    official,
+    loadedAt: Date.now(),
+  };
+}
+
+export async function LocalizedDashboardShell({ locale }: LocalizedDashboardShellProps) {
+  const [t, initialData] = await Promise.all([
+    getTranslations({ locale, namespace: "app" }),
+    loadInitialDashboardData(),
+  ]);
 
   return (
     <DashboardShell
+      initialData={initialData}
       content={{
         title: t("title"),
         subtitle: t("subtitle"),
@@ -31,10 +76,16 @@ export async function LocalizedDashboardShell() {
         watchlistEmpty: t("watchlistBody"),
         watchlistMatchSuffix: t("watchlistMatchSuffix"),
         feedTitle: t("feedTitle"),
+        viewFullHistoryLabel: t("viewFullHistoryLabel"),
         feedTabs: {
           alerts: t("feedTabs.alerts"),
           news: t("feedTabs.news"),
           official: t("feedTabs.official"),
+        },
+        feedItemTypeLabels: {
+          alerts: t("feedItemTypeLabels.alerts"),
+          official: t("feedItemTypeLabels.official"),
+          news: t("feedItemTypeLabels.news"),
         },
         statusLoading: t("statusLoading"),
         statusError: t("statusError"),
@@ -45,9 +96,11 @@ export async function LocalizedDashboardShell() {
         severityLabel: t("severityLabel"),
         locationLabel: t("locationLabel"),
         streamTitle: t("streamTitle"),
+        streamLiveTitlePrefix: t("streamLiveTitlePrefix"),
         streamSubtitle: t("streamSubtitle"),
         streamContextLabel: t("streamContextLabel"),
         streamEmpty: t("streamEmpty"),
+        streamSourceFallbackLabel: t("streamSourceFallbackLabel"),
         streamWatchLabel: t("streamWatchLabel"),
         sourceHealthTitle: t("sourceHealthTitle"),
         sourceHealthOverallLabel: t("sourceHealthOverallLabel"),

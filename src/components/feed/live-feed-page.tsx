@@ -13,6 +13,7 @@ import { FeedItemCard } from "@/components/dashboard/feed-item-card";
 import { StreamPanel, type StreamPanelContent } from "@/components/streams/stream-panel";
 import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
 import { formatDateTime } from "@/lib/feed/client";
+import type { AlertFeedItem, NewsFeedItem, OfficialUpdateFeedItem } from "@/lib/schemas/feed";
 
 type LiveFeedPageContent = {
   commandBar: CommandBarContent;
@@ -22,10 +23,16 @@ type LiveFeedPageContent = {
   bottomNav: MobileBottomNavContent;
   chronologicalFeedTitle: string;
   liveCoverageTitle: string;
+  viewFullHistoryLabel: string;
   feedTabs: {
     alerts: string;
     news: string;
     official: string;
+  };
+  feedItemTypeLabels: {
+    alerts: string;
+    official: string;
+    news: string;
   };
   statusLoading: string;
   statusError: string;
@@ -38,9 +45,15 @@ type LiveFeedPageContent = {
 
 type LiveFeedPageProps = {
   content: LiveFeedPageContent;
+  initialFeedData?: {
+    alerts: AlertFeedItem[];
+    news: NewsFeedItem[];
+    official: OfficialUpdateFeedItem[];
+    loadedAt: number;
+  };
 };
 
-export function LiveFeedPage({ content }: LiveFeedPageProps) {
+export function LiveFeedPage({ content, initialFeedData }: LiveFeedPageProps) {
   const {
     activeTab,
     setActiveTab,
@@ -52,7 +65,11 @@ export function LiveFeedPage({ content }: LiveFeedPageProps) {
     shouldShowFeedError,
   } = useLiveFeedTabs({
     statusErrorMessage: content.statusError,
-    initialAlertsLoading: true,
+    initialAlertsLoading: !initialFeedData,
+    initialAlertsData: initialFeedData?.alerts,
+    initialNewsData: initialFeedData?.news,
+    initialOfficialData: initialFeedData?.official,
+    initialDataLoadedAt: initialFeedData?.loadedAt ?? null,
   });
 
   const {
@@ -164,6 +181,7 @@ export function LiveFeedPage({ content }: LiveFeedPageProps) {
                         key={item.id}
                         item={item}
                         type={activeTab}
+                        typeLabels={content.feedItemTypeLabels}
                         locationLabel={content.locationLabel}
                         sourceLabel={content.sourceLabel}
                         publishedLabel={content.publishedLabel}

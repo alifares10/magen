@@ -12,6 +12,12 @@ vi.mock("@/components/notifications/browser-notification-opt-in", () => ({
   BrowserNotificationOptIn: () => <div data-testid="browser-notification-opt-in" />,
 }));
 
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
+
 vi.mock("@/components/navigation/mobile-bottom-nav", () => ({
   MobileBottomNav: () => <nav data-testid="mobile-bottom-nav" />,
 }));
@@ -52,9 +58,11 @@ const content = {
   },
   stream: {
     title: "Live Stream",
+    liveTitlePrefix: "Live Feed",
     subtitle: "Live visual context.",
     contextLabel: "Secondary Context",
     empty: "No streams.",
+    sourceFallbackLabel: "Live",
     watchLabel: "Open on YouTube",
     sourceLabel: "Source",
     updatedLabel: "Updated",
@@ -68,10 +76,16 @@ const content = {
   },
   chronologicalFeedTitle: "Chronological Feed",
   liveCoverageTitle: "Live Media Coverage",
+  viewFullHistoryLabel: "View Full History",
   feedTabs: {
     alerts: "Alerts",
     news: "News",
     official: "Official",
+  },
+  feedItemTypeLabels: {
+    alerts: "Critical",
+    official: "Official",
+    news: "Update",
   },
   statusLoading: "Loading latest data...",
   statusError: "Could not load live data right now.",

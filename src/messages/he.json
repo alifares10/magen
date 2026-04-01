@@ -24,10 +24,16 @@
     "watchlistBody": "תשתית מעקב מיקומים הוגדרה. מיקומים שמורים יקבלו קדימות בהצגה.",
     "watchlistMatchSuffix": "התראות פעילות",
     "feedTitle": "פיד חי",
+    "viewFullHistoryLabel": "צפה בכל ההיסטוריה",
     "feedTabs": {
       "alerts": "התראות",
       "news": "חדשות",
       "official": "רשמי"
+    },
+    "feedItemTypeLabels": {
+      "alerts": "קריטי",
+      "official": "רשמי",
+      "news": "עדכון"
     },
     "statusLoading": "טוען נתונים עדכניים...",
     "statusError": "לא ניתן לטעון כרגע נתונים חיים.",
@@ -38,9 +44,11 @@
     "severityLabel": "חומרה",
     "locationLabel": "מיקום",
     "streamTitle": "שידור חי",
+    "streamLiveTitlePrefix": "שידור חי",
     "streamSubtitle": "הקשר חזותי חי מגופי שידור אמינים.",
     "streamContextLabel": "הקשר משני",
     "streamEmpty": "כרגע אין שידורים חיים זמינים.",
+    "streamSourceFallbackLabel": "חי",
     "streamWatchLabel": "פתח ביוטיוב",
     "sourceHealthTitle": "בריאות מקורות",
     "sourceHealthOverallLabel": "כולל",
@@ -80,10 +88,16 @@
     "locationSearchPlaceholder": "חיפוש עיר, אזור או מילת מפתח",
     "chronologicalFeedTitle": "פיד כרונולוגי",
     "liveCoverageTitle": "שידור חי",
+    "viewFullHistoryLabel": "צפה בכל ההיסטוריה",
     "feedTabs": {
       "alerts": "התראות",
       "news": "חדשות",
       "official": "רשמי"
+    },
+    "feedItemTypeLabels": {
+      "alerts": "קריטי",
+      "official": "רשמי",
+      "news": "עדכון"
     },
     "statusLoading": "טוען נתונים עדכניים...",
     "statusError": "לא ניתן לטעון כרגע נתונים חיים.",
@@ -101,9 +115,11 @@
       "unknown": "לא ידוע"
     },
     "streamTitle": "שידור חי",
+    "streamLiveTitlePrefix": "שידור חי",
     "streamSubtitle": "הקשר חזותי חי מגופי שידור אמינים.",
     "streamContextLabel": "הקשר משני",
     "streamEmpty": "כרגע אין שידורים חיים זמינים.",
+    "streamSourceFallbackLabel": "חי",
     "streamWatchLabel": "פתח ביוטיוב",
     "bottomNav": {
       "dashboard": "לוח בקרה",
@@ -154,6 +170,8 @@
       "fullscreen": "החלף למסך מלא",
       "resetBearing": "אפס כיוון לצפון"
     },
+    "mapUnavailableTitle": "המפה אינה זמינה",
+    "mapUnavailableBody": "לא ניתן לטעון כעת את תצוגת המפה במכשיר הזה. ספירת ההתראות, שכבות המפה ובקרי המעקב עדיין זמינים סביב האזור הזה.",
     "watchRadiusLabel": "רדיוס",
     "watchlistTitle": "רשימת מעקב",
     "watchlistAddLabel": "הוסף",

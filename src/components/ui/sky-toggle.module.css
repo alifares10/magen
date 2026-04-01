@@ -27,6 +27,11 @@
   cursor: pointer;
 }
 
+.touchTarget {
+  min-block-size: 44px;
+  padding-block: 4px;
+}
+
 .switch,
 .switch *,
 .switch *::before,

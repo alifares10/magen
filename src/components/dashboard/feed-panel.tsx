@@ -9,10 +9,16 @@ import { FeedItemCard } from "@/components/dashboard/feed-item-card";
 
 type FeedPanelContent = {
   feedTitle: string;
+  viewFullHistoryLabel: string;
   feedTabs: {
     alerts: string;
     news: string;
     official: string;
+  };
+  feedItemTypeLabels: {
+    alerts: string;
+    official: string;
+    news: string;
   };
   statusLoading: string;
   statusError: string;
@@ -110,6 +116,7 @@ export function FeedPanel({
                   key={item.id}
                   item={item}
                   type={activeTab}
+                  typeLabels={content.feedItemTypeLabels}
                   locationLabel={content.locationLabel}
                   sourceLabel={content.sourceLabel}
                   publishedLabel={content.publishedLabel}
@@ -130,9 +137,9 @@ export function FeedPanel({
         ) : null}
         <button
           type="button"
-          className="w-full rounded border border-md3-outline-variant/20 bg-md3-surface-container-highest py-2 font-[family-name:var(--font-label)] text-xs font-bold uppercase transition-colors hover:bg-md3-surface-container-high"
+          className="min-h-11 w-full rounded-lg border border-md3-outline-variant/20 bg-md3-surface-container-highest px-4 py-3 font-[family-name:var(--font-label)] text-xs font-bold uppercase transition-colors hover:bg-md3-surface-container-high"
         >
-          View Full History
+          {content.viewFullHistoryLabel}
         </button>
       </div>
     </motion.aside>
