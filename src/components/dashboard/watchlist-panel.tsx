@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { PlusCircle } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 type WatchlistPanelContent = {
   watchlistTitle: string;
@@ -45,7 +46,13 @@ export function WatchlistPanel({
         <h3 className="font-[family-name:var(--font-label)] text-[10px] uppercase tracking-[0.2em] text-md3-outline">
           {content.watchlistTitle}
         </h3>
-        <PlusCircle className="h-4 w-4 cursor-pointer text-md3-outline transition-colors hover:text-md3-on-surface" />
+        <Link
+          href="/map"
+          aria-label={content.watchlistTitle}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-md3-outline transition-colors hover:bg-md3-surface-container hover:text-md3-on-surface"
+        >
+          <PlusCircle className="h-4 w-4" />
+        </Link>
       </div>
 
       {isLoading && rawWatchedLocationMatches.length === 0 ? (
@@ -55,7 +62,7 @@ export function WatchlistPanel({
           {filteredWatchedLocationMatches.map((match) => (
             <div
               key={`${match.locationName}-${match.alertCount}`}
-              className="cursor-pointer rounded bg-md3-surface-container p-3 transition-colors hover:bg-md3-surface-container-high"
+              className="rounded bg-md3-surface-container p-3"
             >
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-xs font-bold text-md3-on-surface">{match.locationName}</span>

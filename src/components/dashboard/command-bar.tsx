@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { motion } from "framer-motion";
-import { Shield, Map, Database, Crosshair, Terminal, Radar, Bell, Settings } from "lucide-react";
+import { Shield, LayoutGrid, Map, Database } from "lucide-react";
 import { LocaleSwitcher } from "@/components/i18n/locale-switcher";
 import { BrowserNotificationOptIn } from "@/components/notifications/browser-notification-opt-in";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
@@ -11,6 +11,11 @@ import { Link } from "@/i18n/navigation";
 
 type CommandBarContent = {
   title: string;
+  navigation: {
+    dashboard: string;
+    map: string;
+    intel: string;
+  };
   themeSwitcher: {
     label: string;
     dark: string;
@@ -39,24 +44,23 @@ const healthDotColor: Record<SourceHealthStatus, string> = {
 };
 
 const navTabs = [
-  { label: "Map", icon: Map, href: "/map" },
-  { label: "Intel", icon: Database, href: "/feed" },
-  { label: "Assets", icon: Crosshair, href: "#" },
-  { label: "Logs", icon: Terminal, href: "#" },
+  { label: "dashboard", icon: LayoutGrid, href: "/dashboard" },
+  { label: "map", icon: Map, href: "/map" },
+  { label: "intel", icon: Database, href: "/feed" },
 ] as const;
 
 function LocaleSwitcherFallback() {
   return <div className="h-[52px] w-[98px] shrink-0 rounded-lg bg-md3-surface-container" aria-hidden="true" />;
 }
 
-export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/map" }: CommandBarProps) {
+export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/dashboard" }: CommandBarProps) {
   return (
     <header className="fixed top-0 left-0 z-50 flex h-14 w-full items-center justify-between border-b border-md3-outline-variant/10 bg-md3-surface px-2 sm:px-6">
       <div className="flex min-w-0 items-center gap-3 sm:gap-8">
         {/* Logo */}
-        <Link href="/dashboard" className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 py-1 sm:px-2">
+        <Link href="/dashboard" aria-label={content.title} className="flex min-h-11 shrink-0 items-center gap-2 rounded-lg px-1 py-1 sm:px-2">
           <Shield className="h-6 w-6 text-md3-primary" />
-          <span className="font-[family-name:var(--font-sans)] text-sm font-black tracking-tighter text-md3-primary sm:text-xl">
+          <span className="hidden font-[family-name:var(--font-sans)] text-sm font-black tracking-tighter text-md3-primary min-[360px]:inline sm:text-xl">
             {content.title}
           </span>
         </Link>
@@ -64,10 +68,11 @@ export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/
         {/* Nav Tabs */}
         <nav className="hidden items-center gap-1 md:flex">
           {navTabs.map((tab) => (
-            <a
+            <Link
               key={tab.label}
               href={tab.href}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 transition-all ${
+              aria-current={tab.href === activeHref ? "page" : undefined}
+              className={`flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 transition-all lg:px-4 ${
                 tab.href === activeHref
                   ? "bg-md3-primary-container/10 text-md3-primary"
                   : "text-md3-outline hover:bg-md3-surface-container hover:text-md3-on-surface"
@@ -75,9 +80,9 @@ export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/
             >
               <tab.icon className="h-5 w-5" />
               <span className="font-[family-name:var(--font-label)] text-[11px] font-bold uppercase tracking-widest">
-                {tab.label}
+                {content.navigation[tab.label]}
               </span>
-            </a>
+            </Link>
           ))}
         </nav>
       </div>
@@ -114,41 +119,7 @@ export function CommandBar({ content, overallSourceHealthStatus, activeHref = "/
         {/* Action Icons */}
         <div className="flex items-center gap-1">
           <ThemeSwitcher content={content.themeSwitcher} className="text-xs" toggleSize={14} compact />
-          <div className="hidden md:block">
-            <BrowserNotificationOptIn className="text-xs" compact />
-          </div>
-          <button
-            type="button"
-            className="hidden h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
-          >
-            <Radar className="h-5 w-5" />
-          </button>
-          <button
-            type="button"
-            className="relative flex h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-md3-error" />
-          </button>
-          <button
-            type="button"
-            className="hidden h-11 w-11 items-center justify-center rounded-lg text-md3-on-surface-variant transition-colors hover:bg-md3-surface-container-high sm:flex"
-          >
-            <Settings className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Duty Officer */}
-        <div className="hidden items-center gap-3 border-md3-outline-variant sm:flex ltr:ml-4 ltr:border-r ltr:pr-4 rtl:mr-4 rtl:border-l rtl:pl-4">
-          <div className="text-start">
-            <p className="font-[family-name:var(--font-label)] text-[10px] uppercase tracking-tighter text-md3-outline">
-              Duty Officer
-            </p>
-            <p className="text-xs font-bold">ISR-OPS-04</p>
-          </div>
-          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded border border-md3-outline-variant/20 bg-md3-primary-container">
-            <span className="text-xs font-bold text-white">OP</span>
-          </div>
+          <BrowserNotificationOptIn className="text-xs" compact />
         </div>
       </div>
     </header>

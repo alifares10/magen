@@ -12,7 +12,7 @@ import { FeedTabButton } from "@/components/dashboard/feed-tab-button";
 import { FeedItemCard } from "@/components/dashboard/feed-item-card";
 import { StreamPanel, type StreamPanelContent } from "@/components/streams/stream-panel";
 import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
-import { formatDateTime } from "@/lib/feed/client";
+import { formatDateTime, type FeedTabKey } from "@/lib/feed/client";
 import type { AlertFeedItem, NewsFeedItem, OfficialUpdateFeedItem } from "@/lib/schemas/feed";
 
 type LiveFeedPageContent = {
@@ -45,6 +45,7 @@ type LiveFeedPageContent = {
 
 type LiveFeedPageProps = {
   content: LiveFeedPageContent;
+  initialActiveTab?: FeedTabKey;
   initialFeedData?: {
     alerts: AlertFeedItem[];
     news: NewsFeedItem[];
@@ -53,7 +54,7 @@ type LiveFeedPageProps = {
   };
 };
 
-export function LiveFeedPage({ content, initialFeedData }: LiveFeedPageProps) {
+export function LiveFeedPage({ content, initialFeedData, initialActiveTab }: LiveFeedPageProps) {
   const {
     activeTab,
     setActiveTab,
@@ -65,6 +66,7 @@ export function LiveFeedPage({ content, initialFeedData }: LiveFeedPageProps) {
     shouldShowFeedError,
   } = useLiveFeedTabs({
     statusErrorMessage: content.statusError,
+    initialActiveTab,
     initialAlertsLoading: !initialFeedData,
     initialAlertsData: initialFeedData?.alerts,
     initialNewsData: initialFeedData?.news,

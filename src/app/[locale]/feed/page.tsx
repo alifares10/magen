@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { z } from "zod";
 import { LiveFeedPage } from "@/components/feed/live-feed-page";
 import type { AppLocale } from "@/i18n/routing";
 import {
@@ -26,10 +27,12 @@ async function loadInitialFeedData() {
 
 type LocalizedFeedPageProps = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function LocalizedFeedPage({ params }: LocalizedFeedPageProps) {
-  const { locale } = await params;
+export default async function LocalizedFeedPage({ params, searchParams }: LocalizedFeedPageProps) {
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const parsedTab = z.enum(["alerts", "news", "official"]).safeParse(query.tab);
   const appLocale = locale as AppLocale;
   const [t, initialFeedData] = await Promise.all([
     getTranslations({ locale: appLocale, namespace: "feedPage" }),
@@ -39,9 +42,15 @@ export default async function LocalizedFeedPage({ params }: LocalizedFeedPagePro
   return (
     <LiveFeedPage
       initialFeedData={initialFeedData}
+      initialActiveTab={parsedTab.success ? parsedTab.data : "alerts"}
       content={{
         commandBar: {
           title: "Magen",
+          navigation: {
+            dashboard: t("bottomNav.dashboard"),
+            map: t("bottomNav.map"),
+            intel: t("bottomNav.intel"),
+          },
           themeSwitcher: {
             label: t("themeSwitcher.label"),
             dark: t("themeSwitcher.dark"),

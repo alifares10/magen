@@ -7,7 +7,7 @@ Date:
 Phase:
 Phase 8 in progress
 Current focus:
-Phase 8 map watchlist release fixes: prepare `codex/map-watchlist-preview` for Vercel preview testing before merging to main.
+Phase 8 UI navigation fixes reviewed and approved for main; YouTube stream work deferred.
 
 Done:
 
@@ -248,7 +248,6 @@ In progress:
 
 Next up:
 
-0. Test the `codex/map-watchlist-preview` Vercel preview (English/Hebrew map place picking, manual entry, decimal input, and save/remove behavior); merge only after user approval. The watchlist panel still uses the existing desktop-only layout.
 1. Continue manual DB refreshes for `official_updates`, `shelters`, `road_closures`, and `hospitals` using the README runbook.
 2. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
 3. Re-open automation work once constraints clear: official guidance Israel-egress path + first overlay ingestion path.
@@ -266,6 +265,37 @@ Notes:
 ---
 
 ## Session history
+
+### 2026-10-02 — Approve UI fixes for delivery
+
+- User reviewed the UI, approved committing and pushing the fixes, and explicitly deferred YouTube stream work. Delivery targets the existing `main` branch on `origin`.
+- Application files are unchanged from the UI check that passed lint, 139 tests, typecheck, and production build. No stream configuration or source data changes are included.
+
+### 2026-10-02 — Check and fix UI navigation
+
+- User authorized a computer-use UI check and local fixes. Checked the local dashboard, feed, and map in the Codex browser, including English/Hebrew and 320px, 390px, 768px, and 1440px viewports.
+- Confirmed Assets/Logs linked to `#`, radar/bell/settings buttons had no handlers, View Full History and Deploy Response had no action, and desktop Map/Intel links dropped Hebrew locale. The dashboard also incorrectly highlighted Map; mobile Alerts duplicated Dashboard.
+- Replaced desktop navigation with localized Dashboard/Map/Intel links and correct `aria-current` states. Removed unfinished actions and the placeholder Duty Officer identity. Replaced the inert bell with the existing browser-notification opt-in control on desktop and mobile, with an accessible label, state, and status tooltip.
+- Wired View Full History to the selected feed tab using a Zod-validated query parameter. Wired the watchlist plus link to the localized map and added a collapsible mobile watchlist panel; verified a temporary watched place could be added and removed, then removed the test data. Place picking collapses the mobile panel and selection reopens confirmation.
+- Removed false click affordances from read-only cards, stripped HTML from news summaries, and replaced obsolete Phase 2/scaffolding empty-state copy.
+- Browser verification confirmed Hebrew-preserving navigation, news-tab history routing, theme toggling with dark mode restored, mobile watchlist add/remove, and no horizontal overflow at checked widths. Notification permission/delivery behavior was covered by mocked tests; no browser permission was granted.
+- Full validation passed: lint, 139 tests across 29 files, typecheck, and production build. Screenshots saved to `/tmp/magen-ui-check-desktop.jpg` and `/tmp/magen-ui-check-mobile.jpg`.
+- Remaining content issue observed: the configured YouTube stream reports unavailable. No source records, database migrations, commits, pushes, or deployments were changed. Local preview remains on port 3100.
+
+### 2026-10-02 — Recommend next project move
+
+- Reviewed the active tasks, architecture, latest delivery notes, and current alert/map/watchlist code. No application changes or deployments were made; deployed data was not inspected.
+- Recommended the next sprint focus on trustworthy location coverage: first resolve Oref alert-area names to curated locations, preserve unmatched alerts in the feed, and verify extraction through normalization, map markers, and watched-location matching with representative payloads. The place-picker dataset can assist but is not an authoritative mapping of Oref alert areas.
+- Confirmed current Oref extraction has no coordinates, normalization supplies no location lookup, and map/watchlist database queries exclude coordinate-less alerts.
+- Additional priorities: remove production sample-overlay fallback for successful empty database reads, distinguish sample/manual/stale data from verified current data, and expose the watchlist controls below the mobile breakpoint. Guidance and overlay automation remain deferred in manual mode.
+- Validation passed: lint, 129 tests across 28 files, typecheck, and production build. The sandboxed build stalled at compilation and was interrupted; the build outside the sandbox passed.
+
+### 2026-10-02 — Clean up merged preview branch
+
+- User confirmed preview testing and merge completion. Verified PR #2 merge commit `eb588fd` contains preview commit `910ea2a`, with an identical file tree.
+- Switched to main, fast-forwarded local main to `origin/main`, and deleted `codex/map-watchlist-preview` locally and on GitHub. Confirmed the remote main ref remains intact and the preview ref is absent.
+- No application changes were made. The merged tree is identical to the branch that passed lint, 129 tests, typecheck, and production build; those checks were not repeated for branch cleanup.
+- Updated tracking notes locally; no additional commit or push to main was made.
 
 ### 2026-10-02 — Prepare map watchlist preview branch
 

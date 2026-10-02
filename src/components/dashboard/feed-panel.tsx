@@ -6,6 +6,7 @@ import { formatDateTime } from "@/lib/feed/client";
 import type { AlertFeedItem, NewsFeedItem, OfficialUpdateFeedItem } from "@/lib/schemas/feed";
 import { FeedTabButton } from "@/components/dashboard/feed-tab-button";
 import { FeedItemCard } from "@/components/dashboard/feed-item-card";
+import { Link } from "@/i18n/navigation";
 
 type FeedPanelContent = {
   feedTitle: string;
@@ -135,12 +136,12 @@ export function FeedPanel({
             {content.updatedLabel}: {formatDateTime(lastUpdated)}
           </p>
         ) : null}
-        <button
-          type="button"
-          className="min-h-11 w-full rounded-lg border border-md3-outline-variant/20 bg-md3-surface-container-highest px-4 py-3 font-[family-name:var(--font-label)] text-xs font-bold uppercase transition-colors hover:bg-md3-surface-container-high"
+        <Link
+          href={`/feed?tab=${activeTab}`}
+          className="flex min-h-11 w-full items-center justify-center rounded-lg border border-md3-outline-variant/20 bg-md3-surface-container-highest px-4 py-3 text-center font-[family-name:var(--font-label)] text-xs font-bold uppercase transition-colors hover:bg-md3-surface-container-high"
         >
           {content.viewFullHistoryLabel}
-        </button>
+        </Link>
       </div>
     </motion.aside>
   );

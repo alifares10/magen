@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
+import { Bell, BellOff } from "lucide-react";
 import { useBrowserNotificationPermission } from "@/components/notifications/use-browser-notification-permission";
 import { useNotificationPreferencesStore } from "@/store/use-notification-preferences-store";
 import { useNotificationRuntimeStore } from "@/store/use-notification-runtime-store";
@@ -121,6 +122,9 @@ export function BrowserNotificationOptIn({
 
       <button
         type="button"
+        aria-label={compact ? `${t("browserOptInLabel")}: ${buttonLabel}` : undefined}
+        aria-pressed={browserNotificationsEnabled}
+        title={compact ? `${t("browserOptInLabel")}: ${statusText}` : undefined}
         onClick={() => {
           void onToggle();
         }}
@@ -130,9 +134,14 @@ export function BrowserNotificationOptIn({
           !isSupported ||
           (!browserNotificationsEnabled && permission === "denied")
         }
-        className={`${compact ? "" : "mt-1 "}min-h-11 rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900`}
+        className={`${compact ? "flex h-11 w-11 shrink-0 items-center justify-center" : "mt-1 px-3"} min-h-11 rounded-lg border border-zinc-300 bg-white text-sm font-medium text-zinc-900 enabled:hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950/85 dark:text-slate-100 dark:enabled:hover:bg-slate-900`}
       >
-        {buttonLabel}
+        {compact ? (
+          <>
+            {browserNotificationsEnabled ? <Bell className="h-5 w-5" aria-hidden="true" /> : <BellOff className="h-5 w-5" aria-hidden="true" />}
+            <span className="sr-only">{buttonLabel}</span>
+          </>
+        ) : buttonLabel}
       </button>
 
       {!compact && (

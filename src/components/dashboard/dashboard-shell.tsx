@@ -173,6 +173,7 @@ export function DashboardShell({ content, initialData }: DashboardShellProps) {
       <CommandBar
         content={{
           title: "Magen",
+          navigation: content.bottomNav,
           themeSwitcher: content.themeSwitcher,
           sourceHealthOverallLabel: content.sourceHealthOverallLabel,
           sourceHealthStatuses: content.sourceHealthStatuses,
@@ -241,13 +242,6 @@ export function DashboardShell({ content, initialData }: DashboardShellProps) {
             isLoading={overviewState.isLoading}
             hasActiveFilters={hasActiveFilters}
           />
-          {/* Deploy Response — decorative CTA */}
-          <button
-            type="button"
-            className="w-full rounded-lg bg-gradient-to-r from-md3-primary to-md3-primary-container py-3 font-[family-name:var(--font-label)] text-xs font-bold uppercase tracking-widest text-white shadow-lg shadow-md3-primary/10"
-          >
-            Deploy Response
-          </button>
         </div>
 
         {/* Center: Alert Hero + Official Guidance + Live Stream */}

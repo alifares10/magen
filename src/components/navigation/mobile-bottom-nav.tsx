@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, Map, Database, Bell } from "lucide-react";
+import { LayoutGrid, Map, Database } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 
 type MobileBottomNavContent = {
@@ -19,7 +19,6 @@ const navItems = [
   { label: "dashboard" as const, icon: LayoutGrid, href: "/dashboard" },
   { label: "map" as const, icon: Map, href: "/map" },
   { label: "intel" as const, icon: Database, href: "/feed" },
-  { label: "alerts" as const, icon: Bell, href: "/dashboard" },
 ] as const;
 
 export function MobileBottomNav({ content, activeHref }: MobileBottomNavProps) {
@@ -31,6 +30,7 @@ export function MobileBottomNav({ content, activeHref }: MobileBottomNavProps) {
           <Link
             key={item.label}
             href={item.href}
+            aria-current={isActive ? "page" : undefined}
             className={`flex flex-col items-center gap-1 px-3 py-2 transition-colors ${
               isActive ? "text-md3-primary" : "text-md3-outline"
             }`}

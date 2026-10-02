@@ -21,6 +21,11 @@ export default async function LocalizedMapPage({ params }: LocalizedMapPageProps
       content={{
         commandBar: {
           title: "Magen",
+          navigation: {
+            dashboard: t("bottomNav.dashboard"),
+            map: t("bottomNav.map"),
+            intel: t("bottomNav.intel"),
+          },
           themeSwitcher: {
             label: t("themeSwitcher.label"),
             dark: t("themeSwitcher.dark"),

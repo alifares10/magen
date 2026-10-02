@@ -122,6 +122,7 @@ export function MapPreview({
     hospitals: true,
   });
   const [isMobileLayersOpen, setIsMobileLayersOpen] = useState(false);
+  const [isMobileWatchlistOpen, setIsMobileWatchlistOpen] = useState(false);
   const [isPickingPlace, setIsPickingPlace] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<SelectedMapPlace | null>(null);
   const isDesktop = useSyncExternalStore(
@@ -166,6 +167,7 @@ export function MapPreview({
           onSelectPlace={(place) => {
             setSelectedPlace(place);
             setIsPickingPlace(false);
+            setIsMobileWatchlistOpen(true);
           }}
           mapControlLabels={content.mapControlsLabels}
           mapUnavailable={content.mapUnavailable}
@@ -240,7 +242,19 @@ export function MapPreview({
         </div>
 
         {/* Floating: Watchlist (top-end) */}
-        <div className="absolute top-4 z-10 end-4">
+        <button
+          type="button"
+          aria-expanded={isMobileWatchlistOpen}
+          aria-controls="map-watchlist-panel"
+          onClick={() => setIsMobileWatchlistOpen((isOpen) => !isOpen)}
+          className="absolute end-4 top-20 z-20 min-h-11 rounded-lg bg-md3-surface-container-low px-4 text-sm font-semibold shadow-lg md:hidden"
+        >
+          {content.watchlist.title}
+        </button>
+        <div
+          id="map-watchlist-panel"
+          className={`absolute end-4 top-32 z-20 max-h-[calc(100%-9rem)] overflow-y-auto rounded-lg shadow-lg md:top-4 md:max-h-[calc(100%-2rem)] ${isMobileWatchlistOpen ? "block" : "hidden md:block"}`}
+        >
             <MapWatchlistManager
               locale={locale}
               content={content.watchlist}
@@ -251,6 +265,7 @@ export function MapPreview({
               onStartPlacePicking={() => {
                 setSelectedPlace(null);
                 setIsPickingPlace(true);
+                setIsMobileWatchlistOpen(false);
               }}
               onCancelPlacePicking={() => {
                 setSelectedPlace(null);

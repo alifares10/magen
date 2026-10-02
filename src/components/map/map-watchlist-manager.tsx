@@ -232,7 +232,7 @@ export function MapWatchlistManager({
   };
 
   return (
-    <section className="hidden w-72 rounded-lg bg-md3-surface-container-low/90 backdrop-blur-sm md:block">
+    <section className="w-72 max-w-[calc(100vw-2rem)] rounded-lg bg-md3-surface-container-low/90 backdrop-blur-sm">
       {/* Header */}
       <div className="flex items-center justify-between p-3 pb-2">
         <h2 className="font-[family-name:var(--font-label)] text-[10px] font-bold uppercase tracking-[0.2em] text-md3-on-surface-variant">

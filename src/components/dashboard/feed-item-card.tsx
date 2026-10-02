@@ -65,7 +65,8 @@ function getItemDescription(
     return (item as AlertFeedItem).message;
   }
   if (type === "news" && "summary" in item) {
-    return (item as NewsFeedItem).summary;
+    const summary = (item as NewsFeedItem).summary;
+    return summary ? stripHtml(summary) : null;
   }
   if (type === "official" && "body" in item) {
     return stripHtml((item as OfficialUpdateFeedItem).body);
@@ -92,7 +93,7 @@ export function FeedItemCard({
       animate={{ opacity: 1, x: 0 }}
       exit={prefersReducedMotion ? undefined : { opacity: 0, x: -12 }}
       transition={{ duration: 0.25, delay: index * 0.03 }}
-      className={`group cursor-pointer ${isFull ? "rounded-lg bg-md3-surface-container-low p-4" : ""}`}
+      className={`group ${isFull ? "rounded-lg bg-md3-surface-container-low p-4" : ""}`}
     >
       <div className="mb-1 flex items-center justify-between">
         <span className="font-mono text-[10px] text-md3-outline">
@@ -119,7 +120,7 @@ export function FeedItemCard({
           {item.title}
         </a>
       ) : (
-        <p className={`mb-1 font-bold text-md3-on-surface transition-colors group-hover:text-md3-primary ${isFull ? "text-sm" : "text-xs"}`}>
+        <p className={`mb-1 font-bold text-md3-on-surface ${isFull ? "text-sm" : "text-xs"}`}>
           {item.title}
         </p>
       )}

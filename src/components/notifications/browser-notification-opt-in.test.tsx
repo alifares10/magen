@@ -135,4 +135,14 @@ describe("BrowserNotificationOptIn", () => {
       screen.getByText("Blocked by browser permission settings."),
     ).toBeInTheDocument();
   });
+
+  it("gives the compact bell a notification label and enables alerts when clicked", async () => {
+    const user = userEvent.setup();
+    render(<BrowserNotificationOptIn compact />);
+    const button = screen.getByRole("button", { name: "Browser alerts: Enable" });
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    await user.click(button);
+    expect(browserPermissionState.requestPermission).toHaveBeenCalledTimes(1);
+    expect(setBrowserNotificationsEnabledMock).toHaveBeenCalledWith(true);
+  });
 });

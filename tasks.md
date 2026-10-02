@@ -163,6 +163,7 @@ Use these unless a later task explicitly changes them.
 
 ## Phase 8 execution (current)
 
+- [x] Check dashboard/feed/map navigation in the browser and fix dead top-bar controls, locale routing, active states, and mobile watchlist access (reviewed and approved for commit/push; YouTube stream work deferred).
 - [x] Deploy Railway `worker:rss` as a long-lived loop service and verify successful `rss_news` ingestion runs
 - [x] Add Supabase scheduled cleanup for operational tables (every 10 minutes): delete resolved alerts older than 3 hours and ingestion runs older than 2 hours
 - [x] Deactivate failing RSS sources `times-of-israel-main` and `jns-main` after repeated `403` responses
@@ -184,9 +185,11 @@ Use these unless a later task explicitly changes them.
 
 ## Open items to revisit later
 
+- [x] Assess the next project move (2026-10-02): recommend official alert-location matching, production overlay data trust, and mobile watchlist access as the next sprint priorities.
 - [x] Review uncommitted map/watchlist changes against deployed main (2026-10-02) and record release readiness.
 - [x] Correct Hebrew place names in the static dataset and tighten manual coordinate/radius parsing before deploying the place-picker changes.
-- [ ] Test `codex/map-watchlist-preview` on the Vercel preview and approve merging to main.
+- [x] Test `codex/map-watchlist-preview` on the Vercel preview and approve merging to main.
+- [x] Verify the preview branch is merged, sync local main, and delete the preview branch locally and on GitHub.
 
 - [x] Review project direction and implementation (2026-09-05); record data-trust and alert-location integration concerns in `progress.md`.
 

@@ -185,6 +185,7 @@ vi.mock("@/store/use-watchlist-store", async () => {
 const content = {
   commandBar: {
     title: "Magen",
+    navigation: { dashboard: "Dashboard", map: "Map", intel: "Intel" },
     themeSwitcher: { label: "Theme", dark: "Dark", light: "Light" },
     sourceHealthOverallLabel: "Overall",
     sourceHealthStatuses: {
@@ -408,6 +409,21 @@ function renderMapPreview(options?: {
 describe("MapPreview", () => {
   beforeEach(() => {
     useWatchlistStore.setState({ watchedLocations: [] });
+  });
+
+  it("opens and closes the mobile watchlist controls", async () => {
+    const user = userEvent.setup();
+    renderMapPreview({ alertMarkers: [] });
+    const toggle = screen.getByRole("button", { name: content.watchlist.title });
+    const panel = document.getElementById("map-watchlist-panel");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(panel).toHaveClass("hidden");
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(panel).not.toHaveClass("hidden");
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(panel).toHaveClass("hidden");
   });
 
   it("renders shared command bar and status bar with alert counts", () => {

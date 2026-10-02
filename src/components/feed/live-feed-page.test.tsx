@@ -29,6 +29,7 @@ vi.mock("@/components/layout/use-supabase-source-health-realtime", () => ({
 const content = {
   commandBar: {
     title: "Magen",
+    navigation: { dashboard: "Dashboard", map: "Map", intel: "Intel" },
     themeSwitcher: { label: "Theme", dark: "Dark", light: "Light" },
     sourceHealthOverallLabel: "Overall",
     sourceHealthStatuses: {
@@ -148,7 +149,7 @@ function mockFetchByUrl() {
               sourceId: "d530d3f4-bf45-47a4-a6dd-893026f8858d",
               sourceName: "Times of Israel",
               title: "News feed item",
-              summary: "Summary",
+              summary: "<p>Summary</p>",
               url: "https://example.com/news/2",
               author: null,
               topic: null,
@@ -243,8 +244,19 @@ describe("LiveFeedPage", () => {
     await user.click(screen.getByRole("tab", { name: content.feedTabs.news }));
 
     expect(await screen.findByText("News feed item")).toBeInTheDocument();
+    expect(screen.getByText("Summary")).toBeInTheDocument();
+    expect(screen.queryByText("<p>Summary</p>")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/news?limit=20", {
       cache: "no-store",
     });
+  });
+
+  it("opens the news feed when navigation requests that initial tab", async () => {
+    mockFetchByUrl();
+    await act(async () => {
+      render(<LiveFeedPage content={content} initialActiveTab="news" />);
+    });
+    expect(screen.getByRole("tab", { name: content.feedTabs.news })).toHaveAttribute("aria-selected", "true");
+    expect(await screen.findByText("News feed item")).toBeInTheDocument();
   });
 });
