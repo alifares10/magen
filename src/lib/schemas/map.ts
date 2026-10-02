@@ -22,12 +22,18 @@ export const mapAlertMarkerSchema = z.object({
 export const watchedLocationMarkerSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
+  nameEn: z.string().min(1).optional(),
+  nameHe: z.string().min(1).optional(),
   longitude: z.number().gte(-180).lte(180),
   latitude: z.number().gte(-90).lte(90),
   radiusKm: z.number().positive(),
   country: z.string().length(2),
   region: z.string().nullable(),
+  regionEn: z.string().min(1).optional(),
+  regionHe: z.string().min(1).optional(),
   city: z.string().nullable(),
+  cityEn: z.string().min(1).optional(),
+  cityHe: z.string().min(1).optional(),
 });
 
 export type MapAlertMarker = z.infer<typeof mapAlertMarkerSchema>;

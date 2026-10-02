@@ -39,6 +39,22 @@ vi.mock("@/components/dashboard/hooks/use-source-health", () => ({
 }));
 
 vi.mock("@/components/ui/map", () => {
+  const mockPlaceFeature = {
+    type: "Feature",
+    properties: {
+      id: "geonames-293397",
+      nameEn: "Tel Aviv",
+      nameHe: "תל אביב",
+      regionEn: "Tel Aviv",
+      regionHe: "מחוז תל אביב",
+      type: "city",
+    },
+    geometry: {
+      type: "Point",
+      coordinates: [34.7818, 32.0853] as [number, number],
+    },
+  };
+
   return {
     Map: ({
       children,
@@ -93,6 +109,21 @@ vi.mock("@/components/ui/map", () => {
     MapRoute: ({ coordinates }: { coordinates: [number, number][] }) => (
       <div data-testid="map-route" data-coordinate-count={coordinates.length} />
     ),
+    MapClusterLayer: ({
+      onPointClick,
+    }: {
+      onPointClick?: (feature: typeof mockPlaceFeature, coordinates: [number, number]) => void;
+    }) => (
+      <button
+        type="button"
+        data-testid="map-cluster-layer"
+        onClick={() => {
+          onPointClick?.(mockPlaceFeature, mockPlaceFeature.geometry.coordinates);
+        }}
+      >
+        Select mock place
+      </button>
+    ),
   };
 });
 
@@ -102,12 +133,18 @@ vi.mock("@/store/use-watchlist-store", async () => {
   type MockWatchedLocation = {
     id: string;
     name: string;
+    nameEn?: string;
+    nameHe?: string;
     latitude: number;
     longitude: number;
     radiusKm: number;
     country: string;
     region: string | null;
+    regionEn?: string;
+    regionHe?: string;
     city: string | null;
+    cityEn?: string;
+    cityHe?: string;
   };
 
   const useWatchlistStore = create<{
@@ -202,6 +239,23 @@ const content = {
     watchlistPriorityLabel: "Priority",
     watchlistTopPriorityLabel: "Top priority",
     watchlistNearbyAlertsLabel: "nearby alerts",
+    addFormTitle: "Add watched location",
+    addFormNameLabel: "Name",
+    addFormLatitudeLabel: "Latitude",
+    addFormLongitudeLabel: "Longitude",
+    addFormCityLabel: "City",
+    addFormRegionLabel: "Region",
+    saveActionLabel: "Save",
+    cancelActionLabel: "Cancel",
+    nameRequiredError: "Enter a location name.",
+    latitudeInvalidError: "Enter a latitude between -90 and 90.",
+    longitudeInvalidError: "Enter a longitude between -180 and 180.",
+    radiusInvalidError: "Enter a radius greater than 0.",
+    pickPlaceLabel: "Pick place",
+    cancelPlacePickingLabel: "Cancel pick",
+    placePickerHint: "Click a city or town on the map to add it to your watchlist.",
+    selectedPlaceLabel: "Selected place",
+    addSelectedPlaceLabel: "Add selected place",
   },
   watchlistPriorityLabel: "Priority",
   watchlistTopPriorityLabel: "Top priority",
@@ -336,13 +390,28 @@ const alertMarkers = [
   },
 ];
 
+function renderMapPreview(options?: {
+  locale?: "en" | "he";
+  alertMarkers?: typeof alertMarkers;
+  overlays?: typeof emptyOverlays | typeof sampleOverlays | typeof dbBackedOverlays;
+}) {
+  return render(
+    <MapPreview
+      locale={options?.locale ?? "en"}
+      content={content}
+      alertMarkers={options?.alertMarkers ?? alertMarkers}
+      overlays={options?.overlays ?? emptyOverlays}
+    />,
+  );
+}
+
 describe("MapPreview", () => {
   beforeEach(() => {
     useWatchlistStore.setState({ watchedLocations: [] });
   });
 
   it("renders shared command bar and status bar with alert counts", () => {
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
+    renderMapPreview();
 
     expect(screen.getByTestId("command-bar")).toHaveAttribute("data-active-href", "/map");
     expect(screen.getByTestId("mobile-bottom-nav")).toHaveAttribute("data-active-href", "/map");
@@ -352,7 +421,7 @@ describe("MapPreview", () => {
   });
 
   it("renders map with correct center from alert markers", () => {
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
+    renderMapPreview();
 
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.7818,32.0853");
     expect(screen.getByTestId("map-controls")).toHaveAttribute("data-position", "bottom-end");
@@ -363,7 +432,7 @@ describe("MapPreview", () => {
   });
 
   it("renders map legend and overlay controls", () => {
-    render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
+    renderMapPreview({ alertMarkers: [] });
 
     expect(screen.getByText(content.alertsLegend)).toBeInTheDocument();
     expect(screen.getByText(content.sheltersLegend)).toBeInTheDocument();
@@ -387,16 +456,156 @@ describe("MapPreview", () => {
       ],
     });
 
-    render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
+    renderMapPreview({ alertMarkers: [] });
 
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.7915,31.2529");
   });
 
   it("falls back to default map center with empty alerts and watchlist", () => {
-    render(<MapPreview content={content} alertMarkers={[]} overlays={emptyOverlays} />);
+    renderMapPreview({ alertMarkers: [] });
 
     expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "35.2137,31.7683");
     expect(screen.getByText(content.watchlist.emptyBody)).toBeInTheDocument();
+  });
+
+  it("adds a watched location from the watchlist panel", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.addLabel }));
+    await user.type(screen.getByLabelText(content.watchlist.addFormNameLabel), "Haifa");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLatitudeLabel), "32.794");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLongitudeLabel), "34.9896");
+    await user.clear(screen.getByLabelText(content.watchlist.watchRadiusLabel));
+    await user.type(screen.getByLabelText(content.watchlist.watchRadiusLabel), "18");
+    await user.type(screen.getByLabelText(content.watchlist.addFormCityLabel), "Haifa");
+    await user.type(screen.getByLabelText(content.watchlist.addFormRegionLabel), "North");
+    await user.click(screen.getByRole("button", { name: content.watchlist.saveActionLabel }));
+
+    expect(screen.getAllByText("Haifa").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.9896,32.794");
+    expect(screen.getAllByTestId("map-marker")).toHaveLength(1);
+    expect(screen.queryByText(content.watchlist.addFormTitle)).not.toBeInTheDocument();
+  });
+
+  it("shows validation errors for invalid watched location input", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.addLabel }));
+    await user.type(screen.getByLabelText(content.watchlist.addFormLatitudeLabel), "120");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLongitudeLabel), "200");
+    await user.clear(screen.getByLabelText(content.watchlist.watchRadiusLabel));
+    await user.type(screen.getByLabelText(content.watchlist.watchRadiusLabel), "0");
+    await user.click(screen.getByRole("button", { name: content.watchlist.saveActionLabel }));
+
+    expect(screen.getByText(content.watchlist.nameRequiredError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.latitudeInvalidError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.longitudeInvalidError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.radiusInvalidError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.emptyBody)).toBeInTheDocument();
+    expect(screen.queryByTestId("map-marker")).not.toBeInTheDocument();
+  });
+
+  it("adds a watched location by selecting a named place on the map", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.pickPlaceLabel }));
+
+    expect(screen.getByText(content.watchlist.placePickerHint)).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("map-cluster-layer"));
+
+    expect(screen.getByText(content.watchlist.selectedPlaceLabel)).toBeInTheDocument();
+    expect(screen.getAllByText("Tel Aviv").length).toBeGreaterThan(0);
+    await user.clear(screen.getByLabelText(content.watchRadiusLabel));
+    await user.type(screen.getByLabelText(content.watchRadiusLabel), "22");
+    await user.click(screen.getByRole("button", { name: content.watchlist.addSelectedPlaceLabel }));
+
+    expect(screen.getAllByText("Tel Aviv").length).toBeGreaterThan(0);
+    expect(screen.getByTestId("map-root")).toHaveAttribute("data-center", "34.7818,32.0853");
+  });
+
+  it("rejects partial numbers in the manual watchlist form", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.addLabel }));
+    await user.type(screen.getByLabelText(content.watchlist.addFormNameLabel), "Haifa");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLatitudeLabel), "32abc");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLongitudeLabel), "34.9x");
+    await user.clear(screen.getByLabelText(content.watchlist.watchRadiusLabel));
+    await user.type(screen.getByLabelText(content.watchlist.watchRadiusLabel), "15km");
+    await user.click(screen.getByRole("button", { name: content.watchlist.saveActionLabel }));
+
+    expect(screen.getByText(content.watchlist.latitudeInvalidError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.longitudeInvalidError)).toBeInTheDocument();
+    expect(screen.getByText(content.watchlist.radiusInvalidError)).toBeInTheDocument();
+    expect(useWatchlistStore.getState().watchedLocations).toEqual([]);
+  });
+
+  it("preserves comma decimals when saving a manual watched location", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.addLabel }));
+    await user.type(screen.getByLabelText(content.watchlist.addFormNameLabel), "Haifa");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLatitudeLabel), "32,794");
+    await user.type(screen.getByLabelText(content.watchlist.addFormLongitudeLabel), "34,9896");
+    await user.clear(screen.getByLabelText(content.watchlist.watchRadiusLabel));
+    await user.type(screen.getByLabelText(content.watchlist.watchRadiusLabel), "18,5");
+    await user.click(screen.getByRole("button", { name: content.watchlist.saveActionLabel }));
+
+    expect(useWatchlistStore.getState().watchedLocations).toEqual([
+      expect.objectContaining({ latitude: 32.794, longitude: 34.9896, radiusKm: 18.5 }),
+    ]);
+  });
+
+  it("validates the selected-place radius before saving and accepts comma decimals", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.pickPlaceLabel }));
+    await user.click(screen.getByTestId("map-cluster-layer"));
+    const radiusInput = screen.getByLabelText(content.watchRadiusLabel);
+    await user.clear(radiusInput);
+    await user.type(radiusInput, "15km");
+    await user.click(screen.getByRole("button", { name: content.watchlist.addSelectedPlaceLabel }));
+
+    expect(screen.getByText(content.watchlist.radiusInvalidError)).toBeInTheDocument();
+    expect(useWatchlistStore.getState().watchedLocations).toEqual([]);
+
+    await user.clear(radiusInput);
+    await user.type(radiusInput, "22,5");
+    await user.click(screen.getByRole("button", { name: content.watchlist.addSelectedPlaceLabel }));
+
+    expect(useWatchlistStore.getState().watchedLocations).toEqual([
+      expect.objectContaining({ nameEn: "Tel Aviv", radiusKm: 22.5 }),
+    ]);
+  });
+
+  it("shows selected places with Hebrew labels when locale is he", async () => {
+    const user = userEvent.setup();
+
+    renderMapPreview({ locale: "he", alertMarkers: [] });
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.pickPlaceLabel }));
+    await user.click(screen.getByTestId("map-cluster-layer"));
+
+    expect(screen.getAllByText("תל אביב").length).toBeGreaterThan(0);
+    expect(screen.getByText("מחוז תל אביב")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: content.watchlist.addSelectedPlaceLabel }));
+
+    expect(screen.queryByText(content.watchlist.selectedPlaceLabel)).not.toBeInTheDocument();
+    expect(screen.getAllByText("תל אביב").length).toBeGreaterThan(0);
   });
 
   it("removes a watched location from the watchlist panel", async () => {
@@ -417,7 +626,7 @@ describe("MapPreview", () => {
       ],
     });
 
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
+    renderMapPreview();
 
     await user.click(screen.getByRole("button", { name: "Remove Haifa" }));
 
@@ -450,7 +659,7 @@ describe("MapPreview", () => {
       ],
     });
 
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={emptyOverlays} />);
+    renderMapPreview();
 
     expect(screen.getAllByText(content.watchlistTopPriorityLabel).length).toBeGreaterThan(0);
     expect(screen.getAllByText(`${content.watchlistHighestSeverityLabel}: critical`).length).toBeGreaterThan(0);
@@ -462,7 +671,7 @@ describe("MapPreview", () => {
   it("toggles shelter, road closure, and hospital overlays", async () => {
     const user = userEvent.setup();
 
-    render(<MapPreview content={content} alertMarkers={[]} overlays={sampleOverlays} />);
+    renderMapPreview({ alertMarkers: [], overlays: sampleOverlays });
 
     await user.click(screen.getByRole("button", { name: content.mapLayersTitle }));
 
@@ -483,7 +692,7 @@ describe("MapPreview", () => {
   it("starts with mobile map layers collapsed and expands on demand", async () => {
     const user = userEvent.setup();
 
-    render(<MapPreview content={content} alertMarkers={[]} overlays={sampleOverlays} />);
+    renderMapPreview({ alertMarkers: [], overlays: sampleOverlays });
 
     const toggleButton = screen.getByRole("button", { name: content.mapLayersTitle });
 
@@ -501,7 +710,7 @@ describe("MapPreview", () => {
   });
 
   it("renders DB-backed overlays while keeping official alerts visible", () => {
-    render(<MapPreview content={content} alertMarkers={alertMarkers} overlays={dbBackedOverlays} />);
+    renderMapPreview({ overlays: dbBackedOverlays });
 
     expect(screen.getAllByTestId("map-route")).toHaveLength(1);
     expect(screen.getAllByTestId("map-marker")).toHaveLength(5);
