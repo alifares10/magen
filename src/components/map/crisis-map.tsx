@@ -7,16 +7,28 @@ import {
   MarkerLabel,
   MarkerPopup,
 } from "@/components/ui/map";
+import { MapPlacesLayer } from "@/components/map/map-places-layer";
+import type { AppLocale } from "@/i18n/routing";
+import {
+  getSelectedMapPlaceDisplayName,
+  getWatchedLocationDisplayArea,
+  getWatchedLocationDisplayName,
+} from "@/lib/map/location-labels";
 import type { PrioritizedWatchedLocation } from "@/lib/map/watch-priority";
 import type { MapOverlayFixtures } from "@/lib/schemas/map-overlays";
+import type { SelectedMapPlace } from "@/lib/schemas/map-places";
 import type { MapAlertMarker } from "@/lib/schemas/map";
 import { AlertTriangle, Clock3, Hospital, House, MapPin } from "lucide-react";
 import { Fragment } from "react";
 
 type CrisisMapProps = {
+  locale: AppLocale;
   center: [number, number];
   alertMarkers: MapAlertMarker[];
   prioritizedWatchedLocations: PrioritizedWatchedLocation[];
+  isPickingPlace: boolean;
+  selectedPlace: SelectedMapPlace | null;
+  onSelectPlace: (place: SelectedMapPlace) => void;
   mapControlLabels: {
     zoomIn: string;
     zoomOut: string;
@@ -88,9 +100,13 @@ function getRoadClosureAnchorCoordinate(coordinates: [number, number][]): [numbe
 }
 
 export function CrisisMap({
+  locale,
   center,
   alertMarkers,
   prioritizedWatchedLocations,
+  isPickingPlace,
+  selectedPlace,
+  onSelectPlace,
   mapControlLabels,
   mapUnavailable,
   watchRadiusLabel,
@@ -133,6 +149,22 @@ export function CrisisMap({
         showFullscreen
         labels={mapControlLabels}
       />
+
+      {isPickingPlace ? <MapPlacesLayer onSelectPlace={onSelectPlace} /> : null}
+
+      {selectedPlace ? (
+        <MapMarker longitude={selectedPlace.longitude} latitude={selectedPlace.latitude}>
+          <MarkerContent>
+            <div className="rounded-full border border-violet-400 bg-violet-100 p-1.5 shadow ring-1 ring-violet-200">
+              <MapPin className="size-4 text-violet-800" />
+            </div>
+          </MarkerContent>
+
+          <MarkerLabel className="font-semibold text-violet-900">
+            {getSelectedMapPlaceDisplayName(selectedPlace, locale)}
+          </MarkerLabel>
+        </MapMarker>
+      ) : null}
 
       {overlayVisibility.roadClosures
         ? overlays.roadClosures.map((roadClosure) => {
@@ -265,16 +297,20 @@ export function CrisisMap({
             </div>
           </MarkerContent>
 
-          <MarkerLabel className="font-semibold text-amber-900">{item.location.name}</MarkerLabel>
+          <MarkerLabel className="font-semibold text-amber-900">
+            {getWatchedLocationDisplayName(item.location, locale)}
+          </MarkerLabel>
 
           <MarkerPopup closeButton>
             <div className="w-60 space-y-1 rounded-md border border-amber-200 bg-white p-3 dark:border-amber-800/70 dark:bg-slate-950/92">
-              <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">{item.location.name}</p>
+              <p className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                {getWatchedLocationDisplayName(item.location, locale)}
+              </p>
               <p className="text-xs text-slate-700 dark:text-slate-300">
                 {watchRadiusLabel}: {item.location.radiusKm.toFixed(1)} km
               </p>
               <p className="text-xs text-slate-700 dark:text-slate-300">
-                {item.location.city ?? item.location.region ?? item.location.country}
+                {getWatchedLocationDisplayArea(item.location, locale)}
               </p>
               {item.rank ? (
                 <p className="text-xs font-semibold text-amber-900 dark:text-amber-100">

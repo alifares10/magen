@@ -25,7 +25,7 @@ function toWatchedLocationId(input: WatchedLocationInput): string {
     .trim()
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
+    .replace(/[^\p{Letter}\p{Number}-]/gu, "");
 
   return `${normalizedName}-${input.latitude.toFixed(4)}-${input.longitude.toFixed(4)}`;
 }

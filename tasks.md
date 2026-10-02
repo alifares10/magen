@@ -179,8 +179,16 @@ Use these unless a later task explicitly changes them.
 - [x] Refine dark-mode visual system across dashboard/feed/map surfaces with a cohesive midnight palette and corrected contrast for status cards/tabs/badges
 - [x] Fix mobile blockers across dashboard/feed/map: add safe map fallback handling, improve tap-target sizing/layout, and restore full Hebrew mobile localization on locale routes
 - [x] Remove the `ThemeProvider` effect-driven theme sync lint violation and restore full `lint` / `test` / `typecheck` / `build` green status
+- [x] Add the map-page manual watched-location entry form with inline validation and local persistence
+- [x] Add map-page place-picking from a static bilingual Israel localities dataset while keeping manual add available
 
 ## Open items to revisit later
+
+- [x] Review uncommitted map/watchlist changes against deployed main (2026-10-02) and record release readiness.
+- [x] Correct Hebrew place names in the static dataset and tighten manual coordinate/radius parsing before deploying the place-picker changes.
+- [ ] Test `codex/map-watchlist-preview` on the Vercel preview and approve merging to main.
+
+- [x] Review project direction and implementation (2026-09-05); record data-trust and alert-location integration concerns in `progress.md`.
 
 - [x] Confirm exact official alert source integration details
 - [x] Confirm exact official guidance source integration details

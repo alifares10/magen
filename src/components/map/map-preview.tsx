@@ -9,8 +9,10 @@ import { MapWatchlistManager, type MapWatchlistManagerContent } from "@/componen
 import { CommandBar, type CommandBarContent } from "@/components/dashboard/command-bar";
 import { MobileBottomNav, type MobileBottomNavContent } from "@/components/navigation/mobile-bottom-nav";
 import { useSourceHealth } from "@/components/dashboard/hooks/use-source-health";
+import type { AppLocale } from "@/i18n/routing";
 import { getPrioritizedWatchedLocations } from "@/lib/map/watch-priority";
 import type { MapOverlayFixtures } from "@/lib/schemas/map-overlays";
+import type { SelectedMapPlace } from "@/lib/schemas/map-places";
 import type { MapAlertMarker, WatchedLocationMarker } from "@/lib/schemas/map";
 import { useWatchlistStore } from "@/store/use-watchlist-store";
 
@@ -52,6 +54,7 @@ type MapPreviewContent = {
 };
 
 type MapPreviewProps = {
+  locale: AppLocale;
   content: MapPreviewContent;
   alertMarkers: MapAlertMarker[];
   overlays: MapOverlayFixtures;
@@ -103,11 +106,13 @@ function getMapCenter(
 }
 
 export function MapPreview({
+  locale,
   content,
   alertMarkers,
   overlays,
 }: MapPreviewProps) {
   const watchedLocations = useWatchlistStore((state) => state.watchedLocations);
+  const addWatchedLocation = useWatchlistStore((state) => state.addWatchedLocation);
   const removeWatchedLocation = useWatchlistStore(
     (state) => state.removeWatchedLocation,
   );
@@ -117,6 +122,8 @@ export function MapPreview({
     hospitals: true,
   });
   const [isMobileLayersOpen, setIsMobileLayersOpen] = useState(false);
+  const [isPickingPlace, setIsPickingPlace] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState<SelectedMapPlace | null>(null);
   const isDesktop = useSyncExternalStore(
     subscribeToDesktopBreakpoint,
     getDesktopBreakpointSnapshot,
@@ -147,12 +154,19 @@ export function MapPreview({
       />
 
       {/* Full-screen map with floating panels */}
-      <div className="relative flex-1">
+        <div className="relative flex-1">
         {/* Map fills all available space */}
         <CrisisMap
+          locale={locale}
           center={mapCenter}
           alertMarkers={alertMarkers}
           prioritizedWatchedLocations={prioritizedWatchedLocations}
+          isPickingPlace={isPickingPlace}
+          selectedPlace={selectedPlace}
+          onSelectPlace={(place) => {
+            setSelectedPlace(place);
+            setIsPickingPlace(false);
+          }}
           mapControlLabels={content.mapControlsLabels}
           mapUnavailable={content.mapUnavailable}
           watchRadiusLabel={content.watchRadiusLabel}
@@ -227,13 +241,25 @@ export function MapPreview({
 
         {/* Floating: Watchlist (top-end) */}
         <div className="absolute top-4 z-10 end-4">
-          <MapWatchlistManager
-            content={content.watchlist}
-            watchedLocations={watchedLocations}
-            prioritizedWatchedLocations={prioritizedWatchedLocations}
-            onRemoveWatchedLocation={removeWatchedLocation}
-          />
-        </div>
+            <MapWatchlistManager
+              locale={locale}
+              content={content.watchlist}
+              watchedLocations={watchedLocations}
+              prioritizedWatchedLocations={prioritizedWatchedLocations}
+              isPickingPlace={isPickingPlace}
+              selectedPlace={selectedPlace}
+              onStartPlacePicking={() => {
+                setSelectedPlace(null);
+                setIsPickingPlace(true);
+              }}
+              onCancelPlacePicking={() => {
+                setSelectedPlace(null);
+                setIsPickingPlace(false);
+              }}
+              onAddWatchedLocation={addWatchedLocation}
+              onRemoveWatchedLocation={removeWatchedLocation}
+            />
+          </div>
       </div>
 
       {/* Mobile bottom nav */}

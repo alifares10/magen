@@ -17,6 +17,7 @@ export default async function LocalizedMapPage({ params }: LocalizedMapPageProps
 
   return (
     <MapPreview
+      locale={appLocale}
       content={{
         commandBar: {
           title: "Magen",
@@ -78,6 +79,23 @@ export default async function LocalizedMapPage({ params }: LocalizedMapPageProps
           watchlistPriorityLabel: t("watchlistPriorityLabel"),
           watchlistTopPriorityLabel: t("watchlistTopPriorityLabel"),
           watchlistNearbyAlertsLabel: t("watchlistNearbyAlertsLabel"),
+          addFormTitle: t("watchlistAddFormTitle"),
+          addFormNameLabel: t("watchlistAddFormNameLabel"),
+          addFormLatitudeLabel: t("watchlistAddFormLatitudeLabel"),
+          addFormLongitudeLabel: t("watchlistAddFormLongitudeLabel"),
+          addFormCityLabel: t("watchlistAddFormCityLabel"),
+          addFormRegionLabel: t("watchlistAddFormRegionLabel"),
+          saveActionLabel: t("watchlistSaveActionLabel"),
+          cancelActionLabel: t("watchlistCancelActionLabel"),
+          nameRequiredError: t("watchlistNameRequiredError"),
+          latitudeInvalidError: t("watchlistLatitudeInvalidError"),
+          longitudeInvalidError: t("watchlistLongitudeInvalidError"),
+          radiusInvalidError: t("watchlistRadiusInvalidError"),
+          pickPlaceLabel: t("watchlistPickPlaceLabel"),
+          cancelPlacePickingLabel: t("watchlistCancelPlacePickingLabel"),
+          placePickerHint: t("watchlistPlacePickerHint"),
+          selectedPlaceLabel: t("watchlistSelectedPlaceLabel"),
+          addSelectedPlaceLabel: t("watchlistAddSelectedPlaceLabel"),
         },
         watchlistPriorityLabel: t("watchlistPriorityLabel"),
         watchlistTopPriorityLabel: t("watchlistTopPriorityLabel"),

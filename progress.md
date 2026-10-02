@@ -3,11 +3,11 @@
 ## Latest snapshot
 
 Date:
-2026-04-01
+2026-10-02
 Phase:
 Phase 8 in progress
 Current focus:
-Phase 8 mobile polish follow-up: document the completed mobile blocker pass, keep validation green, and clear the remaining theme-provider lint issue.
+Phase 8 map watchlist release fixes: prepare `codex/map-watchlist-preview` for Vercel preview testing before merging to main.
 
 Done:
 
@@ -218,6 +218,16 @@ Done:
 - Added a global theme switcher using `src/components/ui/sky-toggle.tsx` (migrated from `styled-components` to CSS Modules), wired it into dashboard/feed/map headers, and set the default app theme to dark in root layout.
 - Added client theme provider state + document class syncing in `src/components/providers/theme-provider.tsx` and wrapped locale layout with the provider.
 - Added localized theme labels for English/Hebrew (`app`, `feedPage`, `mapPage`) and re-validated successfully: `lint`, `test`, `typecheck`, `build`.
+- Replaced the map-page watchlist panel's placeholder Add control with a real inline manual-entry form in `src/components/map/map-watchlist-manager.tsx`, including local client validation for name/latitude/longitude/radius and save/cancel actions.
+- Wired the map page to pass the persisted Zustand `addWatchedLocation` action into the watchlist manager in `src/components/map/map-preview.tsx` so new watched locations render immediately on the map and in the ranked watchlist.
+- Added new localized watchlist form labels and validation copy in `src/app/[locale]/map/page.tsx`, `src/messages/en.json`, and `src/messages/he.json`.
+- Expanded `src/components/map/map-preview.test.tsx` to cover successful watchlist creation and invalid-input validation, then re-validated successfully: `lint`, `test`, `typecheck`, `build`.
+- Extended watched-location data to support optional bilingual labels (`nameEn/nameHe`, `cityEn/cityHe`, `regionEn/regionHe`) in `src/lib/schemas/map.ts` and `src/store/use-watchlist-store.ts`, preserving existing local-only entries while enabling locale-correct display for newly picked places.
+- Added locale-aware watched-location label helpers plus typed selected-place schemas in `src/lib/map/location-labels.ts` and `src/lib/schemas/map-places.ts`.
+- Added a static bilingual Israel localities dataset at `public/data/israel-places.geojson` (878 inhabited localities generated from GeoNames Israel) and a selectable point layer in `src/components/map/map-places-layer.tsx` using the existing `MapClusterLayer` support.
+- Updated `src/components/map/map-preview.tsx`, `src/components/map/crisis-map.tsx`, and `src/components/map/map-watchlist-manager.tsx` to support place-pick mode, selected-place confirmation with radius, and localized English/Hebrew place rendering while keeping manual add available.
+- Added new place-picking map-page strings in `src/messages/en.json` and `src/messages/he.json`, wired through `src/app/[locale]/map/page.tsx`, and expanded `src/components/map/map-preview.test.tsx` to cover named-place selection and Hebrew label display.
+- Re-validated successfully after bilingual place-pick slice: `lint`, `test`, `typecheck`, `build`.
 - Reworked dark-mode styling into a cohesive midnight palette across dashboard/feed/map surfaces (`src/app/globals.css`, `src/components/layout/app-shell.tsx`, `src/components/feed/live-feed-page.tsx`, `src/components/map/*`, `src/components/streams/stream-panel.tsx`) with stronger contrast for alerts/official/news cards, tab pills, status badges, and form controls.
 - Tuned supporting dark-mode UI details in `src/components/notifications/browser-notification-opt-in.tsx`, `src/components/i18n/locale-switcher.tsx`, and `src/components/ui/sky-toggle.module.css` for more consistent readability and tone.
 - Re-validated successfully after dark-mode refinement: `lint`, `test`, `typecheck`, `build`.
@@ -238,6 +248,7 @@ In progress:
 
 Next up:
 
+0. Test the `codex/map-watchlist-preview` Vercel preview (English/Hebrew map place picking, manual entry, decimal input, and save/remove behavior); merge only after user approval. The watchlist panel still uses the existing desktop-only layout.
 1. Continue manual DB refreshes for `official_updates`, `shelters`, `road_closures`, and `hospitals` using the README runbook.
 2. Rotate relay token and keep `/healthz` monitoring active; settle `ALERTS_INTERVAL_SECONDS` to a steady value (`15`-`20` seconds recommended) after burn-in.
 3. Re-open automation work once constraints clear: official guidance Israel-egress path + first overlay ingestion path.
@@ -255,6 +266,31 @@ Notes:
 ---
 
 ## Session history
+
+### 2026-10-02 — Prepare map watchlist preview branch
+
+- Created `codex/map-watchlist-preview` from main and included the existing uncommitted manual-entry and bilingual place-picker work for preview delivery.
+- Corrected Hebrew display labels for Jerusalem, Tel Aviv, Jaljulya, Qiryat HaYovel, Yehud-Monosson, and Lod. Removed the historical Yajur record while retaining the distinct current Yagur record; the dataset now has 877 points. Added `public/data/README.md` with source and correction notes.
+- Replaced partial `parseFloat` parsing with whole-value decimal validation. Coordinates and both radius inputs accept decimal points or commas, preserve fractions, and reject blank or malformed values.
+- Added regression coverage against the actual GeoJSON data, plus manual-entry and selected-place tests for malformed values and comma decimals.
+- Full validation passed: lint, 129 tests across 28 files, typecheck, and production build. Production build used the same unsandboxed font/build-worker access confirmed during the review.
+- Delivery plan authorized by the user: commit and push this preview branch, open a draft PR, and wait for deployed preview testing before merging main. No database migration or environment-variable changes are required.
+
+### 2026-10-02 — Review local changes before deployment
+
+- Fetched `origin`; local `main` and `origin/main` both point to `14652ab` with no ahead/behind commits. Pending changes add manual watchlist entry, clustered place picking from 878 localities, bilingual watched-location metadata, Unicode-aware IDs, translations, and UI tests.
+- Release concerns: the actual dataset labels Jerusalem as `אֵילִיָּה קַפִּיטוֹלִינָה` and Tel Aviv as `tel־ʼabiyb-yapwo`; five `nameHe` values have no Hebrew letters. Place-picking tests mock correct labels rather than loading this dataset. `Number.parseFloat` accepts malformed coordinate/radius inputs such as `32abc` and truncates `32,5` to `32`.
+- Existing limitation: the watchlist panel remains hidden below the `md` breakpoint, so the new add/pick controls are unavailable on mobile.
+- Validation: lint, all 118 tests across 27 files, and typecheck passed. The sandboxed production build stalled and was interrupted; rerunning `npm run build` outside the sandbox passed compilation, TypeScript, and page generation.
+- Recommendation: correct dataset labels and numeric parsing before pushing to production main. Include the four untracked files, including `public/data/israel-places.geojson`, when committing. No application edits, commits, pushes, or deployments were performed during this review; only project tracking notes were updated.
+
+### 2026-09-05 — Project assessment
+
+- Reviewed project plans and representative dashboard, ingestion, map, and notification code at the user's request. No application changes made.
+- Strengths: clear official-source priority, schema validation, English/Hebrew support, source-health visibility, and notification fallback polling.
+- Follow-up concerns: `getMapOverlays()` can serve fixtures for empty successful production queries; the Oref extractor supplies location names without coordinates, while map markers and radius watchlist matching require coordinates. Guidance and overlays remain in documented manual-update mode.
+- Validation: lint, 118 tests across 27 files, and typecheck passed. Stopped the production build after over two minutes without progress beyond compilation; build success remains unverified.
+- Assessment covers local code; deployed source health and rendered UI were not inspected.
 
 ### YYYY-MM-DD
 
